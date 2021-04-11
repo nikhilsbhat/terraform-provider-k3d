@@ -1,0 +1,8 @@
+# dropping ide datas
+.idea
+
+# dropping vendor and other data directories
+vendor/
+
+# dropping local built binaries
+terraform-provider-rancherk3d*
