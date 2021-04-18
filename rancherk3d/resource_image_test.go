@@ -9,26 +9,20 @@ import (
 
 func Test_getImagesStored(t *testing.T) {
 	t.Run("should return the images to be stored in a required format", func(t *testing.T) {
-		clusters := []string{"cluster1", "cluster2"}
+		cluster := "cluster1"
 		images := []string{"basnik/terragen:latest", "basnik/renderer:latest"}
 
-		//expected := []map[string]interface{}{
-		//	{
-		//		"cluster": "cluster1",
-		//		"tarball_stored": {
-		//			"basnik/renderer:latest": "basnik/renderer:latest",
-		//			"basnik/terragen:latest": "basnik/terragen:latest",
-		//		},
-		//	},
-		//	{
-		//		"cluster": "cluster2",
-		//		"tarball_stored":
-		//		"basnik/renderer:latest": "basnik/renderer:latest",
-		//		"basnik/terragen:latest": "basnik/terragen:latest",
-		//	},
-		//}
-		actual := getImagesToBeStored(clusters, images)
-		assert.Equal(t, "", actual)
+		expected := []map[string]interface{}{
+			{
+				"cluster": "cluster1",
+				"tarball_stored": map[string]string{
+					"basnik/renderer:latest": "basnik/renderer:latest",
+					"basnik/terragen:latest": "basnik/terragen:latest",
+				},
+			},
+		}
+		actual := getImagesToBeStored(cluster, images)
+		assert.Equal(t, expected, actual)
 
 	})
 }

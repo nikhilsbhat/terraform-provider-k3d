@@ -15,9 +15,9 @@ package rancherk3d
 
 import (
 	"fmt"
-	"terraform-provider-rancherk3d/k3d"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/k3d"
 )
 
 // Provider returns a terraform.ResourceProvider.

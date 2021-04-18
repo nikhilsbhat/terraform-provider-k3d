@@ -14,7 +14,7 @@
 package main
 
 import (
-	"terraform-provider-rancherk3d/rancherk3d"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/rancherk3d"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
