@@ -3,17 +3,19 @@ package k3d
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/rancher/k3d/v4/pkg/tools"
 	K3D "github.com/rancher/k3d/v4/pkg/types"
 )
 
 type K3Dimages struct {
-	Images       []string     `json:"images,omitempty"`
-	Cluster      string       `json:"cluster,omitempty"`
-	StoreTarBall bool         `json:"keep_tarball,omitempty"`
-	StoredImages StoredImages `json:"images_stored,omitempty"`
-	Config       K3dConfig    `json:"config,omitempty"`
+	Images       []string        `json:"images,omitempty"`
+	Cluster      string          `json:"cluster,omitempty"`
+	StoreTarBall bool            `json:"keep_tarball,omitempty"`
+	StoredImages StoredImages    `json:"images_stored,omitempty"`
+	Context      context.Context `json:"context,omitempty"`
+	Config       K3dConfig       `json:"config,omitempty"`
 }
 
 type StoredImages struct {
@@ -30,12 +32,17 @@ type TarBallData struct {
 func (client *K3Dimages) StoreImages() (*StoredImages, error) {
 	loadImageOpts := K3D.ImageImportOpts{KeepTar: client.StoreTarBall}
 
-	if err := tools.ImageImportIntoClusterMulti(context.Background(), client.Config.K3DRuntime, client.Images, Clusters(client.Cluster), loadImageOpts); err != nil {
-		return nil, fmt.Errorf("failed to import image(s) into cluster '%s': %+v", client.Cluster, err)
+	cluster, err := GetCluster(client.Context, client.Config.K3DRuntime, client.Cluster)
+	if err != nil {
+		return nil, err
 	}
 
+	log.Printf("loading images %v to cluster %s", client.Images, cluster.Name)
+	if err := tools.ImageImportIntoClusterMulti(client.Context, client.Config.K3DRuntime, client.Images, cluster, loadImageOpts); err != nil {
+		return nil, fmt.Errorf("failed to import image(s) into cluster '%s': %+v", cluster.Name, err)
+	}
 	return &StoredImages{
-		Cluster: client.Cluster,
+		Cluster: cluster.Name,
 		Images:  client.Images,
 	}, nil
 }
