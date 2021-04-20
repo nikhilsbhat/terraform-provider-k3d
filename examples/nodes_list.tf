@@ -5,7 +5,7 @@
 
 data "rancherk3d_node_list" "k3s_default" {
   cluster = "k3s-default"
-  nodes = ["k3d-k3s-default-serverlb"]
+  nodes   = ["k3d-k3s-default-serverlb"]
 }
 
 output "rancher_nodes_list" {

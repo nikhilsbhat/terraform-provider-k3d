@@ -9,4 +9,6 @@ const (
 	TerraformResourceTarballStored = "tarball_stored"
 	TerraformResourceNodes         = "nodes"
 	TerraformResourceNodesList     = "node_list"
+	TerraformResourceClusterList   = "clusters_list"
+	TerraformResourceAll           = "all"
 )

@@ -55,6 +55,10 @@ func String(value interface{}) string {
 	return value.(string)
 }
 
+func Bool(value interface{}) bool {
+	return value.(bool)
+}
+
 func Map(value interface{}) ([]map[string]interface{}, error) {
 	mp := make([]map[string]interface{}, 0)
 	j, err := json.Marshal(value)
