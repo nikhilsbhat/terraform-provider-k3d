@@ -14,15 +14,6 @@ import (
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/utils"
 )
 
-var (
-	terraformResourceImageClusters = "clusters"
-	terraformResourceImageCluster  = "cluster"
-	terraformResourceImages        = "images"
-	terraformResourceImagesStored  = "images_stored"
-	terraformResourceKeepTarball   = "keep_tarball"
-	terraformResourceTarballStored = "tarball_stored"
-)
-
 func resourceImage() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceLoadImageLoad,
@@ -42,7 +33,7 @@ func resourceImage() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "list of images to be imported to the existing cluster",
 			},
-			"clusters": {
+			"cluster": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Computed:    false,
@@ -78,7 +69,7 @@ func resourceImage() *schema.Resource {
 				Set: func(v interface{}) int {
 					var buf bytes.Buffer
 					m := v.(map[string]interface{})
-					buf.WriteString(fmt.Sprintf("%s-", m["cluster"].(string)))
+					buf.WriteString(fmt.Sprintf("%s-", utils.String(m["cluster"])))
 					return utils.GetHash(buf.String())
 				},
 			},
@@ -91,16 +82,18 @@ func resourceLoadImageLoad(ctx context.Context, d *schema.ResourceData, meta int
 
 	if d.IsNewResource() {
 		id := d.Id()
-		fmt.Print(defaultConfig)
 
-		id, err := utils.GetRandomID()
-		if err != nil {
-			return diag.Errorf("errored while fetching randomID %v", err)
+		if len(id) == 0 {
+			newID, err := utils.GetChecksum(utils.String(d.Get(utils.TerraformResourceCluster)))
+			if err != nil {
+				return diag.Errorf("errored while fetching randomID %v", err)
+			}
+			id = newID
 		}
 
-		images := getImages(d.Get(terraformResourceImages))
-		keepTarball := d.Get(terraformResourceKeepTarball).(bool)
-		cluster := d.Get(terraformResourceImageClusters).(string)
+		images := getImages(d.Get(utils.TerraformResourceImages))
+		keepTarball := d.Get(utils.TerraformResourceKeepTarball).(bool)
+		cluster := utils.String(d.Get(utils.TerraformResourceCluster))
 
 		imagesLoaded, err := uploadImagesToClusters(defaultConfig, ctx, keepTarball, images, cluster)
 		if err != nil {
@@ -116,20 +109,19 @@ func resourceLoadImageLoad(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceLoadImageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	images := d.Get(terraformResourceImages)
-	cluster := d.Get(terraformResourceImageClusters).(string)
+	images := d.Get(utils.TerraformResourceImages)
+	cluster := utils.String(d.Get(utils.TerraformResourceCluster))
 
 	imagesStored := getImagesToBeStored(cluster, utils.GetSlice(images.([]interface{})))
 
-	log.Printf("imagesToBeStored %v", imagesStored)
-	if err := d.Set(terraformResourceImagesStored, imagesStored); err != nil {
+	if err := d.Set(utils.TerraformResourceImagesStored, imagesStored); err != nil {
 		return diag.Errorf("oops setting 'images_stored' errored with : %v", err)
 	}
-	if err := d.Set(terraformResourceImages, images); err != nil {
+	if err := d.Set(utils.TerraformResourceImages, images); err != nil {
 		return diag.Errorf("oops setting 'images' errored with : %v", err)
 	}
-	if err := d.Set(terraformResourceImageClusters, cluster); err != nil {
-		return diag.Errorf("oops setting 'clusters' errored with : %v", err)
+	if err := d.Set(utils.TerraformResourceCluster, cluster); err != nil {
+		return diag.Errorf("oops setting 'cluster' errored with : %v", err)
 	}
 	return nil
 }
@@ -139,8 +131,8 @@ func resourceLoadImageDelete(ctx context.Context, d *schema.ResourceData, meta i
 	_ = defaultConfig
 	// could be properly implemented once k3d supports deleting loaded images from cluster.
 
-	orderID := d.Id()
-	if len(orderID) == 0 {
+	id := d.Id()
+	if len(id) == 0 {
 		return diag.Errorf("resource with the specified ID not found")
 	}
 	d.SetId("")
@@ -152,21 +144,21 @@ func resourceLoadImageUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	fmt.Println(defaultConfig)
 
 	log.Printf("uploading newer images to k3d clusters")
-	if d.HasChange(terraformResourceImageClusters) || d.HasChange(terraformResourceImages) {
+	if d.HasChange(utils.TerraformResourceCluster) || d.HasChange(utils.TerraformResourceImages) {
 
-		updatedClusters, updatedImages := getUpdatedClusterAndImages(d)
-		keepTarball := d.Get(terraformResourceKeepTarball).(bool)
+		updatedCluster, updatedImages := getUpdatedClusterAndImages(d)
+		keepTarball := d.Get(utils.TerraformResourceKeepTarball).(bool)
 
-		imagesLoaded, err := uploadImagesToClusters(defaultConfig, ctx, keepTarball, updatedImages, updatedClusters)
+		imagesLoaded, err := uploadImagesToClusters(defaultConfig, ctx, keepTarball, updatedImages, updatedCluster)
 		if err != nil {
 			return diag.Errorf("creation failed with error: %v", err)
 		}
 		_ = imagesLoaded
-		if err := d.Set(terraformResourceImageClusters, updatedClusters); err != nil {
-			return diag.Errorf("oops setting '%s' errored with : %v", terraformResourceImageClusters, err)
+		if err := d.Set(utils.TerraformResourceCluster, updatedCluster); err != nil {
+			return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceCluster, err)
 		}
-		if err := d.Set(terraformResourceImages, updatedImages); err != nil {
-			return diag.Errorf("oops setting '%s' errored with : %v", terraformResourceImages, err)
+		if err := d.Set(utils.TerraformResourceImages, updatedImages); err != nil {
+			return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceImages, err)
 		}
 		return resourceLoadImageRead(ctx, d, meta)
 	}
@@ -178,8 +170,8 @@ func resourceLoadImageUpdate(ctx context.Context, d *schema.ResourceData, meta i
 func getImagesToBeStored(cluster string, images []string) []map[string]interface{} {
 	imagesStored := make([]map[string]interface{}, 0)
 	imageStored := make(map[string]interface{})
-	imageStored[terraformResourceImageCluster] = cluster
-	imageStored[terraformResourceTarballStored] = getImageStored(images)
+	imageStored[utils.TerraformResourceCluster] = cluster
+	imageStored[utils.TerraformResourceTarballStored] = getImageStored(images)
 	imagesStored = append(imagesStored, imageStored)
 	return imagesStored
 }
@@ -206,23 +198,23 @@ func uploadImagesToClusters(defaultConfig *k3d.K3dConfig, ctx context.Context, k
 	return storedImages, nil
 }
 
-func getImagesClient(dfconfig *k3d.K3dConfig, ctx context.Context, images []string, cluster string, keepArtifact bool) *k3d.K3Dimages {
+func getImagesClient(defaultConfig *k3d.K3dConfig, ctx context.Context, images []string, cluster string, keepArtifact bool) *k3d.K3Dimages {
 	imagesClient := k3d.NewK3dImages()
 	imagesClient.Context = context.Background()
 	imagesClient.Images = images
 	imagesClient.Cluster = cluster
-	imagesClient.Config.K3DRuntime = dfconfig.K3DRuntime
+	imagesClient.Config.K3DRuntime = defaultConfig.K3DRuntime
 	imagesClient.StoreTarBall = keepArtifact
 	return imagesClient
 }
 
 func getUpdatedClustersAndImages(d *schema.ResourceData) (clusters, images []string) {
-	oldClusters, newClusters := d.GetChange(terraformResourceImageClusters)
+	oldClusters, newClusters := d.GetChange(utils.TerraformResourceCluster)
 	clusters = getClusters(oldClusters)
 	if !cmp.Equal(oldClusters, newClusters) {
 		clusters = getClusters(newClusters)
 	}
-	oldImages, newImages := d.GetChange(terraformResourceImages)
+	oldImages, newImages := d.GetChange(utils.TerraformResourceImages)
 	images = getImages(oldImages)
 	if !cmp.Equal(oldImages, newImages) {
 		images = getImages(newImages)
@@ -231,11 +223,11 @@ func getUpdatedClustersAndImages(d *schema.ResourceData) (clusters, images []str
 }
 
 func getUpdatedClusterAndImages(d *schema.ResourceData) (cluster string, images []string) {
-	oldCluster, newCluster := d.GetChange(terraformResourceImageClusters)
+	oldCluster, newCluster := d.GetChange(utils.TerraformResourceCluster)
 	if !cmp.Equal(oldCluster, newCluster) {
-		cluster = newCluster.(string)
+		cluster = utils.String(newCluster)
 	}
-	oldImages, newImages := d.GetChange(terraformResourceImages)
+	oldImages, newImages := d.GetChange(utils.TerraformResourceImages)
 	images = getImages(oldImages)
 	if !cmp.Equal(oldImages, newImages) {
 		images = getImages(newImages)

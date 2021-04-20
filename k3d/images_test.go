@@ -1,9 +1,9 @@
 package k3d_test
 
 import (
-	"terraform-provider-rancherk3d/k3d"
 	"testing"
 
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/k3d"
 	"github.com/rancher/k3d/v4/pkg/runtimes"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"

@@ -2,7 +2,9 @@ package utils
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"hash/crc32"
 
@@ -38,4 +40,29 @@ func GetSlice(slice []interface{}) (stringSLice []string) {
 		stringSLice = append(stringSLice, sl.(string))
 	}
 	return
+}
+
+func GetChecksum(value string) (string, error) {
+	cksm := sha256.New()
+	_, err := cksm.Write([]byte(value))
+	if err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(cksm.Sum(nil)), nil
+}
+
+func String(value interface{}) string {
+	return value.(string)
+}
+
+func Map(value interface{}) ([]map[string]interface{}, error) {
+	mp := make([]map[string]interface{}, 0)
+	j, err := json.Marshal(value)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(j, &mp); err != nil {
+		return nil, err
+	}
+	return mp, nil
 }

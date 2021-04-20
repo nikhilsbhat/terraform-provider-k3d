@@ -6,3 +6,8 @@ vendor/
 
 # dropping local built binaries
 terraform-provider-rancherk3d*
+
+# dropping terraform plans and states
+terraform.tfstate*
+*.tfplan
+examples

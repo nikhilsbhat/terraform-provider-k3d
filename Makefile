@@ -3,7 +3,7 @@ GOFMT_FILES?=$$(find . -not -path "./vendor/*" -type f -name '*.go')
 APP_NAME?=terraform-provider-rancherk3d
 APP_DIR?=$$(git rev-parse --show-toplevel)
 SRC_PACKAGES=$(shell go list -mod=vendor ./... | grep -v "vendor" | grep -v "mocks")
-VERSION?=0_0_1
+VERSION?=0.0.2
 
 .PHONY: help
 help: ## Prints help (only for targets with comments)
@@ -18,7 +18,7 @@ local.check: local.fmt ## Loads all the dependencies to vendor directory
 	go mod tidy
 
 local.build: local.check ## Generates the artifact with the help of 'go build'
-	go build -o $(APP_NAME)_$(VERSION) -ldflags="-s -w"
+	go build -o $(APP_NAME)_v$(VERSION) -ldflags="-s -w"
 
 local.push: local.build ## Pushes built artifact to the specified location
 
@@ -48,3 +48,9 @@ dev.prerequisite.up: ## Sets up the development environment with all necessary c
 
 generate.mock: ## generates mocks for the selected source packages.
 	@go generate ${SRC_PACKAGES}
+
+create.newversion.tfregistry: local.build ## Sets up the local terraform registry with the version specified.
+	mkdir -p ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_amd64/
+
+upload.newversion.provider: create.newversion.tfregistry ## Uploads the updated provider to local terraform registry.
+	cp terraform-provider-rancherk3d_v$(VERSION) ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_amd64/
