@@ -21,6 +21,12 @@ func dataSourceNodeList() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "list of nodes to be listed from the cluster selected",
 			},
+			"all": {
+				Type:        schema.TypeBool,
+				Computed:    false,
+				Optional:    true,
+				Description: "if enabled fetches all the nodes available in the selected cluster",
+			},
 			"cluster": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -100,6 +106,7 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 	if len(id) == 0 {
 		newID, err := utils.GetRandomID()
 		if err != nil {
+			d.SetId("")
 			return diag.Errorf("errored while fetching randomID %v", err)
 		}
 		id = newID
@@ -107,14 +114,17 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	nodes := getNodes(d.Get(utils.TerraformResourceNodes))
 	cluster := utils.String(d.Get(utils.TerraformResourceCluster))
+	all := utils.Bool(d.Get(utils.TerraformResourceAll))
 
-	k3dNodes, err := getNodesFromCluster(ctx, defaultConfig, cluster, nodes)
+	k3dNodes, err := getNodesFromCluster(ctx, defaultConfig, cluster, nodes, all)
 	if err != nil {
+		d.SetId("")
 		return diag.Errorf("errored while fetching nodes: %v", err)
 	}
 
 	flattenedNodes, err := utils.Map(k3dNodes)
 	if err != nil {
+		d.SetId("")
 		return diag.Errorf("errored while flattening nodes obtained: %v", err)
 	}
 	d.SetId(id)
@@ -125,8 +135,8 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func getNodesFromCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, cluster string, nodes []string) ([]*k3d.Node, error) {
-	if len(nodes) == 0 {
+func getNodesFromCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, cluster string, nodes []string, all bool) ([]*k3d.Node, error) {
+	if all {
 		k3dNodes, err := k3d.GetNodes(ctx, defaultConfig.K3DRuntime, cluster)
 		if err != nil {
 			return nil, err
@@ -135,11 +145,11 @@ func getNodesFromCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, clus
 	}
 	k3dNodes := make([]*k3d.Node, 0)
 	for _, node := range nodes {
-		node, err := k3d.GetNode(ctx, defaultConfig.K3DRuntime, node, cluster)
+		fetchedNode, err := k3d.GetNode(ctx, defaultConfig.K3DRuntime, node, cluster)
 		if err != nil {
 			return nil, err
 		}
-		k3dNodes = append(k3dNodes, node)
+		k3dNodes = append(k3dNodes, fetchedNode)
 	}
 	return k3dNodes, nil
 }

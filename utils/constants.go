@@ -11,4 +11,7 @@ const (
 	TerraformResourceNodesList     = "node_list"
 	TerraformResourceClusterList   = "clusters_list"
 	TerraformResourceAll           = "all"
+	TerraformResourceNotEncode     = "not_encoded"
+	TerraformResourceEncode        = "encode"
+	TerraformResourceKubeConfig    = "kube_config"
 )

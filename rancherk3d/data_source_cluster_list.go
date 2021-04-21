@@ -104,6 +104,7 @@ func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta
 	if len(id) == 0 {
 		newID, err := utils.GetRandomID()
 		if err != nil {
+			d.SetId("")
 			return diag.Errorf("errored while fetching randomID %v", err)
 		}
 		id = newID
@@ -114,11 +115,13 @@ func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta
 
 	k3dClusters, err := getK3dCluster(ctx, defaultConfig, clusters, all)
 	if err != nil {
+		d.SetId("")
 		return diag.Errorf("errored while fetching clusters: %v", err)
 	}
 
 	flattenedClusters, err := utils.Map(k3dClusters)
 	if err != nil {
+		d.SetId("")
 		return diag.Errorf("errored while flattening nodes obtained: %v", err)
 	}
 	d.SetId(id)
