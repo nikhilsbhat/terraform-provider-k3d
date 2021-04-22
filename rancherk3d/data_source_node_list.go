@@ -112,7 +112,7 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 		id = newID
 	}
 
-	nodes := getNodes(d.Get(utils.TerraformResourceNodes))
+	nodes := getNodesSlice(d.Get(utils.TerraformResourceNodes))
 	cluster := utils.String(d.Get(utils.TerraformResourceCluster))
 	all := utils.Bool(d.Get(utils.TerraformResourceAll))
 
@@ -137,23 +137,19 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func getNodesFromCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, cluster string, nodes []string, all bool) ([]*k3d.Node, error) {
 	if all {
-		k3dNodes, err := k3d.GetNodes(ctx, defaultConfig.K3DRuntime, cluster)
+		k3dNodes, err := k3d.GetNodesFromCluster(ctx, defaultConfig.K3DRuntime, cluster)
 		if err != nil {
 			return nil, err
 		}
 		return k3dNodes, err
 	}
-	k3dNodes := make([]*k3d.Node, 0)
-	for _, node := range nodes {
-		fetchedNode, err := k3d.GetNode(ctx, defaultConfig.K3DRuntime, node, cluster)
-		if err != nil {
-			return nil, err
-		}
-		k3dNodes = append(k3dNodes, fetchedNode)
+	k3dNodes, err := k3d.GetFilteredNodes(ctx, defaultConfig.K3DRuntime, nodes)
+	if err != nil {
+		return nil, err
 	}
 	return k3dNodes, nil
 }
 
-func getNodes(nodes interface{}) []string {
+func getNodesSlice(nodes interface{}) []string {
 	return utils.GetSlice(nodes.([]interface{}))
 }
