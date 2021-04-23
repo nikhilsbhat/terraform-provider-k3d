@@ -21,7 +21,7 @@ type TarBallData struct {
 	Path  string `json:"path,omitempty"`
 }
 
-type Node struct {
+type K3DNode struct {
 	Name                 string   `json:"name,omitempty"`
 	Role                 string   `json:"role,omitempty"`
 	ClusterAssociated    string   `json:"cluster,omitempty"`
@@ -30,4 +30,12 @@ type Node struct {
 	Volumes              []string `json:"volumes,omitempty"`
 	Networks             []string `json:"networks,omitempty"`
 	EnvironmentVariables []string `json:"env,omitempty"`
+}
+
+type K3DNodeStatus struct {
+	Node    string `json:"node,omitempty"`
+	Cluster string `json:"cluster,omitempty"`
+	Role    string `json:"role,omitempty"`
+	State   string `json:"state,omitempty"`
+	Running bool   `json:"running,omitempty"`
 }

@@ -11,3 +11,4 @@ terraform-provider-rancherk3d*
 terraform.tfstate*
 *.tfplan
 .terraform
+*.log

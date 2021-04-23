@@ -14,4 +14,7 @@ const (
 	TerraformResourceNotEncode     = "not_encoded"
 	TerraformResourceEncode        = "encode"
 	TerraformResourceKubeConfig    = "kube_config"
+	TerraformResourceStatus        = "status"
+	TerraformResourceStart         = "start"
+	TerraformResourceStop          = "stop"
 )

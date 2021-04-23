@@ -12,7 +12,7 @@ var (
 	K3dclusterNameLabel = "k3d.cluster"
 )
 
-func GetNodes(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3D.Node, error) {
+func Nodes(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3D.Node, error) {
 	nodes, err := runtime.GetNodesByLabel(ctx, map[string]string{
 		"k3d.cluster": cluster,
 	})
@@ -22,7 +22,7 @@ func GetNodes(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]
 	return nodes, nil
 }
 
-func GetNode(ctx context.Context, runtime runtimes.Runtime, name string) (*K3D.Node, error) {
+func Node(ctx context.Context, runtime runtimes.Runtime, name string) (*K3D.Node, error) {
 	node, err := client.NodeGet(ctx, runtime, &K3D.Node{Name: name})
 	if err != nil {
 		return nil, err
@@ -30,14 +30,44 @@ func GetNode(ctx context.Context, runtime runtimes.Runtime, name string) (*K3D.N
 	return node, err
 }
 
-func GetNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*Node, error) {
-	k3dNodes, err := GetNodes(ctx, runtime, cluster)
+func FilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) ([]*K3D.Node, error) {
+	k3dNodes, err := client.NodeList(ctx, runtime)
 	if err != nil {
 		return nil, err
 	}
-	filteredNodes := make([]*Node, 0)
+	filteredNodes := make([]*K3D.Node, 0)
+	for _, k3dNode := range k3dNodes {
+		for _, node := range nodes {
+			if k3dNode.Name == node {
+				filteredNodes = append(filteredNodes, k3dNode)
+			}
+		}
+	}
+	return filteredNodes, nil
+}
+
+func StopNode(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node) error {
+	if err := runtime.StopNode(ctx, node); err != nil {
+		return err
+	}
+	return nil
+}
+
+func StartNode(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node) error {
+	if err := runtime.StartNode(ctx, node); err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetFilteredNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3DNode, error) {
+	k3dNodes, err := Nodes(ctx, runtime, cluster)
+	if err != nil {
+		return nil, err
+	}
+	filteredNodes := make([]*K3DNode, 0)
 	for _, node := range k3dNodes {
-		filteredNodes = append(filteredNodes, &Node{
+		filteredNodes = append(filteredNodes, &K3DNode{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
 			ClusterAssociated:    node.Labels[K3dclusterNameLabel],
@@ -51,14 +81,14 @@ func GetNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster 
 	return filteredNodes, err
 }
 
-func GetFilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) ([]*Node, error) {
-	k3dNodes := make([]*Node, 0)
+func GetFilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) ([]*K3DNode, error) {
+	k3dNodes := make([]*K3DNode, 0)
 	for _, currentNode := range nodes {
-		node, err := GetNode(ctx, runtime, currentNode)
+		node, err := Node(ctx, runtime, currentNode)
 		if err != nil {
 			return nil, err
 		}
-		k3dNodes = append(k3dNodes, &Node{
+		k3dNodes = append(k3dNodes, &K3DNode{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
 			ClusterAssociated:    node.Labels[K3dclusterNameLabel],
@@ -72,13 +102,55 @@ func GetFilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []str
 	return k3dNodes, nil
 }
 
-//func StopNodes(ctx context.Context, runtime runtimes.Runtime, cluster string, nodes []string) error {
-//	nodesRaw, err := GetNodeRaw(ctx, runtime, cluster)
-//	for _, node := range nodes {
-//		nodeRaw, err := GetNodeRaw(ctx)
-//		if err := runtime.StopNode(ctx, node); err != nil {
-//			log.Fatalln(err)
-//		}
-//	}
-//
-//}
+func StopNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) error {
+	nodesRaw, err := FilteredNodes(ctx, runtime, nodes)
+	if err != nil {
+		return err
+	}
+	for _, node := range nodesRaw {
+		if err := StopNode(ctx, runtime, node); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func StopNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) error {
+	nodesRaw, err := Nodes(ctx, runtime, cluster)
+	if err != nil {
+		return err
+	}
+	for _, node := range nodesRaw {
+		if err := StopNode(ctx, runtime, node); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func StartNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) error {
+	nodesRaw, err := FilteredNodes(ctx, runtime, nodes)
+	if err != nil {
+		return err
+	}
+	for _, node := range nodesRaw {
+		if err := StartNode(ctx, runtime, node); err != nil {
+			return err
+		}
+
+	}
+	return nil
+}
+
+func StartNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) error {
+	nodesRaw, err := Nodes(ctx, runtime, cluster)
+	if err != nil {
+		return err
+	}
+	for _, node := range nodesRaw {
+		if err := StartNode(ctx, runtime, node); err != nil {
+			return err
+		}
+	}
+	return nil
+}

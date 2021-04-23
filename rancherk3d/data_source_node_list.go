@@ -135,19 +135,15 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func getNodesFromCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, cluster string, nodes []string, all bool) ([]*k3d.Node, error) {
+func getNodesFromCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, cluster string, nodes []string, all bool) ([]*k3d.K3DNode, error) {
 	if all {
-		k3dNodes, err := k3d.GetNodesFromCluster(ctx, defaultConfig.K3DRuntime, cluster)
+		k3dNodes, err := k3d.GetFilteredNodesFromCluster(ctx, defaultConfig.K3DRuntime, cluster)
 		if err != nil {
 			return nil, err
 		}
 		return k3dNodes, err
 	}
-	k3dNodes, err := k3d.GetFilteredNodes(ctx, defaultConfig.K3DRuntime, nodes)
-	if err != nil {
-		return nil, err
-	}
-	return k3dNodes, nil
+	return k3d.GetFilteredNodes(ctx, defaultConfig.K3DRuntime, nodes)
 }
 
 func getNodesSlice(nodes interface{}) []string {

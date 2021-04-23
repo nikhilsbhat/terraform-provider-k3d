@@ -1,6 +1,6 @@
 data "rancherk3d_kubeconfig" "k3s-default" {
   clusters = ["k3s-default"]
-//  not_encoded = true
+  //  not_encoded = true
 }
 
 //data "rancherk3d_kubeconfig" "all_clusters" {
