@@ -1,9 +1,7 @@
 package rancherk3d
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -12,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/k3d"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/utils"
+	"github.com/rancher/k3d/v4/pkg/runtimes"
 )
 
 func resourceImage() *schema.Resource {
@@ -39,6 +38,12 @@ func resourceImage() *schema.Resource {
 				Computed:    false,
 				Description: "name of the existing cluster to which the images has to be imported to",
 			},
+			"all": {
+				Type:        schema.TypeBool,
+				Computed:    false,
+				Optional:    true,
+				Description: "if enabled loads images to all available clusters",
+			},
 			"keep_tarball": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -46,7 +51,7 @@ func resourceImage() *schema.Resource {
 				Description: "enable to keep the tarball of the loaded images locally",
 			},
 			"images_stored": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				ForceNew: false,
 				Elem: &schema.Resource{
@@ -57,20 +62,14 @@ func resourceImage() *schema.Resource {
 							Optional:    true,
 							Description: "cluster to which the below images are stored",
 						},
-						"tarball_stored": {
-							Type:        schema.TypeMap,
+						"images": {
+							Type:        schema.TypeList,
 							Computed:    true,
 							Optional:    true,
 							Description: "details of images and its tarball stored, if in case keep_tarball is enabled",
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
 					},
-				},
-				Set: func(v interface{}) int {
-					var buf bytes.Buffer
-					m := v.(map[string]interface{})
-					buf.WriteString(fmt.Sprintf("%s-", utils.String(m["cluster"])))
-					return utils.GetHash(buf.String())
 				},
 			},
 		},
@@ -92,14 +91,13 @@ func resourceLoadImageLoad(ctx context.Context, d *schema.ResourceData, meta int
 		}
 
 		images := getImages(d.Get(utils.TerraformResourceImages))
-		keepTarball := d.Get(utils.TerraformResourceKeepTarball).(bool)
+		keepTarball := utils.Bool(d.Get(utils.TerraformResourceKeepTarball))
 		cluster := utils.String(d.Get(utils.TerraformResourceCluster))
+		all := utils.Bool(d.Get(utils.TerraformResourceAll))
 
-		imagesLoaded, err := uploadImagesToClusters(defaultConfig, ctx, keepTarball, images, cluster)
-		if err != nil {
-			return diag.Errorf("creation failed with error: %v", err)
+		if err := storeImagesToClusters(ctx, defaultConfig.K3DRuntime, images, cluster, all, keepTarball); err != nil {
+			return diag.Errorf("%v", err)
 		}
-		_ = imagesLoaded
 		d.SetId(id)
 		return resourceLoadImageRead(ctx, d, meta)
 	}
@@ -109,18 +107,33 @@ func resourceLoadImageLoad(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceLoadImageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	images := d.Get(utils.TerraformResourceImages)
+	defaultConfig := meta.(*k3d.K3dConfig)
+
+	images := getImages(d.Get(utils.TerraformResourceImages))
 	cluster := utils.String(d.Get(utils.TerraformResourceCluster))
+	all := utils.Bool(d.Get(utils.TerraformResourceAll))
 
-	imagesStored := getImagesToBeStored(cluster, utils.GetSlice(images.([]interface{})))
+	imagesToStore, err := getImagesToBeStored(ctx, defaultConfig.K3DRuntime, images, cluster, all)
+	if err != nil {
+		d.SetId("")
+		diag.Errorf("an error occurred while fetching images to be stored")
+	}
 
-	if err := d.Set(utils.TerraformResourceImagesStored, imagesStored); err != nil {
+	flattenedImagesToStore, err := utils.Map(imagesToStore)
+	if err != nil {
+		d.SetId("")
+		return diag.Errorf("errored while flattening images to store: %v", err)
+	}
+	if err := d.Set(utils.TerraformResourceImagesStored, flattenedImagesToStore); err != nil {
+		d.SetId("")
 		return diag.Errorf("oops setting 'images_stored' errored with : %v", err)
 	}
 	if err := d.Set(utils.TerraformResourceImages, images); err != nil {
+		d.SetId("")
 		return diag.Errorf("oops setting 'images' errored with : %v", err)
 	}
 	if err := d.Set(utils.TerraformResourceCluster, cluster); err != nil {
+		d.SetId("")
 		return diag.Errorf("oops setting 'cluster' errored with : %v", err)
 	}
 	return nil
@@ -141,19 +154,18 @@ func resourceLoadImageDelete(ctx context.Context, d *schema.ResourceData, meta i
 
 func resourceLoadImageUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	defaultConfig := meta.(*k3d.K3dConfig)
-	fmt.Println(defaultConfig)
 
 	log.Printf("uploading newer images to k3d clusters")
 	if d.HasChange(utils.TerraformResourceCluster) || d.HasChange(utils.TerraformResourceImages) {
 
 		updatedCluster, updatedImages := getUpdatedClusterAndImages(d)
-		keepTarball := d.Get(utils.TerraformResourceKeepTarball).(bool)
+		keepTarball := utils.Bool(d.Get(utils.TerraformResourceKeepTarball))
+		all := utils.Bool(d.Get(utils.TerraformResourceAll))
 
-		imagesLoaded, err := uploadImagesToClusters(defaultConfig, ctx, keepTarball, updatedImages, updatedCluster)
-		if err != nil {
-			return diag.Errorf("creation failed with error: %v", err)
+		if err := storeImagesToClusters(ctx, defaultConfig.K3DRuntime, updatedImages, updatedCluster, all, keepTarball); err != nil {
+			return diag.Errorf("%v", err)
 		}
-		_ = imagesLoaded
+
 		if err := d.Set(utils.TerraformResourceCluster, updatedCluster); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceCluster, err)
 		}
@@ -167,59 +179,11 @@ func resourceLoadImageUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	return nil
 }
 
-func getImagesToBeStored(cluster string, images []string) []map[string]interface{} {
-	imagesStored := make([]map[string]interface{}, 0)
-	imageStored := make(map[string]interface{})
-	imageStored[utils.TerraformResourceCluster] = cluster
-	imageStored[utils.TerraformResourceTarballStored] = getImageStored(images)
-	imagesStored = append(imagesStored, imageStored)
-	return imagesStored
-}
-
-func getImageStored(images []string) map[string]string {
-	imagesStored := make(map[string]string, len(images))
-	for _, image := range images {
-		imagesStored[image] = image
+func storeImagesToClusters(ctx context.Context, runtime runtimes.Runtime, images []string, cluster string, all, storeTarball bool) error {
+	if all {
+		return k3d.StoreImagesToClusters(ctx, runtime, images, storeTarball)
 	}
-	return imagesStored
-}
-
-func uploadImagesToClusters(defaultConfig *k3d.K3dConfig, ctx context.Context, keepArtifact bool, images []string, cluster string) ([]*k3d.StoredImages, error) {
-	storedImages := make([]*k3d.StoredImages, 0)
-	log.Printf("uploading images %v to k3d cluster %s", images, cluster)
-	client := getImagesClient(defaultConfig, ctx, images, cluster, keepArtifact)
-	imagesToStore, err := client.StoreImages()
-	if err != nil {
-		return nil, fmt.Errorf("oops an error occurred while storing images to cluster %s : %v", cluster, err)
-	}
-	storedImages = append(storedImages, imagesToStore)
-	log.Printf("images %v were successfully uploaded to k3d cluster %s", images, cluster)
-
-	return storedImages, nil
-}
-
-func getImagesClient(defaultConfig *k3d.K3dConfig, ctx context.Context, images []string, cluster string, keepArtifact bool) *k3d.K3Dimages {
-	imagesClient := k3d.NewK3dImages()
-	imagesClient.Context = context.Background()
-	imagesClient.Images = images
-	imagesClient.Cluster = cluster
-	imagesClient.Config.K3DRuntime = defaultConfig.K3DRuntime
-	imagesClient.StoreTarBall = keepArtifact
-	return imagesClient
-}
-
-func getUpdatedClustersAndImages(d *schema.ResourceData) (clusters, images []string) {
-	oldClusters, newClusters := d.GetChange(utils.TerraformResourceCluster)
-	clusters = getClusters(oldClusters)
-	if !cmp.Equal(oldClusters, newClusters) {
-		clusters = getClusters(newClusters)
-	}
-	oldImages, newImages := d.GetChange(utils.TerraformResourceImages)
-	images = getImages(oldImages)
-	if !cmp.Equal(oldImages, newImages) {
-		images = getImages(newImages)
-	}
-	return
+	return k3d.StoreImagesToCluster(ctx, runtime, images, cluster, storeTarball)
 }
 
 func getUpdatedClusterAndImages(d *schema.ResourceData) (cluster string, images []string) {
@@ -233,6 +197,21 @@ func getUpdatedClusterAndImages(d *schema.ResourceData) (cluster string, images 
 		images = getImages(newImages)
 	}
 	return
+}
+
+func getImagesToBeStored(ctx context.Context, runtime runtimes.Runtime, images []string, cluster string, all bool) ([]*k3d.StoredImages, error) {
+	if all {
+		imagesToBeStored, err := k3d.GetImagesLoadedClusters(ctx, runtime, images)
+		if err != nil {
+			return nil, err
+		}
+		return imagesToBeStored, nil
+	}
+	imagesToBeStored, err := k3d.GetImagesLoadedCluster(ctx, runtime, images, cluster)
+	if err != nil {
+		return nil, err
+	}
+	return imagesToBeStored, nil
 }
 
 func getImages(images interface{}) []string {
