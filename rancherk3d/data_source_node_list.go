@@ -37,61 +37,9 @@ func dataSourceNodeList() *schema.Resource {
 			"node_list": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				Description: "list of nodes and its details fetched from the specified cluster",
+				Description: "list of nodes that were retrieved",
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Optional:    true,
-							Description: "cluster to which the below images are stored",
-						},
-						"role": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Optional:    true,
-							Description: "cluster to which the below images are stored",
-						},
-						"cluster": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Optional:    true,
-							Description: "cluster to which the below images are stored",
-						},
-						"state": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Optional:    true,
-							Description: "cluster to which the below images are stored",
-						},
-						"created": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Optional:    true,
-							Description: "cluster to which the below images are stored",
-						},
-						"volumes": {
-							Type:        schema.TypeList,
-							Computed:    true,
-							Optional:    true,
-							Description: "details of images and its tarball stored, if in case keep_tarball is enabled",
-							Elem:        &schema.Schema{Type: schema.TypeString},
-						},
-						"networks": {
-							Type:        schema.TypeList,
-							Computed:    true,
-							Optional:    true,
-							Description: "details of images and its tarball stored, if in case keep_tarball is enabled",
-							Elem:        &schema.Schema{Type: schema.TypeString},
-						},
-						"env": {
-							Type:        schema.TypeList,
-							Computed:    true,
-							Optional:    true,
-							Description: "details of images and its tarball stored, if in case keep_tarball is enabled",
-							Elem:        &schema.Schema{Type: schema.TypeString},
-						},
-					},
+					Schema: resourceNodeSchema(),
 				},
 			},
 		},

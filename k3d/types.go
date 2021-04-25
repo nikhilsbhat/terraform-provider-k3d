@@ -1,6 +1,8 @@
 package k3d
 
-import "context"
+import (
+	"context"
+)
 
 type K3Dimages struct {
 	Images       []string        `json:"images,omitempty"`
@@ -27,9 +29,12 @@ type K3DNode struct {
 	ClusterAssociated    string   `json:"cluster,omitempty"`
 	State                string   `json:"state,omitempty"`
 	Created              string   `json:"created,omitempty"`
+	Memory               string   `json:"memory,omitempty"`
 	Volumes              []string `json:"volumes,omitempty"`
 	Networks             []string `json:"networks,omitempty"`
 	EnvironmentVariables []string `json:"env,omitempty"`
+	Count                int      `json:"count,omitempty"`
+	Image                string   `json:"image,omitempty"`
 }
 
 type K3DNodeStatus struct {

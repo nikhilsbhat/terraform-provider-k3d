@@ -156,7 +156,7 @@ func resourceNodeActionRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if err := d.Set(utils.TerraformResourceStatus, flattenedNodeStatus); err != nil {
-		return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceNodesList, err)
+		return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceStatus, err)
 	}
 	return nil
 }

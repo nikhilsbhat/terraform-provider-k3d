@@ -5,15 +5,17 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/utils"
 	"github.com/rancher/k3d/v4/pkg/runtimes"
 )
 
 // K3dConfig holds the base configurations for creation of k3d cluster.
 type K3dConfig struct {
-	KubeVersion   string
-	K3DAPIVersion string
-	K3DKind       string
-	K3DRuntime    runtimes.Runtime
+	KubeImageVersion string
+	K3DAPIVersion    string
+	K3DKind          string
+	K3DRegistry      string
+	K3DRuntime       runtimes.Runtime
 }
 
 func GetK3dConfig(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -22,7 +24,13 @@ func GetK3dConfig(ctx context.Context, d *schema.ResourceData) (interface{}, dia
 	if kubeVersion := d.Get("kubernetes_version").(string); len(kubeVersion) == 0 {
 		diag.Errorf("'kubernetes_version' was not set")
 	} else {
-		newConfig.KubeVersion = kubeVersion
+		newConfig.KubeImageVersion = kubeVersion
+	}
+
+	if kubeVersion := utils.String(d.Get(utils.TerraformK3dRegistry)); len(kubeVersion) == 0 {
+		diag.Errorf("'%s' was not set", utils.TerraformK3dRegistry)
+	} else {
+		newConfig.K3DRegistry = getRegistry(d)
 	}
 
 	if k3dAPIVersion := d.Get("k3d_api_version").(string); len(k3dAPIVersion) == 0 {
@@ -53,6 +61,13 @@ func getRuntime(runtime string) runtimes.Runtime {
 	default:
 		return runtimes.SelectedRuntime
 	}
+}
+
+func getRegistry(d *schema.ResourceData) string {
+	if len(utils.String(d.Get(utils.TerraformK3dRegistry))) == 0 {
+		return utils.K3DRepoDEFAULT
+	}
+	return utils.String(d.Get(utils.TerraformK3dRegistry))
 }
 
 func newK3dConfig() *K3dConfig {

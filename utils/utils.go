@@ -66,6 +66,11 @@ func Bool(value interface{}) bool {
 	return value.(bool)
 }
 
+// Int returns bool converted interface.
+func Int(value interface{}) int {
+	return value.(int)
+}
+
 // Map returns array flattens the object passed to []map[string]interface{} to simplify terraform attributes saving.
 func Map(value interface{}) ([]map[string]interface{}, error) {
 	mp := make([]map[string]interface{}, 0)

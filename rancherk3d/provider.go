@@ -32,6 +32,14 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("KUBERNETES_VERSION", "1.20.2-k3s1"),
 				Description: "version of kubernetes cluster that has to be created (tag of k3s to be passed)",
 			},
+			"registry": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Computed:    false,
+				DefaultFunc: schema.EnvDefaultFunc("K3D_REGISTRY", "rancher/k3s"),
+				Description: "registry to be used for pulling images while creating cluster/nodes",
+			},
 			"k3d_api_version": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -64,6 +72,7 @@ func Provider() *schema.Provider {
 			//"rancherk3d_create_registry": resourceRegistry(),
 			"rancherk3d_load_image":  resourceImage(),
 			"rancherk3d_node_action": resourceNodeAction(),
+			"rancherk3d_node_create": resourceNode(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
