@@ -66,7 +66,7 @@ func resourceNodeAction() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
-				Description: "if enabled it stops a running nodes",
+				Description: "updated status of started/stopped nodes",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"node": {
@@ -183,7 +183,7 @@ func resourceNodeActionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceCluster, err)
 		}
 		if err := d.Set(utils.TerraformResourceNodes, nodes); err != nil {
-			return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceCluster, err)
+			return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceNodes, err)
 		}
 		if err := d.Set(utils.TerraformResourceAll, all); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceAll, err)
@@ -217,11 +217,11 @@ func getUpdatedNodeActionChanges(d *schema.ResourceData) (nodes []string, cluste
 	if !cmp.Equal(oldCluster, newCluster) {
 		cluster = utils.String(newCluster)
 	}
-	oldStart, newStart := d.GetChange(utils.TerraformResourceNodes)
+	oldStart, newStart := d.GetChange(utils.TerraformResourceStart)
 	if !cmp.Equal(oldStart, newStart) {
 		start = utils.Bool(newStart)
 	}
-	oldStop, newStop := d.GetChange(utils.TerraformResourceCluster)
+	oldStop, newStop := d.GetChange(utils.TerraformResourceStop)
 	if !cmp.Equal(oldStop, newStop) {
 		stop = utils.Bool(newStop)
 	}

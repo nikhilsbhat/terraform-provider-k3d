@@ -2,7 +2,7 @@ resource "rancherk3d_node_create" "node-1" {
   name     = "test-node-from-terraform"
   cluster  = "k3s-default"
   role     = "agent"
-  replicas = 2
+  replicas = 1
   //  wait     = true
   //  timeout  = 3
 }

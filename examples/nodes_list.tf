@@ -5,7 +5,7 @@ data "rancherk3d_node_list" "k3s_default" {
 
 data "rancherk3d_node_list" "k3s_default_server" {
   cluster = "k3s-default"
-  nodes   = ["test-node-from-terraform-0","test-node-from-terraform-1"]
+  nodes   = ["k3d-k3s-default-server-0", "k3d-k3s-default-serverlb"]
 }
 
 output "rancher_nodes_list" {

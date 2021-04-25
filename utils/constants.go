@@ -27,6 +27,7 @@ const (
 	TerraformResourceName          = "name"
 	TerraformK3dLabel              = "k3d.terraform"
 	TerraformK3dRegistry           = "registry"
+	TerraformResourceState         = "state"
 	TerraformKubernetesVersion     = "kubernetes_version"
 	TerraformK3dAPIVersion         = "k3d_api_version"
 	TerraformK3dKind               = "kind"

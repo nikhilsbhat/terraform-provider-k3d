@@ -178,7 +178,6 @@ func StartNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) e
 		if err := StartNode(ctx, runtime, node); err != nil {
 			return err
 		}
-
 	}
 	return nil
 }

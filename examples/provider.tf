@@ -2,7 +2,7 @@ terraform {
   required_providers {
     rancherk3d = {
       source  = "hashicorp/rancherk3d"
-      version = "0.0.6"
+      version = "0.0.7"
     }
   }
 }
@@ -13,5 +13,5 @@ provider "rancherk3d" {
   registry           = "rancher/k3s"
   kind               = "Simple"
   runtime            = "docker"
-  version            = "0.0.6"
+  version            = "0.0.7"
 }

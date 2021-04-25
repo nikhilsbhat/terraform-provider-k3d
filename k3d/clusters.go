@@ -3,23 +3,12 @@ package k3d
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/rancher/k3d/v4/pkg/client"
 	"github.com/rancher/k3d/v4/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v4/pkg/types"
 )
-
-type Cluster struct {
-	Name            string   `json:"name,omitempty"`
-	Nodes           []string `json:"nodes,omitempty"`
-	Network         string   `json:"network,omitempty"`
-	Token           string   `json:"cluster_token,omitempty"`
-	ServersCount    int64    `json:"servers_count,omitempty"`
-	AgentsCount     int64    `json:"agents_count,omitempty"`
-	AgentsRunning   int64    `json:"agents_running,omitempty"`
-	ImageVolume     string   `json:"image_volume,omitempty"`
-	HasLoadBalancer bool     `json:"has_loadbalancer,omitempty"`
-}
 
 func GetCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) (*K3D.Cluster, error) {
 	clusterConfig, err := client.ClusterGet(ctx, runtime, &K3D.Cluster{Name: cluster})
@@ -54,4 +43,22 @@ func GetClusters(ctx context.Context, runtime runtimes.Runtime) ([]*K3D.Cluster,
 		return nil, err
 	}
 	return clustersList, nil
+}
+
+func StartClusters(ctx context.Context, runtime runtimes.Runtime, clusters []*K3D.Cluster, options K3D.ClusterStartOpts) error {
+	for _, cluster := range clusters {
+		if err := client.ClusterStart(ctx, runtime, cluster, options); err != nil {
+			log.Fatalln(err)
+		}
+	}
+	return nil
+}
+
+func StopClusters(ctx context.Context, runtime runtimes.Runtime, clusters []*K3D.Cluster) error {
+	for _, cluster := range clusters {
+		if err := client.ClusterStop(ctx, runtime, cluster); err != nil {
+			log.Fatalln(err)
+		}
+	}
+	return nil
 }

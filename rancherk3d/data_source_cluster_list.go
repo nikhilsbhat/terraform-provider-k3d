@@ -33,63 +33,7 @@ func dataSourceClusterList() *schema.Resource {
 				Computed:    true,
 				Description: "list of cluster of which information has been retrieved",
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Optional:    true,
-							Description: "cluster name that was fetched",
-						},
-						"nodes": {
-							Type:        schema.TypeList,
-							Computed:    true,
-							Optional:    true,
-							Description: "list of nodes present in cluster",
-							Elem:        &schema.Schema{Type: schema.TypeString},
-						},
-						"network": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Optional:    true,
-							Description: "network associated with the cluster",
-						},
-						"cluster_token": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Optional:    true,
-							Description: "token of the cluster",
-						},
-						"servers_count": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Optional:    true,
-							Description: "count of servers",
-						},
-						"agents_count": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Optional:    true,
-							Description: "count of agents in the cluster",
-						},
-						"agents_running": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Optional:    true,
-							Description: "number of agents running in the cluster",
-						},
-						"has_loadbalancer": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Optional:    true,
-							Description: "details of images and its tarball stored, if in case keep_tarball is enabled",
-						},
-						"image_volume": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Optional:    true,
-							Description: "volume to import images",
-						},
-					},
+					Schema: resourceClusterSchema(),
 				},
 			},
 		},
@@ -149,16 +93,17 @@ func getK3dCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, clusters [
 	}
 	filteredClusterinfo := make([]*k3d.Cluster, 0)
 	for _, cluster := range fetchedClusters {
-		serverCount, _ := cluster.ServerCountRunning()
+		serversRunning, serverCount := cluster.ServerCountRunning()
 		agentsCount, agentsRunning := cluster.AgentCountRunning()
 		filteredClusterinfo = append(filteredClusterinfo, &k3d.Cluster{
 			Name:            cluster.Name,
 			Nodes:           getNodesList(cluster.Nodes),
 			Network:         cluster.Network.Name,
 			Token:           cluster.Token,
-			ServersCount:    int64(serverCount),
-			AgentsCount:     int64(agentsCount),
-			AgentsRunning:   int64(agentsRunning),
+			ServersCount:    serverCount,
+			ServersRunning:  serversRunning,
+			AgentsCount:     agentsCount,
+			AgentsRunning:   agentsRunning,
 			ImageVolume:     cluster.ImageVolume,
 			HasLoadBalancer: cluster.HasLoadBalancer(),
 		})
@@ -171,4 +116,8 @@ func getNodesList(rawNodes []*K3D.Node) (nodes []string) {
 		nodes = append(nodes, node.Name)
 	}
 	return
+}
+
+func getClusterSlice(clusters interface{}) []string {
+	return utils.GetSlice(clusters.([]interface{}))
 }

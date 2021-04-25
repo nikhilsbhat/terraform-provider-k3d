@@ -3,7 +3,7 @@ GOFMT_FILES?=$$(find . -not -path "./vendor/*" -type f -name '*.go')
 APP_NAME?=terraform-provider-rancherk3d
 APP_DIR?=$$(git rev-parse --show-toplevel)
 SRC_PACKAGES=$(shell go list -mod=vendor ./... | grep -v "vendor" | grep -v "mocks")
-VERSION?=0.0.6
+VERSION?=0.0.7
 
 .PHONY: help
 help: ## Prints help (only for targets with comments)
