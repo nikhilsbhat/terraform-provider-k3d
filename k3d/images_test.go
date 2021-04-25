@@ -72,9 +72,8 @@ func TestStoreImages(t *testing.T) {
 			Config:       k3d.K3dConfig{K3DRuntime: runtimes.Docker},
 			Context:      context.TODO(),
 		}
-		got, err := client.StoreImages()
+		err := k3d.StoreImagesToClusters(client.Context, runtimes.SelectedRuntime, client.Images, client.StoreTarBall)
 		assert.Nil(t, err)
-		assert.NotNil(t, got)
 	})
 
 	t.Run("should be able to load images to cluster test-cluster", func(t *testing.T) {
@@ -85,8 +84,7 @@ func TestStoreImages(t *testing.T) {
 			Config:       k3d.K3dConfig{K3DRuntime: runtimes.Docker},
 			Context:      context.Background(),
 		}
-		got, err := client.StoreImages()
+		err := k3d.StoreImagesToClusters(client.Context, runtimes.SelectedRuntime, client.Images, client.StoreTarBall)
 		assert.Nil(t, err)
-		assert.NotNil(t, got)
 	})
 }
