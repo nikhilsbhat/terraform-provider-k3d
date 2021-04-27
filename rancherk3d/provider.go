@@ -77,9 +77,10 @@ func Provider() *schema.Provider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"rancherk3d_node_list":    dataSourceNodeList(),
-			"rancherk3d_cluster_list": dataSourceClusterList(),
-			"rancherk3d_kubeconfig":   dataSourceKubeConfig(),
+			"rancherk3d_node_list":     dataSourceNodeList(),
+			"rancherk3d_cluster_list":  dataSourceClusterList(),
+			"rancherk3d_kubeconfig":    dataSourceKubeConfig(),
+			"rancherk3d_registry_list": dataSourceRegistryList(),
 		},
 
 		ConfigureContextFunc: k3d.GetK3dConfig,

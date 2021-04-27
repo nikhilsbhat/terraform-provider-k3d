@@ -3,6 +3,7 @@ module github.com/nikhilsbhat/terraform-provider-rancherk3d
 go 1.16
 
 require (
+	github.com/docker/go-connections v0.4.0
 	github.com/google/go-cmp v0.5.5
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.4.4

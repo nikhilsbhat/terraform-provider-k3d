@@ -3,6 +3,7 @@ package rancherk3d
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -125,7 +126,7 @@ func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interf
 
 		if err := createNodes(ctx, defaultConfig.K3DRuntime, node, timeout, wait, 0); err != nil {
 			d.Set(utils.TerraformResourceCreatedAt, "")
-			return diag.Errorf("errored while creating cluster: %v", err)
+			return diag.Errorf("errored while creating nodes with: %v", err)
 		}
 
 		d.SetId(id)
@@ -169,7 +170,7 @@ func resourceNodeDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	for _, node := range nodes {
-		if err := k3d.DeletNodesFromCluster(ctx, defaultConfig.K3DRuntime, node); err != nil {
+		if err = k3d.DeletNodesFromCluster(ctx, defaultConfig.K3DRuntime, node); err != nil {
 			return diag.Errorf("errored while deleting node %s : %v", node.Name, err)
 		}
 	}
@@ -193,7 +194,15 @@ func createNodes(ctx context.Context, runtime runtimes.Runtime, node k3d.K3DNode
 		startFrom++
 	}
 	if err := k3d.CreateNodeWithTimeout(ctx, runtime, node.ClusterAssociated, nodesToCreate, wait, nodeTimeout); err != nil {
-		return err
+		for _, nodeToCreate := range nodesToCreate {
+			nd := nodeToCreate.GetNode()
+			log.Printf("cleaning up node: %s", nd.Name)
+			if err = k3d.DeletNodesFromCluster(ctx, runtime, nd); err != nil {
+				return fmt.Errorf("errored while deleting node %s : %v", nd.Name, err)
+			}
+		}
+		log.Printf("creating nodes failed")
+		return fmt.Errorf("creating nodes failed")
 	}
 	return nil
 }

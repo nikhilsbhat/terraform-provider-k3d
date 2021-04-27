@@ -60,7 +60,7 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 		id = newID
 	}
 
-	nodes := getNodesSlice(d.Get(utils.TerraformResourceNodes))
+	nodes := getSlice(d.Get(utils.TerraformResourceNodes))
 	cluster := utils.String(d.Get(utils.TerraformResourceCluster))
 	all := utils.Bool(d.Get(utils.TerraformResourceAll))
 
@@ -94,6 +94,6 @@ func getNodesFromCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, clus
 	return k3d.GetFilteredNodes(ctx, defaultConfig.K3DRuntime, nodes)
 }
 
-func getNodesSlice(nodes interface{}) []string {
-	return utils.GetSlice(nodes.([]interface{}))
+func getSlice(data interface{}) []string {
+	return utils.GetSlice(data.([]interface{}))
 }

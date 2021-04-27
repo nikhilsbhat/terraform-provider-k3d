@@ -125,16 +125,16 @@ func resourceClusterActionRead(ctx context.Context, d *schema.ResourceData, meta
 	if err != nil {
 		return diag.Errorf("errored while fetching cluster status: %v", err)
 	}
+
 	flattenedClusterStatus, err := utils.Map(clusterStatus)
-	log.Printf("flattenedClusterStatus, %v", flattenedClusterStatus)
 	if err != nil {
 		return diag.Errorf("errored while flattening clusters obtained: %v", err)
 	}
 
-	if err := d.Set(utils.TerraformResourceStatus, flattenedClusterStatus); err != nil {
+	if err = d.Set(utils.TerraformResourceStatus, flattenedClusterStatus); err != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceStatus, err)
 	}
-	if err := d.Set(utils.TerraformResourceState, action); err != nil {
+	if err = d.Set(utils.TerraformResourceState, action); err != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceState, err)
 	}
 	return nil

@@ -116,7 +116,7 @@ func resourceNodeActionStartStop(ctx context.Context, d *schema.ResourceData, me
 			id = newID
 		}
 
-		nodes := getNodesSlice(d.Get(utils.TerraformResourceNodes))
+		nodes := getSlice(d.Get(utils.TerraformResourceNodes))
 		cluster := utils.String(d.Get(utils.TerraformResourceCluster))
 		all := utils.Bool(d.Get(utils.TerraformResourceAll))
 		start := utils.Bool(d.Get(utils.TerraformResourceStart))
@@ -141,7 +141,7 @@ func resourceNodeActionStartStop(ctx context.Context, d *schema.ResourceData, me
 func resourceNodeActionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	defaultConfig := meta.(*k3d.K3dConfig)
 
-	nodes := getNodesSlice(d.Get(utils.TerraformResourceNodes))
+	nodes := getSlice(d.Get(utils.TerraformResourceNodes))
 	cluster := utils.String(d.Get(utils.TerraformResourceCluster))
 	all := utils.Bool(d.Get(utils.TerraformResourceAll))
 

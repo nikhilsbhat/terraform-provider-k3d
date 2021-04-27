@@ -2,8 +2,10 @@ package k3d
 
 import (
 	"context"
+	"log"
 	"time"
 
+	"github.com/docker/go-connections/nat"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/utils"
 	"github.com/rancher/k3d/v4/pkg/client"
 	"github.com/rancher/k3d/v4/pkg/runtimes"
@@ -18,7 +20,7 @@ type K3dNode interface {
 	DeleteNodes()
 }
 
-func GetNodes(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3D.Node, error) {
+func Nodes(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3D.Node, error) {
 	nodes, err := runtime.GetNodesByLabel(ctx, map[string]string{
 		"k3d.cluster": cluster,
 	})
@@ -81,7 +83,7 @@ func DeleteNodes(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node, 
 }
 
 func GetFilteredNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3DNode, error) {
-	k3dNodes, err := GetNodes(ctx, runtime, cluster)
+	k3dNodes, err := Nodes(ctx, runtime, cluster)
 	if err != nil {
 		return nil, err
 	}
@@ -122,6 +124,29 @@ func GetFilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []str
 	return k3dNodes, nil
 }
 
+func GetNodes(ctx context.Context, runtime runtimes.Runtime) ([]*K3DNode, error) {
+	nodes, err := client.NodeList(ctx, runtime)
+	if err != nil {
+		return nil, err
+	}
+	k3dNodes := make([]*K3DNode, 0)
+	for _, node := range nodes {
+		k3dNodes = append(k3dNodes, &K3DNode{
+			Name:                 node.Name,
+			Role:                 string(node.Role),
+			ClusterAssociated:    node.Labels[K3dclusterNameLabel],
+			State:                node.State.Status,
+			Created:              node.Created,
+			Memory:               node.Memory,
+			Volumes:              node.Volumes,
+			Networks:             node.Networks,
+			EnvironmentVariables: node.Env,
+			PortMapping:          getPortMaps(node.Ports),
+		})
+	}
+	return k3dNodes, nil
+}
+
 func GetNodesByLabels(ctx context.Context, runtime runtimes.Runtime, label map[string]string) ([]*K3DNode, error) {
 	k3dNodes, err := runtime.GetNodesByLabel(ctx, label)
 	if err != nil {
@@ -135,9 +160,12 @@ func GetNodesByLabels(ctx context.Context, runtime runtimes.Runtime, label map[s
 			ClusterAssociated:    node.Labels[K3dclusterNameLabel],
 			State:                node.State.Status,
 			Created:              node.Created,
+			Memory:               node.Memory,
 			Volumes:              node.Volumes,
 			Networks:             node.Networks,
 			EnvironmentVariables: node.Env,
+			// dropping PortMapping as terraform schema format is yet to be figured.
+			//PortMapping:          getPortMaps(node.Ports),
 		})
 	}
 	return filteredNodes, err
@@ -157,7 +185,7 @@ func StopNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) er
 }
 
 func StopNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) error {
-	nodesRaw, err := GetNodes(ctx, runtime, cluster)
+	nodesRaw, err := Nodes(ctx, runtime, cluster)
 	if err != nil {
 		return err
 	}
@@ -183,7 +211,7 @@ func StartNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) e
 }
 
 func StartNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) error {
-	nodesRaw, err := GetNodes(ctx, runtime, cluster)
+	nodesRaw, err := Nodes(ctx, runtime, cluster)
 	if err != nil {
 		return err
 	}
@@ -230,4 +258,14 @@ func DeletNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, node *
 		SkipLBUpdate: false,
 	}
 	return DeleteNodes(ctx, runtime, node, deleteOps)
+}
+
+func getPortMaps(p nat.PortMap) map[string]interface{} {
+	portM := make(map[string]interface{})
+	for key, value := range p {
+		log.Printf("value is : %v", value)
+		log.Printf("key is : %v", key)
+		portM[string(key)] = value
+	}
+	return portM
 }

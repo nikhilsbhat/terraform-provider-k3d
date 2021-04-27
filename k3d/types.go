@@ -37,17 +37,18 @@ type TarBallData struct {
 }
 
 type K3DNode struct {
-	Name                 string   `json:"name,omitempty"`
-	Role                 string   `json:"role,omitempty"`
-	ClusterAssociated    string   `json:"cluster,omitempty"`
-	State                string   `json:"state,omitempty"`
-	Created              string   `json:"created,omitempty"`
-	Memory               string   `json:"memory,omitempty"`
-	Volumes              []string `json:"volumes,omitempty"`
-	Networks             []string `json:"networks,omitempty"`
-	EnvironmentVariables []string `json:"env,omitempty"`
-	Count                int      `json:"count,omitempty"`
-	Image                string   `json:"image,omitempty"`
+	Name                 string                 `json:"name,omitempty"`
+	Role                 string                 `json:"role,omitempty"`
+	ClusterAssociated    string                 `json:"cluster,omitempty"`
+	State                string                 `json:"state,omitempty"`
+	Created              string                 `json:"created,omitempty"`
+	Memory               string                 `json:"memory,omitempty"`
+	Volumes              []string               `json:"volumes,omitempty"`
+	Networks             []string               `json:"networks,omitempty"`
+	EnvironmentVariables []string               `json:"env,omitempty"`
+	Count                int                    `json:"count,omitempty"`
+	Image                string                 `json:"image,omitempty"`
+	PortMapping          map[string]interface{} `json:"port_mappings,omitempty"`
 }
 
 type K3DNodeStatus struct {
