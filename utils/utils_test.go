@@ -38,7 +38,7 @@ func TestMap(t *testing.T) {
 				"state":   "stopped",
 			},
 		}
-		actual, err := Map(node)
+		actual, err := MapSlice(node)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, actual)
 	})

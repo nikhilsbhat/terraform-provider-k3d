@@ -63,7 +63,7 @@ func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta
 		return diag.Errorf("errored while fetching clusters: %v", err)
 	}
 
-	flattenedClusters, err := utils.Map(k3dClusters)
+	flattenedClusters, err := utils.MapSlice(k3dClusters)
 	if err != nil {
 		d.SetId("")
 		return diag.Errorf("errored while flattening nodes obtained: %v", err)

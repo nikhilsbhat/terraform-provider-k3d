@@ -58,3 +58,15 @@ type K3DNodeStatus struct {
 	State   string `json:"state,omitempty"`
 	Running bool   `json:"running,omitempty"`
 }
+
+type K3DRegistry struct {
+	Name     string            `json:"name,omitempty"`
+	Image    string            `json:"image,omitempty"`
+	Cluster  string            `json:"cluster,omitempty"`
+	Protocol string            `json:"protocol,omitempty"`
+	Host     string            `json:"host,omitempty"`
+	Port     string            `json:"port,omitempty"`
+	Expose   map[string]string `json:"expose,omitempty"`
+	UseProxy bool              `json:"use_proxy,omitempty"`
+	Proxy    map[string]string `json:"proxy,omitempty"`
+}

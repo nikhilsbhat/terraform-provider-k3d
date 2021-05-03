@@ -71,14 +71,27 @@ func Int(value interface{}) int {
 	return value.(int)
 }
 
-// Map returns array flattens the object passed to []map[string]interface{} to simplify terraform attributes saving.
-func Map(value interface{}) ([]map[string]interface{}, error) {
+// MapSlice returns array flattens the object passed to []map[string]interface{} to simplify terraform attributes saving.
+func MapSlice(value interface{}) ([]map[string]interface{}, error) {
 	mp := make([]map[string]interface{}, 0)
 	j, err := json.Marshal(value)
 	if err != nil {
 		return nil, err
 	}
-	if err := json.Unmarshal(j, &mp); err != nil {
+	if err = json.Unmarshal(j, &mp); err != nil {
+		return nil, err
+	}
+	return mp, nil
+}
+
+// Map returns array flattens the object passed to []map[string]interface{} to simplify terraform attributes saving.
+func Map(value interface{}) (map[string]string, error) {
+	var mp map[string]string
+	j, err := json.Marshal(value)
+	if err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(j, &mp); err != nil {
 		return nil, err
 	}
 	return mp, nil

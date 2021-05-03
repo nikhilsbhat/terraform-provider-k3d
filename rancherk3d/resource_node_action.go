@@ -149,7 +149,7 @@ func resourceNodeActionRead(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		return diag.Errorf("errored while fetching nodes: %v", err)
 	}
-	flattenedNodeStatus, err := utils.Map(nodeStatus)
+	flattenedNodeStatus, err := utils.MapSlice(nodeStatus)
 	log.Printf("flattenedNodeStatus, %v", flattenedNodeStatus)
 	if err != nil {
 		return diag.Errorf("errored while flattening nodes obtained: %v", err)

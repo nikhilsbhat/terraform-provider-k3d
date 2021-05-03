@@ -70,7 +70,7 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("errored while fetching nodes: %v", err)
 	}
 
-	flattenedNodes, err := utils.Map(k3dNodes)
+	flattenedNodes, err := utils.MapSlice(k3dNodes)
 	if err != nil {
 		d.SetId("")
 		return diag.Errorf("errored while flattening nodes obtained: %v", err)

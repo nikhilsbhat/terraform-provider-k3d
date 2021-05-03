@@ -126,7 +126,7 @@ func resourceClusterActionRead(ctx context.Context, d *schema.ResourceData, meta
 		return diag.Errorf("errored while fetching cluster status: %v", err)
 	}
 
-	flattenedClusterStatus, err := utils.Map(clusterStatus)
+	flattenedClusterStatus, err := utils.MapSlice(clusterStatus)
 	if err != nil {
 		return diag.Errorf("errored while flattening clusters obtained: %v", err)
 	}

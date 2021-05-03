@@ -69,11 +69,11 @@ func Provider() *schema.Provider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			//"rancherk3d_create_cluster":  resourceRANCHERK3D(),
-			//"rancherk3d_create_registry": resourceRegistry(),
-			"rancherk3d_load_image":     resourceImage(),
-			"rancherk3d_node_action":    resourceNodeAction(),
-			"rancherk3d_node_create":    resourceNode(),
-			"rancherk3d_cluster_action": resourceClusterAction(),
+			"rancherk3d_create_registry": resourceRegistry(),
+			"rancherk3d_load_image":      resourceImage(),
+			"rancherk3d_node_action":     resourceNodeAction(),
+			"rancherk3d_node_create":     resourceNode(),
+			"rancherk3d_cluster_action":  resourceClusterAction(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{

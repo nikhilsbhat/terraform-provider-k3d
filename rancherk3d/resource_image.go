@@ -119,7 +119,7 @@ func resourceLoadImageRead(ctx context.Context, d *schema.ResourceData, meta int
 		diag.Errorf("an error occurred while fetching images to be stored")
 	}
 
-	flattenedImagesToStore, err := utils.Map(imagesToStore)
+	flattenedImagesToStore, err := utils.MapSlice(imagesToStore)
 	if err != nil {
 		d.SetId("")
 		return diag.Errorf("errored while flattening images to store: %v", err)

@@ -74,7 +74,7 @@ func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, met
 		return diag.Errorf("either there are no registries in the environment or with the specified configurations")
 	}
 
-	flattenedNodes, err := utils.Map(k3dNodes)
+	flattenedNodes, err := utils.MapSlice(k3dNodes)
 	if err != nil {
 		d.SetId("")
 		return diag.Errorf("errored while flattening registry nodes obtained: %v", err)

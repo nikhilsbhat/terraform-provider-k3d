@@ -144,7 +144,7 @@ func resourceNodeRead(ctx context.Context, d *schema.ResourceData, meta interfac
 		return diag.Errorf("errored while fetching created nodes: %v", k3dNodes)
 	}
 
-	flattenedk3dNodes, err := utils.Map(k3dNodes)
+	flattenedk3dNodes, err := utils.MapSlice(k3dNodes)
 	if err != nil {
 		return diag.Errorf("errored while flattening obtained created nodes : %v", err)
 	}
