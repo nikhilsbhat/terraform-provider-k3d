@@ -79,7 +79,7 @@ func resourceNodeAction() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    false,
 							Computed:    true,
-							Description: "node of which the current status is updated with",
+							Description: "role of updated node",
 						},
 						"state": {
 							Type:        schema.TypeString,
@@ -150,12 +150,11 @@ func resourceNodeActionRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("errored while fetching nodes: %v", err)
 	}
 	flattenedNodeStatus, err := utils.MapSlice(nodeStatus)
-	log.Printf("flattenedNodeStatus, %v", flattenedNodeStatus)
 	if err != nil {
 		return diag.Errorf("errored while flattening nodes obtained: %v", err)
 	}
 
-	if err := d.Set(utils.TerraformResourceStatus, flattenedNodeStatus); err != nil {
+	if err = d.Set(utils.TerraformResourceStatus, flattenedNodeStatus); err != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceStatus, err)
 	}
 	return nil
@@ -164,7 +163,6 @@ func resourceNodeActionRead(ctx context.Context, d *schema.ResourceData, meta in
 func resourceNodeActionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	defaultConfig := meta.(*k3d.K3dConfig)
 
-	log.Printf("uploading newer images to k3d clusters")
 	if d.HasChange(utils.TerraformResourceCluster) || d.HasChange(utils.TerraformResourceNodes) || d.HasChange(utils.TerraformResourceStart) || d.HasChange(utils.TerraformResourceStop) {
 
 		all := utils.Bool(d.Get(utils.TerraformResourceAll))

@@ -70,3 +70,9 @@ type K3DRegistry struct {
 	UseProxy bool              `json:"use_proxy,omitempty"`
 	Proxy    map[string]string `json:"proxy,omitempty"`
 }
+
+type K3DRegistryConnect struct {
+	Registries []string `json:"registries,omitempty"`
+	Cluster    string   `json:"cluster,omitempty"`
+	Connect    bool     `json:"connect,omitempty"`
+}

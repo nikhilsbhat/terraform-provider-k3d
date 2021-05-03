@@ -119,3 +119,12 @@ func Json(data interface{}) (string, error) {
 	}
 	return string(jsn), err
 }
+
+func Contains(s []string, searchterm string) bool {
+	for _, i := range s {
+		if i == searchterm {
+			return true
+		}
+	}
+	return false
+}

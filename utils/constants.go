@@ -34,6 +34,7 @@ const (
 	TerraformResourceProtocol       = "protocol"
 	TerraformResourceProxy          = "proxy"
 	TerraformResourceMetadata       = "metadata"
+	TerraformResourceConnect        = "connect"
 	TerraformUseProxy               = "use_proxy"
 	TerraformResourceConfigFile     = "config_file"
 	TerraformK3dLabel               = "k3d.terraform"
