@@ -14,9 +14,10 @@ import (
 
 // GetRandomID returns a random id when invoked.
 func GetRandomID() (string, error) {
-	bytes := make([]byte, 10)
+	randInt := 10
+	bytes := make([]byte, randInt)
 	n, err := rand.Reader.Read(bytes)
-	if n != 10 {
+	if n != randInt {
 		return "", errors.New("generated insufficient random bytes")
 	}
 	if err != nil {
@@ -71,7 +72,8 @@ func Int(value interface{}) int {
 	return value.(int)
 }
 
-// MapSlice returns array flattens the object passed to []map[string]interface{} to simplify terraform attributes saving.
+// MapSlice returns array flattens the object passed to []map[string]interface{}
+// to simplify terraform attributes saving.
 func MapSlice(value interface{}) ([]map[string]interface{}, error) {
 	mp := make([]map[string]interface{}, 0)
 	j, err := json.Marshal(value)
@@ -84,7 +86,8 @@ func MapSlice(value interface{}) ([]map[string]interface{}, error) {
 	return mp, nil
 }
 
-// Map returns array flattens the object passed to []map[string]interface{} to simplify terraform attributes saving.
+// Map returns array flattens the object passed to []map[string]interface{}
+// to simplify terraform attributes saving.
 func Map(value interface{}) (map[string]string, error) {
 	var mp map[string]string
 	j, err := json.Marshal(value)
@@ -111,8 +114,8 @@ func Yaml(data interface{}) (string, error) {
 	return string(yml), err
 }
 
-// Json returns json encoded data structure passed to it
-func Json(data interface{}) (string, error) {
+// JSON returns json encoded data structure passed to it
+func JSON(data interface{}) (string, error) {
 	jsn, err := json.Marshal(data)
 	if err != nil {
 		return "", err

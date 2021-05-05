@@ -43,5 +43,6 @@ const (
 	TerraformK3dAPIVersion          = "k3d_api_version"
 	TerraformK3dKind                = "kind"
 	TerraformK3dRuntime             = "runtime"
+	TerraformTimeOut5               = 5
 	K3DRepoDEFAULT                  = "rancher/k3s"
 )

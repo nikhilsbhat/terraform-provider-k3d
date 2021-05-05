@@ -74,7 +74,7 @@ func resourceConnectRegistry() *schema.Resource {
 }
 
 func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	if d.IsNewResource() {
 		id := d.Id()
@@ -88,7 +88,7 @@ func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData,
 			id = newID
 		}
 
-		connect := k3d.K3DRegistryConnect{
+		connect := k3d.RegistryConnect{
 			Registries: getSlice(d.Get(utils.TerraformResourceRegistries)),
 			Cluster:    utils.String(d.Get(utils.TerraformResourceCluster)),
 			Connect:    utils.Bool(d.Get(utils.TerraformResourceConnect)),
@@ -105,9 +105,9 @@ func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceConnectRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
-	connect := k3d.K3DRegistryConnect{
+	connect := k3d.RegistryConnect{
 		Registries: getSlice(d.Get(utils.TerraformResourceRegistries)),
 		Cluster:    utils.String(d.Get(utils.TerraformResourceCluster)),
 		Connect:    utils.Bool(d.Get(utils.TerraformResourceConnect)),
@@ -125,9 +125,10 @@ func resourceConnectRegistryRead(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceConnectRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
-	if d.HasChange(utils.TerraformResourceRegistries) || d.HasChange(utils.TerraformResourceCluster) || d.HasChange(utils.TerraformResourceConnect) || d.HasChange(utils.TerraformResourceStop) {
+	if d.HasChange(utils.TerraformResourceRegistries) || d.HasChange(utils.TerraformResourceCluster) ||
+		d.HasChange(utils.TerraformResourceConnect) || d.HasChange(utils.TerraformResourceStop) {
 		connect := getUpdatedRegistriesChanges(d)
 		if err := connectRegistryToCluster(ctx, defaultConfig.K3DRuntime, connect); err != nil {
 			return diag.Errorf("errored while connecting/disconnecting registries '%v' with cluster '%s,", connect.Registries, connect.Cluster)
@@ -150,7 +151,7 @@ func resourceConnectRegistryUpdate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceConnectRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 	_ = defaultConfig
 	// could be properly implemented once k3d supports deleting loaded images from cluster.
 
@@ -162,7 +163,7 @@ func resourceConnectRegistryDelete(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func connectRegistryToCluster(ctx context.Context, runtime runtimes.Runtime, connect k3d.K3DRegistryConnect) error {
+func connectRegistryToCluster(ctx context.Context, runtime runtimes.Runtime, connect k3d.RegistryConnect) error {
 	log.Printf("the connect data %v", connect)
 	registries, err := k3d.FilteredNodes(ctx, runtime, connect.Registries)
 	if err != nil {
@@ -180,7 +181,7 @@ func connectRegistryToCluster(ctx context.Context, runtime runtimes.Runtime, con
 	return nil
 }
 
-func getRegistryStatus(ctx context.Context, runtime runtimes.Runtime, connect k3d.K3DRegistryConnect) ([]map[string]string, error) {
+func getRegistryStatus(ctx context.Context, runtime runtimes.Runtime, connect k3d.RegistryConnect) ([]map[string]string, error) {
 	updatedStatus := make([]map[string]string, 0)
 	cluster, err := k3d.GetCluster(ctx, runtime, connect.Cluster)
 	if err != nil {
@@ -210,7 +211,7 @@ func getRegistryStatus(ctx context.Context, runtime runtimes.Runtime, connect k3
 	return updatedStatus, nil
 }
 
-func getUpdatedRegistriesChanges(d *schema.ResourceData) (registries k3d.K3DRegistryConnect) {
+func getUpdatedRegistriesChanges(d *schema.ResourceData) (registries k3d.RegistryConnect) {
 	oldRegistries, newRegistries := d.GetChange(utils.TerraformResourceRegistries)
 	if !cmp.Equal(oldRegistries, newRegistries) {
 		registries.Registries = getSlice(newRegistries)

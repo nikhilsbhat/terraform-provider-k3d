@@ -47,7 +47,7 @@ func dataSourceKubeConfig() *schema.Resource {
 }
 
 func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	id := d.Id()
 	if len(id) == 0 {
@@ -83,8 +83,8 @@ func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func getUnfilteredCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, clusters []string, all bool) ([]*K3D.Cluster, error) {
-	fetchedClusters := make([]*K3D.Cluster, 0)
+func getUnfilteredCluster(ctx context.Context, defaultConfig *k3d.Config, clusters []string, all bool) ([]*K3D.Cluster, error) {
+	var fetchedClusters []*K3D.Cluster
 	if all {
 		allClusters, err := k3d.GetClusters(ctx, defaultConfig.K3DRuntime)
 		if err != nil {

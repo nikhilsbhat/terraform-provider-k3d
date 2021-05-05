@@ -16,10 +16,6 @@ var (
 	K3dclusterNameLabel = "k3d.cluster"
 )
 
-type K3dNode interface {
-	DeleteNodes()
-}
-
 func Nodes(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3D.Node, error) {
 	nodes, err := runtime.GetNodesByLabel(ctx, map[string]string{
 		"k3d.cluster": cluster,
@@ -68,28 +64,30 @@ func StartNode(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node) er
 	return nil
 }
 
-func CreateNode(ctx context.Context, runtime runtimes.Runtime, node []*K3D.Node, cluster *K3D.Cluster, options K3D.NodeCreateOpts) error {
+func CreateNode(ctx context.Context, runtime runtimes.Runtime,
+	node []*K3D.Node, cluster *K3D.Cluster, options K3D.NodeCreateOpts) error {
 	if err := client.NodeAddToClusterMulti(ctx, runtime, node, cluster, options); err != nil {
 		return err
 	}
 	return nil
 }
 
-func DeleteNodes(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node, options K3D.NodeDeleteOpts) error {
+func DeleteNodes(ctx context.Context, runtime runtimes.Runtime,
+	node *K3D.Node, options K3D.NodeDeleteOpts) error {
 	if err := client.NodeDelete(ctx, runtime, node, options); err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetFilteredNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3DNode, error) {
+func GetFilteredNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3Node, error) {
 	k3dNodes, err := Nodes(ctx, runtime, cluster)
 	if err != nil {
 		return nil, err
 	}
-	filteredNodes := make([]*K3DNode, 0)
+	filteredNodes := make([]*K3Node, 0)
 	for _, node := range k3dNodes {
-		filteredNodes = append(filteredNodes, &K3DNode{
+		filteredNodes = append(filteredNodes, &K3Node{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
 			ClusterAssociated:    node.Labels[K3dclusterNameLabel],
@@ -103,14 +101,14 @@ func GetFilteredNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, 
 	return filteredNodes, err
 }
 
-func GetFilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) ([]*K3DNode, error) {
-	k3dNodes := make([]*K3DNode, 0)
+func GetFilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) ([]*K3Node, error) {
+	k3dNodes := make([]*K3Node, 0)
 	for _, currentNode := range nodes {
 		node, err := Node(ctx, runtime, currentNode)
 		if err != nil {
 			return nil, err
 		}
-		k3dNodes = append(k3dNodes, &K3DNode{
+		k3dNodes = append(k3dNodes, &K3Node{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
 			ClusterAssociated:    node.Labels[K3dclusterNameLabel],
@@ -124,14 +122,14 @@ func GetFilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []str
 	return k3dNodes, nil
 }
 
-func GetNodes(ctx context.Context, runtime runtimes.Runtime) ([]*K3DNode, error) {
+func GetNodes(ctx context.Context, runtime runtimes.Runtime) ([]*K3Node, error) {
 	nodes, err := client.NodeList(ctx, runtime)
 	if err != nil {
 		return nil, err
 	}
-	k3dNodes := make([]*K3DNode, 0)
+	k3dNodes := make([]*K3Node, 0)
 	for _, node := range nodes {
-		k3dNodes = append(k3dNodes, &K3DNode{
+		k3dNodes = append(k3dNodes, &K3Node{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
 			ClusterAssociated:    node.Labels[K3dclusterNameLabel],
@@ -147,14 +145,14 @@ func GetNodes(ctx context.Context, runtime runtimes.Runtime) ([]*K3DNode, error)
 	return k3dNodes, nil
 }
 
-func GetNodesByLabels(ctx context.Context, runtime runtimes.Runtime, label map[string]string) ([]*K3DNode, error) {
+func GetNodesByLabels(ctx context.Context, runtime runtimes.Runtime, label map[string]string) ([]*K3Node, error) {
 	k3dNodes, err := runtime.GetNodesByLabel(ctx, label)
 	if err != nil {
 		return nil, err
 	}
-	filteredNodes := make([]*K3DNode, 0)
+	filteredNodes := make([]*K3Node, 0)
 	for _, node := range k3dNodes {
-		filteredNodes = append(filteredNodes, &K3DNode{
+		filteredNodes = append(filteredNodes, &K3Node{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
 			ClusterAssociated:    node.Labels[K3dclusterNameLabel],
@@ -223,7 +221,7 @@ func StartNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluste
 	return nil
 }
 
-func (c *K3DNode) GetNode() *K3D.Node {
+func (c *K3Node) GetNode() *K3D.Node {
 	return &K3D.Node{
 		Name: c.Name,
 		Role: K3D.NodeRoles[c.Role],
@@ -237,7 +235,8 @@ func (c *K3DNode) GetNode() *K3D.Node {
 	}
 }
 
-func CreateNodeWithTimeout(ctx context.Context, runtime runtimes.Runtime, cluster string, nodes []*K3DNode, wait bool, timeout time.Duration) error {
+func CreateNodeWithTimeout(ctx context.Context, runtime runtimes.Runtime,
+	cluster string, nodes []*K3Node, wait bool, timeout time.Duration) error {
 	var nodeCreatOpts K3D.NodeCreateOpts
 	if wait {
 		nodeCreatOpts = K3D.NodeCreateOpts{Wait: wait, Timeout: timeout}

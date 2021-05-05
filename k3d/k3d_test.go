@@ -26,8 +26,8 @@ func Test_getRuntime(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getRuntime(tt.runtime); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("getRuntime() = %v, want %v", got, tt.want)
+			if got := getRuntime(tt.runtime); !reflect.DeepEqual(got, tt.want) { //nolint:scopelint
+				t.Errorf("getRuntime() = %v, want %v", got, tt.want) //nolint:scopelint
 			}
 		})
 	}

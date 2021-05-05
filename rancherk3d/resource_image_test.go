@@ -1,10 +1,12 @@
 package rancherk3d
 
 import (
+	"context"
 	"testing"
 
+	"github.com/rancher/k3d/v4/pkg/runtimes"
 	"github.com/stretchr/testify/assert"
-	//"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	// "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func Test_getImagesStored(t *testing.T) {
@@ -21,13 +23,13 @@ func Test_getImagesStored(t *testing.T) {
 				},
 			},
 		}
-		actual := getImagesToBeStored(cluster, images)
+		actual, err := getImagesToBeStored(context.Background(), runtimes.SelectedRuntime, images, cluster, false)
+		assert.NoError(t, err)
 		assert.Equal(t, expected, actual)
-
 	})
 }
 
-//func Test_resourceImage(t *testing.T) {
+// func Test_resourceImage(t *testing.T) {
 //	ri := acctest.RandInt()
 //
 //	resource.Test(t, resource.TestCase{
@@ -41,15 +43,15 @@ func Test_getImagesStored(t *testing.T) {
 //			},
 //		},
 //	})
-//}
+// }
 //
-//func getMapofinterface() map[string]interface{} {
+// func getMapofinterface() map[string]interface{} {
 //	return map[string]interface{}{
 //
 //	}
-//}
+// }
 //
-//func testAccCheckImageDestroy() resource.TestCheckFunc {
+// func testAccCheckImageDestroy() resource.TestCheckFunc {
 //	return func(s *terraform.State) error {
 //		for _, rs := range s.RootModule().Resources {
 //			if rs.Type != "keycloak_role" {
@@ -67,18 +69,18 @@ func Test_getImagesStored(t *testing.T) {
 //
 //		return nil
 //	}
-//}
+// }
 //
-//func testAccMachineImage_basic(rInt int) string {
+// func testAccMachineImage_basic(rInt int) string {
 //
 //	identity_domain := os.Getenv("OPC_IDENTITY_DOMAIN")
 //
 //	testAccMachineImageBasic := `
-//resource "rancherk3d_load_image" "loading" {
+// resource "rancherk3d_load_image" "loading" {
 //  images       = ["basnik/terragen:latest", "basnik/renderer:latest"]
 //  clusters     = ["k3s-default",]
 //  keep_tarball = true
-//}`
+// }`
 //
 //	return fmt.Sprintf(testAccMachineImageBasic, identity_domain, rInt)
-//}
+// }

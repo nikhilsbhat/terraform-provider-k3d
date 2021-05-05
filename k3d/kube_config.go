@@ -10,7 +10,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func GetKubeConfig(ctx context.Context, runtime runtimes.Runtime, clusters []*K3D.Cluster, notEncode bool) (map[string]string, error) {
+func GetKubeConfig(ctx context.Context, runtime runtimes.Runtime,
+	clusters []*K3D.Cluster, notEncode bool) (map[string]string, error) {
 	kubeConfigs := make(map[string]string, len(clusters))
 	for _, cluster := range clusters {
 		kubeConfig, err := client.KubeconfigGet(ctx, runtime, cluster)
@@ -30,10 +31,10 @@ func GetKubeConfig(ctx context.Context, runtime runtimes.Runtime, clusters []*K3
 	return kubeConfigs, nil
 }
 
-func getWriteKubeConfigOptions() *client.WriteKubeConfigOptions {
-	return &client.WriteKubeConfigOptions{
-		UpdateExisting:       true,
-		UpdateCurrentContext: true,
-		OverwriteExisting:    true,
-	}
-}
+// func getWriteKubeConfigOptions() *client.WriteKubeConfigOptions {
+//	return &client.WriteKubeConfigOptions{
+//		UpdateExisting:       true,
+//		UpdateCurrentContext: true,
+//		OverwriteExisting:    true,
+//	}
+// }

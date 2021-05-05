@@ -109,7 +109,7 @@ func resourceRegistry() *schema.Resource {
 }
 
 func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	if d.IsNewResource() {
 		id := d.Id()
@@ -127,21 +127,17 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			return diag.Errorf("errored while flattening '%s' with :%v", utils.TerraformResourceProxy, err)
 		}
+
 		expose, err := utils.Map(d.Get(utils.TerraformResourceExpose))
 		if err != nil {
 			return diag.Errorf("errored while flattening '%s' with :%v", utils.TerraformResourceExpose, err)
 		}
 
-		metaData, err := getMetadata(d)
-		if err != nil {
-			return diag.Errorf("errored while fetching '%s' with :%v", utils.TerraformResourceMetadata, err)
-		}
-
-		if err = d.Set(utils.TerraformResourceMetadata, metaData); err != nil {
+		if err = d.Set(utils.TerraformResourceMetadata, getMetadata(d)); err != nil {
 			return diag.Errorf("errored while setting '%s' with :%v", utils.TerraformResourceHost, err)
 		}
 
-		registry := &k3d.K3DRegistry{
+		registry := &k3d.Registry{
 			Name:     utils.String(d.Get(utils.TerraformResourceName)),
 			Image:    utils.String(d.Get(utils.TerraformResourceImage)),
 			Cluster:  utils.String(d.Get(utils.TerraformResourceCluster)),
@@ -153,7 +149,7 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 		if err = createRegistry(ctx, defaultConfig.K3DRuntime, registry); err != nil {
-			diag.Errorf("oops errored while creating registry", err)
+			diag.Errorf("oops errored while creating registry: %v", err)
 		}
 
 		d.SetId(id)
@@ -164,7 +160,7 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	cluster := utils.String(d.Get(utils.TerraformResourceCluster))
 	metadata, err := utils.Map(d.Get(utils.TerraformResourceMetadata))
@@ -189,7 +185,7 @@ func resourceRegistryRead(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	id := d.Id()
 	if len(id) == 0 {
@@ -210,9 +206,9 @@ func resourceRegistryDelete(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func getRegistriesFromState(ctx context.Context, d *schema.ResourceData, defaultConfig *k3d.K3dConfig) ([]*K3D.Node, error) {
+func getRegistriesFromState(ctx context.Context, d *schema.ResourceData, defaultConfig *k3d.Config) ([]*K3D.Node, error) {
 	registriesFromState := d.Get(utils.TerraformResourceRegistriesList)
-	var nodes []*k3d.K3DNode
+	var nodes []*k3d.K3Node
 	if err := mapstructure.Decode(registriesFromState, &nodes); err != nil {
 		return nil, err
 	}
@@ -227,7 +223,7 @@ func getRegistriesFromState(ctx context.Context, d *schema.ResourceData, default
 	return k3dNodes, nil
 }
 
-func createRegistry(ctx context.Context, runtime runtimes.Runtime, registry *k3d.K3DRegistry) error {
+func createRegistry(ctx context.Context, runtime runtimes.Runtime, registry *k3d.Registry) error {
 	k3dRegistry := &K3D.Registry{}
 
 	k3dRegistry.ClusterRef = registry.Cluster
@@ -239,7 +235,7 @@ func createRegistry(ctx context.Context, runtime runtimes.Runtime, registry *k3d
 		if !validateProxy(registry.Proxy) {
 			k3d.GetProxyConfig(registry.Proxy, k3dRegistry)
 		}
-		fmt.Errorf("proxy config validation failed, config cannot be empty")
+		return fmt.Errorf("proxy config validation failed, config cannot be empty")
 	}
 
 	if err := k3d.CreateRegistry(ctx, runtime, k3dRegistry, []string{registry.Cluster}); err != nil {
@@ -272,19 +268,19 @@ func getExpose(expose map[string]string) map[string]string {
 	return expose
 }
 
-func getHost(registry *k3d.K3DRegistry) string {
+func getHost(registry *k3d.Registry) string {
 	if len(registry.Host) == 0 {
 		return registry.Name
 	}
 	return registry.Host
 }
 
-func getMetadata(d *schema.ResourceData) (map[string]string, error) {
+func getMetadata(d *schema.ResourceData) map[string]string {
 	metadata := make(map[string]string)
 	if host := utils.String(d.Get(utils.TerraformResourceHost)); len(host) == 0 {
 		metadata["host"] = utils.String(d.Get(utils.TerraformResourceName))
-		return metadata, nil
+		return metadata
 	}
 	metadata["host"] = utils.String(d.Get(utils.TerraformResourceHost))
-	return metadata, nil
+	return metadata
 }

@@ -41,7 +41,7 @@ func dataSourceClusterList() *schema.Resource {
 }
 
 func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	id := d.Id()
 
@@ -76,8 +76,8 @@ func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func getK3dCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, clusters []string, all bool) ([]*k3d.Cluster, error) {
-	fetchedClusters := make([]*K3D.Cluster, 0)
+func getK3dCluster(ctx context.Context, defaultConfig *k3d.Config, clusters []string, all bool) ([]*k3d.Cluster, error) {
+	var fetchedClusters []*K3D.Cluster
 	if all {
 		allClusters, err := k3d.GetClusters(ctx, defaultConfig.K3DRuntime)
 		if err != nil {
@@ -91,11 +91,11 @@ func getK3dCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, clusters [
 		}
 		fetchedClusters = allClusters
 	}
-	filteredClusterinfo := make([]*k3d.Cluster, 0)
+	filteredClusterInfo := make([]*k3d.Cluster, 0)
 	for _, cluster := range fetchedClusters {
 		serversRunning, serverCount := cluster.ServerCountRunning()
 		agentsCount, agentsRunning := cluster.AgentCountRunning()
-		filteredClusterinfo = append(filteredClusterinfo, &k3d.Cluster{
+		filteredClusterInfo = append(filteredClusterInfo, &k3d.Cluster{
 			Name:            cluster.Name,
 			Nodes:           getNodesList(cluster.Nodes),
 			Network:         cluster.Network.Name,
@@ -108,7 +108,7 @@ func getK3dCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, clusters [
 			HasLoadBalancer: cluster.HasLoadBalancer(),
 		})
 	}
-	return filteredClusterinfo, nil
+	return filteredClusterInfo, nil
 }
 
 func getNodesList(rawNodes []*K3D.Node) (nodes []string) {

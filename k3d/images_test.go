@@ -9,12 +9,12 @@ import (
 	"golang.org/x/net/context"
 )
 
-//func TestK3Dimages_StoreImages(t *testing.T) {
-//	images1 := k3d.K3Dimages{
+// func TestK3Dimages_StoreImages(t *testing.T) {
+//	images1 := k3d.Images{
 //		Images:       []string{"basnik/terragen:v0.2.0"},
 //		Cluster:      "k3s-default",
 //		StoreTarBall: false,
-//		Config:       k3d.K3dConfig{K3DRuntime: runtimes.Docker},
+//		Config:       k3d.Config{K3DRuntime: runtimes.Docker},
 //	}
 //
 //	images2 := images1
@@ -22,7 +22,7 @@ import (
 //
 //	tests := []struct {
 //		name    string
-//		images  k3d.K3Dimages
+//		images  k3d.Images
 //		want    *k3d.StoredImages
 //		wantErr bool
 //	}{
@@ -44,7 +44,7 @@ import (
 //	}
 //	for _, tt := range tests {
 //		t.Run(tt.name, func(t *testing.T) {
-//			client := &k3d.K3Dimages{
+//			client := &k3d.Images{
 //				Images:       tt.images.Images,
 //				Cluster:      tt.images.Cluster,
 //				StoreTarBall: tt.images.StoreTarBall,
@@ -61,15 +61,15 @@ import (
 //			}
 //		})
 //	}
-//}
+// }
 
 func TestStoreImages(t *testing.T) {
 	t.Run("should be able to load images to cluster k3s-default", func(t *testing.T) {
-		client := &k3d.K3Dimages{
+		client := &k3d.Images{
 			Images:       []string{"basnik/terragen:v0.2.0"},
 			Cluster:      "k3s-default",
 			StoreTarBall: false,
-			Config:       k3d.K3dConfig{K3DRuntime: runtimes.Docker},
+			Config:       k3d.Config{K3DRuntime: runtimes.Docker},
 			Context:      context.TODO(),
 		}
 		err := k3d.StoreImagesToClusters(client.Context, runtimes.SelectedRuntime, client.Images, client.StoreTarBall)
@@ -77,11 +77,11 @@ func TestStoreImages(t *testing.T) {
 	})
 
 	t.Run("should be able to load images to cluster test-cluster", func(t *testing.T) {
-		client := &k3d.K3Dimages{
+		client := &k3d.Images{
 			Images:       []string{"basnik/terragen:v0.2.0"},
 			Cluster:      "test-cluster",
 			StoreTarBall: false,
-			Config:       k3d.K3dConfig{K3DRuntime: runtimes.Docker},
+			Config:       k3d.Config{K3DRuntime: runtimes.Docker},
 			Context:      context.Background(),
 		}
 		err := k3d.StoreImagesToClusters(client.Context, runtimes.SelectedRuntime, client.Images, client.StoreTarBall)

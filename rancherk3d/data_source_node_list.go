@@ -47,7 +47,7 @@ func dataSourceNodeList() *schema.Resource {
 }
 
 func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	id := d.Id()
 
@@ -83,7 +83,7 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func getNodesFromCluster(ctx context.Context, defaultConfig *k3d.K3dConfig, cluster string, nodes []string, all bool) ([]*k3d.K3DNode, error) {
+func getNodesFromCluster(ctx context.Context, defaultConfig *k3d.Config, cluster string, nodes []string, all bool) ([]*k3d.K3Node, error) {
 	if all {
 		k3dNodes, err := k3d.GetFilteredNodesFromCluster(ctx, defaultConfig.K3DRuntime, cluster)
 		if err != nil {

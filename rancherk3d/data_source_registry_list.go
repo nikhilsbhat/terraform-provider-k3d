@@ -47,7 +47,7 @@ func dataSourceRegistryList() *schema.Resource {
 }
 
 func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	id := d.Id()
 
@@ -87,7 +87,7 @@ func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func getRegistries(ctx context.Context, defaultConfig *k3d.K3dConfig, cluster string, registries []string, all bool) ([]*k3d.K3DNode, error) {
+func getRegistries(ctx context.Context, defaultConfig *k3d.Config, cluster string, registries []string, all bool) ([]*k3d.K3Node, error) {
 	if all {
 		return k3d.GetRegistries(ctx, defaultConfig.K3DRuntime, cluster)
 	}

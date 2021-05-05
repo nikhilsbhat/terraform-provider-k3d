@@ -50,13 +50,13 @@ func TestGetCluster(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetCluster(tt.args.ctx, tt.args.runtime, tt.args.cluster)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetCluster() error = %v, wantErr %v", err, tt.wantErr)
+			got, err := GetCluster(tt.args.ctx, tt.args.runtime, tt.args.cluster) //nolint:scopelint
+			if (err != nil) != tt.wantErr {                                       //nolint:scopelint
+				t.Errorf("GetCluster() error = %v, wantErr %v", err, tt.wantErr) //nolint:scopelint
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetCluster() got = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(got, tt.want) { //nolint:scopelint
+				t.Errorf("GetCluster() got = %v, want %v", got, tt.want) //nolint:scopelint
 			}
 		})
 	}

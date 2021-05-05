@@ -20,9 +20,9 @@ func resourceImage() *schema.Resource {
 		DeleteContext: resourceLoadImageDelete,
 		UpdateContext: resourceLoadImageUpdate,
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Minute),
-			Update: schema.DefaultTimeout(5 * time.Minute),
-			Delete: schema.DefaultTimeout(5 * time.Minute),
+			Create: schema.DefaultTimeout(utils.TerraformTimeOut5 * time.Minute),
+			Update: schema.DefaultTimeout(utils.TerraformTimeOut5 * time.Minute),
+			Delete: schema.DefaultTimeout(utils.TerraformTimeOut5 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"images": {
@@ -77,7 +77,7 @@ func resourceImage() *schema.Resource {
 }
 
 func resourceLoadImageLoad(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	if d.IsNewResource() {
 		id := d.Id()
@@ -107,7 +107,7 @@ func resourceLoadImageLoad(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceLoadImageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	images := getImages(d.Get(utils.TerraformResourceImages))
 	cluster := utils.String(d.Get(utils.TerraformResourceCluster))
@@ -140,7 +140,7 @@ func resourceLoadImageRead(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceLoadImageDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 	_ = defaultConfig
 	// could be properly implemented once k3d supports deleting loaded images from cluster.
 
@@ -153,11 +153,10 @@ func resourceLoadImageDelete(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func resourceLoadImageUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	log.Printf("uploading newer images to k3d clusters")
 	if d.HasChange(utils.TerraformResourceCluster) || d.HasChange(utils.TerraformResourceImages) {
-
 		updatedCluster, updatedImages := getUpdatedClusterAndImages(d)
 		keepTarball := utils.Bool(d.Get(utils.TerraformResourceKeepTarball))
 		all := utils.Bool(d.Get(utils.TerraformResourceAll))
@@ -199,7 +198,8 @@ func getUpdatedClusterAndImages(d *schema.ResourceData) (cluster string, images 
 	return
 }
 
-func getImagesToBeStored(ctx context.Context, runtime runtimes.Runtime, images []string, cluster string, all bool) ([]*k3d.StoredImages, error) {
+func getImagesToBeStored(ctx context.Context, runtime runtimes.Runtime,
+	images []string, cluster string, all bool) ([]*k3d.StoredImages, error) {
 	if all {
 		imagesToBeStored, err := k3d.GetImagesLoadedClusters(ctx, runtime, images)
 		if err != nil {

@@ -37,10 +37,10 @@ docker.login: ## Establishes the connection to the docker registry
 docker.publish.image: docker_login ## Publisies the image to the registered docker registry.
 	docker push ${DOCKER_USER}/${PROJECT_NAME}:${VERSION}
 
-coverage.lint: ## Lint's application for errors, it is a linters aggregator (https://github.com/golangci/golangci-lint).
-	docker run --rm -v $(APP_DIR):/app -w /app golangci/golangci-lint:v1.31-alpine golangci-lint run --color always
+lint: ## Lint's application for errors, it is a linters aggregator (https://github.com/golangci/golangci-lint).
+	@golangci-lint run --color always
 
-coverage.report: ## Publishes the go-report of the appliction (uses go-reportcard)
+report: ## Publishes the go-report of the appliction (uses go-reportcard)
 	docker run --rm -v $(APP_DIR):/app -w /app basnik/goreportcard-cli:latest goreportcard-cli -v
 
 dev.prerequisite.up: ## Sets up the development environment with all necessary components.

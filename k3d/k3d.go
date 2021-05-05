@@ -9,8 +9,8 @@ import (
 	"github.com/rancher/k3d/v4/pkg/runtimes"
 )
 
-// K3dConfig holds the base configurations for creation of k3d cluster.
-type K3dConfig struct {
+// Config holds the base configurations for creation of k3d cluster.
+type Config struct {
 	KubeImageVersion string
 	K3DAPIVersion    string
 	K3DKind          string
@@ -70,6 +70,6 @@ func getRegistry(d *schema.ResourceData) string {
 	return utils.String(d.Get(utils.TerraformK3dRegistry))
 }
 
-func newK3dConfig() *K3dConfig {
-	return &K3dConfig{}
+func newK3dConfig() *Config {
+	return &Config{}
 }

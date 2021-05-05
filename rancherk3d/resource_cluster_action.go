@@ -20,9 +20,9 @@ func resourceClusterAction() *schema.Resource {
 		DeleteContext: resourceClusterActionDelete,
 		UpdateContext: resourceClusterActionUpdate,
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Minute),
-			Update: schema.DefaultTimeout(5 * time.Minute),
-			Delete: schema.DefaultTimeout(5 * time.Minute),
+			Create: schema.DefaultTimeout(utils.TerraformTimeOut5 * time.Minute),
+			Update: schema.DefaultTimeout(utils.TerraformTimeOut5 * time.Minute),
+			Delete: schema.DefaultTimeout(utils.TerraformTimeOut5 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"clusters": {
@@ -75,7 +75,7 @@ func resourceClusterAction() *schema.Resource {
 }
 
 func resourceClusterActionStartStop(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	if d.IsNewResource() {
 		id := d.Id()
@@ -109,7 +109,7 @@ func resourceClusterActionStartStop(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceClusterActionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	clusters := getClusterSlice(d.Get(utils.TerraformResourceClusters))
 	all := utils.Bool(d.Get(utils.TerraformResourceAll))
@@ -141,11 +141,11 @@ func resourceClusterActionRead(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceClusterActionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 
 	log.Printf("uploading newer images to k3d clusters")
-	if d.HasChange(utils.TerraformResourceClusters) || d.HasChange(utils.TerraformResourceStart) || d.HasChange(utils.TerraformResourceStop) {
-
+	if d.HasChange(utils.TerraformResourceClusters) || d.HasChange(utils.TerraformResourceStart) ||
+		d.HasChange(utils.TerraformResourceStop) {
 		all := utils.Bool(d.Get(utils.TerraformResourceAll))
 		clusters, start, stop := getUpdatedClustersActionChanges(d)
 
@@ -172,7 +172,7 @@ func resourceClusterActionUpdate(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceClusterActionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.K3dConfig)
+	defaultConfig := meta.(*k3d.Config)
 	_ = defaultConfig
 	// could be properly implemented once k3d supports deleting loaded images from cluster.
 
@@ -184,14 +184,14 @@ func resourceClusterActionDelete(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func updateClusterStatus(ctx context.Context, defaultConfig *k3d.K3dConfig, clusters []string, action string, all bool) error {
+func updateClusterStatus(ctx context.Context, defaultConfig *k3d.Config, clusters []string, action string, all bool) error {
 	if action == utils.TerraformResourceStart {
 		return startClusters(ctx, defaultConfig, clusters, all)
 	}
 	return stopClusters(ctx, defaultConfig, clusters, all)
 }
 
-func startClusters(ctx context.Context, defaultConfig *k3d.K3dConfig, clusters []string, all bool) error {
+func startClusters(ctx context.Context, defaultConfig *k3d.Config, clusters []string, all bool) error {
 	var fetchedClusters []*K3D.Cluster
 	if all {
 		cls, err := k3d.GetClusters(ctx, defaultConfig.K3DRuntime)
@@ -209,7 +209,7 @@ func startClusters(ctx context.Context, defaultConfig *k3d.K3dConfig, clusters [
 	return k3d.StartClusters(ctx, defaultConfig.K3DRuntime, fetchedClusters, K3D.ClusterStartOpts{})
 }
 
-func stopClusters(ctx context.Context, defaultConfig *k3d.K3dConfig, clusters []string, all bool) error {
+func stopClusters(ctx context.Context, defaultConfig *k3d.Config, clusters []string, all bool) error {
 	var fetchedClusters []*K3D.Cluster
 	if all {
 		cls, err := k3d.GetClusters(ctx, defaultConfig.K3DRuntime)

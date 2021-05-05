@@ -10,8 +10,8 @@ import (
 	K3D "github.com/rancher/k3d/v4/pkg/types"
 )
 
-func GetRegistry(ctx context.Context, runtime runtimes.Runtime, cluster string, registry string) ([]*K3DNode, error) {
-	var nodes []*K3DNode
+func GetRegistry(ctx context.Context, runtime runtimes.Runtime, cluster string, registry string) ([]*K3Node, error) {
+	var nodes []*K3Node
 	if len(cluster) != 0 {
 		k3dNodes, err := GetFilteredNodesFromCluster(ctx, runtime, cluster)
 		if err != nil {
@@ -36,13 +36,13 @@ func GetRegistry(ctx context.Context, runtime runtimes.Runtime, cluster string, 
 	return nodes, nil
 }
 
-func GetRegistries(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3DNode, error) {
+func GetRegistries(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3Node, error) {
 	if len(cluster) != 0 {
 		k3dNodes, err := GetFilteredNodesFromCluster(ctx, runtime, cluster)
 		if err != nil {
 			return nil, err
 		}
-		var nodes []*K3DNode
+		var nodes []*K3Node
 		for _, k3dNode := range k3dNodes {
 			if k3dNode.Role == "registry" {
 				nodes = append(nodes, k3dNode)
@@ -53,8 +53,9 @@ func GetRegistries(ctx context.Context, runtime runtimes.Runtime, cluster string
 	return GetNodesByLabels(ctx, runtime, map[string]string{"k3d.role": "registry"})
 }
 
-func GetRegistriesWithName(ctx context.Context, runtime runtimes.Runtime, cluster string, registries []string) ([]*K3DNode, error) {
-	nodes := make([]*K3DNode, 0)
+func GetRegistriesWithName(ctx context.Context, runtime runtimes.Runtime,
+	cluster string, registries []string) ([]*K3Node, error) {
+	nodes := make([]*K3Node, 0)
 	for _, registry := range registries {
 		regs, err := GetRegistry(ctx, runtime, cluster, registry)
 		if err != nil {
@@ -73,7 +74,8 @@ func ConnectRegistryToCluster(ctx context.Context, runtime runtimes.Runtime, clu
 	return client.RegistryConnectClusters(ctx, runtime, node, k3dClusters)
 }
 
-func DisconnectRegistryFormCluster(ctx context.Context, runtime runtimes.Runtime, cluster string, node *K3D.Node) error {
+func DisconnectRegistryFormCluster(ctx context.Context, runtime runtimes.Runtime,
+	cluster string, node *K3D.Node) error {
 	k3dCluster, err := GetCluster(ctx, runtime, cluster)
 	if err != nil {
 		return err
@@ -111,24 +113,30 @@ func GetProxyConfig(proxyCfg map[string]string, registry *K3D.Registry) {
 	registry.Options.Proxy.RemoteURL = proxyCfg["password"]
 }
 
-func ConnectRegistriesToCluster(ctx context.Context, runtime runtimes.Runtime, clusters []string, nodes []*K3D.Node) error {
+func ConnectRegistriesToCluster(ctx context.Context, runtime runtimes.Runtime,
+	clusters []string, nodes []*K3D.Node) error {
+	k3dClusters, err := GetFilteredClusters(ctx, runtime, clusters)
+	if err != nil {
+		return err
+	}
 	for _, node := range nodes {
-		k3dClusters, err := GetFilteredClusters(ctx, runtime, clusters)
-		if err != nil {
+		if err = client.RegistryConnectClusters(ctx, runtime, node, k3dClusters); err != nil {
 			return err
 		}
-		return client.RegistryConnectClusters(ctx, runtime, node, k3dClusters)
 	}
 	return nil
 }
 
-func DisconnectRegistriesFormCluster(ctx context.Context, runtime runtimes.Runtime, cluster string, nodes []*K3D.Node) error {
+func DisconnectRegistriesFormCluster(ctx context.Context, runtime runtimes.Runtime,
+	cluster string, nodes []*K3D.Node) error {
+	k3dCluster, err := GetCluster(ctx, runtime, cluster)
+	if err != nil {
+		return err
+	}
 	for _, node := range nodes {
-		k3dCluster, err := GetCluster(ctx, runtime, cluster)
-		if err != nil {
+		if err = runtime.DisconnectNodeFromNetwork(ctx, node, k3dCluster.Network.Name); err != nil {
 			return err
 		}
-		return runtime.DisconnectNodeFromNetwork(ctx, node, k3dCluster.Network.Name)
 	}
 	return nil
 }

@@ -17,13 +17,13 @@ type Cluster struct {
 	HasLoadBalancer bool     `json:"has_loadbalancer,omitempty"`
 }
 
-type K3Dimages struct {
+type Images struct {
 	Images       []string        `json:"images,omitempty"`
 	Cluster      string          `json:"cluster,omitempty"`
 	StoreTarBall bool            `json:"keep_tarball,omitempty"`
 	StoredImages StoredImages    `json:"images_stored,omitempty"`
 	Context      context.Context `json:"context,omitempty"`
-	Config       K3dConfig       `json:"config,omitempty"`
+	Config       Config          `json:"config,omitempty"`
 }
 
 type StoredImages struct {
@@ -36,7 +36,7 @@ type TarBallData struct {
 	Path  string `json:"path,omitempty"`
 }
 
-type K3DNode struct {
+type K3Node struct {
 	Name                 string                 `json:"name,omitempty"`
 	Role                 string                 `json:"role,omitempty"`
 	ClusterAssociated    string                 `json:"cluster,omitempty"`
@@ -51,7 +51,7 @@ type K3DNode struct {
 	PortMapping          map[string]interface{} `json:"port_mappings,omitempty"`
 }
 
-type K3DNodeStatus struct {
+type NodeStatus struct {
 	Node    string `json:"node,omitempty"`
 	Cluster string `json:"cluster,omitempty"`
 	Role    string `json:"role,omitempty"`
@@ -59,7 +59,7 @@ type K3DNodeStatus struct {
 	Running bool   `json:"running,omitempty"`
 }
 
-type K3DRegistry struct {
+type Registry struct {
 	Name     string            `json:"name,omitempty"`
 	Image    string            `json:"image,omitempty"`
 	Cluster  string            `json:"cluster,omitempty"`
@@ -71,7 +71,7 @@ type K3DRegistry struct {
 	Proxy    map[string]string `json:"proxy,omitempty"`
 }
 
-type K3DRegistryConnect struct {
+type RegistryConnect struct {
 	Registries []string `json:"registries,omitempty"`
 	Cluster    string   `json:"cluster,omitempty"`
 	Connect    bool     `json:"connect,omitempty"`
