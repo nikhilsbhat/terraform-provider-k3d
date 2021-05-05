@@ -174,7 +174,7 @@ func resourceNodeDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	for _, node := range nodes {
-		if err = k3d.DeletNodesFromCluster(ctx, defaultConfig.K3DRuntime, node); err != nil {
+		if err = k3d.DeleteNodesFromCluster(ctx, defaultConfig.K3DRuntime, node); err != nil {
 			return diag.Errorf("errored while deleting node %s : %v", node.Name, err)
 		}
 	}
@@ -201,7 +201,7 @@ func createNodes(ctx context.Context, runtime runtimes.Runtime, node k3d.K3Node,
 		for _, nodeToCreate := range nodesToCreate {
 			nd := nodeToCreate.GetNode()
 			log.Printf("cleaning up node: %s", nd.Name)
-			if err = k3d.DeletNodesFromCluster(ctx, runtime, nd); err != nil {
+			if err = k3d.DeleteNodesFromCluster(ctx, runtime, nd); err != nil {
 				return fmt.Errorf("errored while deleting node %s : %v", nd.Name, err)
 			}
 		}

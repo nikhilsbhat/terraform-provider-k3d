@@ -198,7 +198,7 @@ func resourceRegistryDelete(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	for _, node := range nodes {
-		if err = k3d.DeletNodesFromCluster(ctx, defaultConfig.K3DRuntime, node); err != nil {
+		if err = k3d.DeleteNodesFromCluster(ctx, defaultConfig.K3DRuntime, node); err != nil {
 			return diag.Errorf("errored while deleting registry node %s : %v", node.Name, err)
 		}
 	}

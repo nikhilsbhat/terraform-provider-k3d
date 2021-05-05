@@ -10,6 +10,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+// GetKubeConfig fetches kubernetes config from the specified clusters.
 func GetKubeConfig(ctx context.Context, runtime runtimes.Runtime,
 	clusters []*K3D.Cluster, notEncode bool) (map[string]string, error) {
 	kubeConfigs := make(map[string]string, len(clusters))

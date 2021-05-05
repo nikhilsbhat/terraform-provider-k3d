@@ -13,9 +13,11 @@ import (
 )
 
 var (
+	// K3dclusterNameLabel is the label that holds cluster name in k3d node.
 	K3dclusterNameLabel = "k3d.cluster"
 )
 
+// Nodes fetches details of all available nodes in the specified cluster.
 func Nodes(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3D.Node, error) {
 	nodes, err := runtime.GetNodesByLabel(ctx, map[string]string{
 		"k3d.cluster": cluster,
@@ -26,6 +28,7 @@ func Nodes(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3
 	return nodes, nil
 }
 
+// Node fetches details of a specified node.
 func Node(ctx context.Context, runtime runtimes.Runtime, name string) (*K3D.Node, error) {
 	node, err := client.NodeGet(ctx, runtime, &K3D.Node{Name: name})
 	if err != nil {
@@ -34,6 +37,7 @@ func Node(ctx context.Context, runtime runtimes.Runtime, name string) (*K3D.Node
 	return node, err
 }
 
+// FilteredNodes fetches details of specified list of nodes.
 func FilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) ([]*K3D.Node, error) {
 	k3dNodes, err := client.NodeList(ctx, runtime)
 	if err != nil {
@@ -50,6 +54,7 @@ func FilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string
 	return filteredNodes, nil
 }
 
+// StopNode stops the specified node.
 func StopNode(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node) error {
 	if err := runtime.StopNode(ctx, node); err != nil {
 		return err
@@ -57,6 +62,7 @@ func StopNode(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node) err
 	return nil
 }
 
+// StartNode starts the specified node.
 func StartNode(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node) error {
 	if err := runtime.StartNode(ctx, node); err != nil {
 		return err
@@ -64,6 +70,7 @@ func StartNode(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node) er
 	return nil
 }
 
+// CreateNode creates list node with specified configurations.
 func CreateNode(ctx context.Context, runtime runtimes.Runtime,
 	node []*K3D.Node, cluster *K3D.Cluster, options K3D.NodeCreateOpts) error {
 	if err := client.NodeAddToClusterMulti(ctx, runtime, node, cluster, options); err != nil {
@@ -72,6 +79,7 @@ func CreateNode(ctx context.Context, runtime runtimes.Runtime,
 	return nil
 }
 
+// DeleteNodes deletes the specified node.
 func DeleteNodes(ctx context.Context, runtime runtimes.Runtime,
 	node *K3D.Node, options K3D.NodeDeleteOpts) error {
 	if err := client.NodeDelete(ctx, runtime, node, options); err != nil {
@@ -80,6 +88,7 @@ func DeleteNodes(ctx context.Context, runtime runtimes.Runtime,
 	return nil
 }
 
+// GetFilteredNodesFromCluster returns the fetched all nodes from a specified cluster with list of *K3Node type.
 func GetFilteredNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3Node, error) {
 	k3dNodes, err := Nodes(ctx, runtime, cluster)
 	if err != nil {
@@ -101,6 +110,7 @@ func GetFilteredNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, 
 	return filteredNodes, err
 }
 
+// GetFilteredNodes returns the fetched list of specified nodes from specified cluster with list of *K3Node type.
 func GetFilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) ([]*K3Node, error) {
 	k3dNodes := make([]*K3Node, 0)
 	for _, currentNode := range nodes {
@@ -122,6 +132,7 @@ func GetFilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []str
 	return k3dNodes, nil
 }
 
+// GetNodes returns the list of all nodes available in the specified runtime.
 func GetNodes(ctx context.Context, runtime runtimes.Runtime) ([]*K3Node, error) {
 	nodes, err := client.NodeList(ctx, runtime)
 	if err != nil {
@@ -145,6 +156,7 @@ func GetNodes(ctx context.Context, runtime runtimes.Runtime) ([]*K3Node, error) 
 	return k3dNodes, nil
 }
 
+// GetNodesByLabels gets the nodes that matches with the specified label.
 func GetNodesByLabels(ctx context.Context, runtime runtimes.Runtime, label map[string]string) ([]*K3Node, error) {
 	k3dNodes, err := runtime.GetNodesByLabel(ctx, label)
 	if err != nil {
@@ -169,6 +181,7 @@ func GetNodesByLabels(ctx context.Context, runtime runtimes.Runtime, label map[s
 	return filteredNodes, err
 }
 
+// StopNodes stops all specified nodes.
 func StopNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) error {
 	nodesRaw, err := FilteredNodes(ctx, runtime, nodes)
 	if err != nil {
@@ -182,6 +195,7 @@ func StopNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) er
 	return nil
 }
 
+// StopNodesFromCluster stops all available nodes from a specified cluster.
 func StopNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) error {
 	nodesRaw, err := Nodes(ctx, runtime, cluster)
 	if err != nil {
@@ -195,6 +209,7 @@ func StopNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster
 	return nil
 }
 
+// StartNodes starts all specified of nodes.
 func StartNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) error {
 	nodesRaw, err := FilteredNodes(ctx, runtime, nodes)
 	if err != nil {
@@ -208,6 +223,7 @@ func StartNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) e
 	return nil
 }
 
+// StartNodesFromCluster starts all available nodes from a specified cluster.
 func StartNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) error {
 	nodesRaw, err := Nodes(ctx, runtime, cluster)
 	if err != nil {
@@ -221,6 +237,7 @@ func StartNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluste
 	return nil
 }
 
+// GetNode returns K3D.Node equivalent for an stance of K3Node.
 func (c *K3Node) GetNode() *K3D.Node {
 	return &K3D.Node{
 		Name: c.Name,
@@ -235,6 +252,7 @@ func (c *K3Node) GetNode() *K3D.Node {
 	}
 }
 
+// CreateNodeWithTimeout creates node by setting timeouts as per input.
 func CreateNodeWithTimeout(ctx context.Context, runtime runtimes.Runtime,
 	cluster string, nodes []*K3Node, wait bool, timeout time.Duration) error {
 	var nodeCreatOpts K3D.NodeCreateOpts
@@ -252,7 +270,8 @@ func CreateNodeWithTimeout(ctx context.Context, runtime runtimes.Runtime,
 	return CreateNode(ctx, runtime, k3dNodes, clusterFetched, nodeCreatOpts)
 }
 
-func DeletNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node) error {
+// DeleteNodesFromCluster deletes the specified node.
+func DeleteNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node) error {
 	deleteOps := K3D.NodeDeleteOpts{
 		SkipLBUpdate: false,
 	}

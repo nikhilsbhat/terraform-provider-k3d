@@ -9,11 +9,6 @@ import (
 	K3D "github.com/rancher/k3d/v4/pkg/types"
 )
 
-func LoadImages(ctx context.Context, runtime runtimes.Runtime,
-	images []string, cluster *K3D.Cluster, importOpts K3D.ImageImportOpts) error {
-	return tools.ImageImportIntoClusterMulti(ctx, runtime, images, cluster, importOpts)
-}
-
 // StoreImages stores images in a specified clusters, also stores the tarball locally if feature is enabled.
 func StoreImagesToCluster(ctx context.Context, runtime runtimes.Runtime,
 	images []string, cluster string, storeTarball bool) error {
@@ -30,6 +25,7 @@ func StoreImagesToCluster(ctx context.Context, runtime runtimes.Runtime,
 	return nil
 }
 
+// StoreImagesToClusters stores images to all specified clusters.
 func StoreImagesToClusters(ctx context.Context, runtime runtimes.Runtime,
 	images []string, storeTarball bool) error {
 	loadImageOpts := K3D.ImageImportOpts{KeepTar: storeTarball}
@@ -47,6 +43,7 @@ func StoreImagesToClusters(ctx context.Context, runtime runtimes.Runtime,
 	return nil
 }
 
+// GetImagesLoadedCluster returns list of images loaded to the cluster.
 func GetImagesLoadedCluster(ctx context.Context, runtime runtimes.Runtime,
 	images []string, cluster string) ([]*StoredImages, error) {
 	retrievedCluster, err := GetCluster(ctx, runtime, cluster)
@@ -60,6 +57,7 @@ func GetImagesLoadedCluster(ctx context.Context, runtime runtimes.Runtime,
 	}}, nil
 }
 
+// GetImagesLoadedClusters returns list of images loaded to the clusters.
 func GetImagesLoadedClusters(ctx context.Context, runtime runtimes.Runtime,
 	images []string) ([]*StoredImages, error) {
 	retrievedClusters, err := GetClusters(ctx, runtime)

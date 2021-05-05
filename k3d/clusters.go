@@ -10,6 +10,7 @@ import (
 	K3D "github.com/rancher/k3d/v4/pkg/types"
 )
 
+// GetCluster is a wrap of client.ClusterGet of k3d.
 func GetCluster(ctx context.Context, runtime runtimes.Runtime,
 	cluster string) (*K3D.Cluster, error) {
 	clusterConfig, err := client.ClusterGet(ctx, runtime, &K3D.Cluster{Name: cluster})
@@ -19,6 +20,7 @@ func GetCluster(ctx context.Context, runtime runtimes.Runtime,
 	return clusterConfig, nil
 }
 
+// GetFilteredClusters returns the list of *K3D.Cluster of specified clusters.
 func GetFilteredClusters(ctx context.Context, runtime runtimes.Runtime,
 	clusters []string) ([]*K3D.Cluster, error) {
 	clustersList, err := client.ClusterList(ctx, runtime)
@@ -39,6 +41,7 @@ func GetFilteredClusters(ctx context.Context, runtime runtimes.Runtime,
 	return clusterConfig, nil
 }
 
+// GetClusters return the list of *K3D.Cluster of all clusters available in the specified runtime.
 func GetClusters(ctx context.Context, runtime runtimes.Runtime) ([]*K3D.Cluster, error) {
 	clustersList, err := client.ClusterList(ctx, runtime)
 	if err != nil {
@@ -47,6 +50,7 @@ func GetClusters(ctx context.Context, runtime runtimes.Runtime) ([]*K3D.Cluster,
 	return clustersList, nil
 }
 
+// StartClusters starts the specified clusters
 func StartClusters(ctx context.Context, runtime runtimes.Runtime,
 	clusters []*K3D.Cluster, options K3D.ClusterStartOpts) error {
 	for _, cluster := range clusters {
@@ -57,6 +61,7 @@ func StartClusters(ctx context.Context, runtime runtimes.Runtime,
 	return nil
 }
 
+// StopClusters stops the specified clusters.
 func StopClusters(ctx context.Context, runtime runtimes.Runtime,
 	clusters []*K3D.Cluster) error {
 	for _, cluster := range clusters {

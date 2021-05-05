@@ -18,6 +18,7 @@ type Config struct {
 	K3DRuntime       runtimes.Runtime
 }
 
+// GetK3dConfig validates the defaults passed in providers and set the configs.
 func GetK3dConfig(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	newConfig := newK3dConfig()
 

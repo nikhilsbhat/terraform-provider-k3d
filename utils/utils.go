@@ -123,9 +123,10 @@ func JSON(data interface{}) (string, error) {
 	return string(jsn), err
 }
 
-func Contains(s []string, searchterm string) bool {
+// Contains returns true if given element is present the specified slice.
+func Contains(s []string, searchTerm string) bool {
 	for _, i := range s {
-		if i == searchterm {
+		if i == searchTerm {
 			return true
 		}
 	}
