@@ -5,3 +5,12 @@
 
 
 terraform provider support for [k3d](https://k3d.io/), which helps in performing all operation that k3d does
+
+# Features supported by the provider at the moment.
+| component    | list/fetch | start/stop   | create   | delete    | load    |
+| :----------: | :--------: | :----------: | :------: | :-------: | ------: |
+|  `cluster`   | yes        | yes          | no       |  no       |  no     |
+|  `node`      | yes        | yes          | yes      |  yes      |  no     | 
+|  `registry`  | yes        | yes          | yes      |  yes      |  no     |
+| `kubeconfig` | yes        | no           | no       |  yes      |  no     |
+|    `image`   | no         | no           | no       |  no       |  yes    |

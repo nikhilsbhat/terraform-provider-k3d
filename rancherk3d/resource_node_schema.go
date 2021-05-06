@@ -34,6 +34,12 @@ func resourceNodeSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "creation timestamp of node",
 		},
+		"memory": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Optional:    true,
+			Description: "memory limit imposed on node",
+		},
 		"volumes": {
 			Type:        schema.TypeList,
 			Computed:    true,

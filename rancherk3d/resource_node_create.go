@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	dockerunits "github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/mapstructure"
@@ -127,8 +128,8 @@ func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		wait := utils.Bool(d.Get(utils.TerraformResourceWait))
 
 		if err := createNodes(ctx, defaultConfig.K3DRuntime, node, timeout, wait, 0); err != nil {
-			if err = d.Set(utils.TerraformResourceCreatedAt, ""); err != nil {
-				return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceCreatedAt, err)
+			if seErr := d.Set(utils.TerraformResourceCreatedAt, ""); seErr != nil {
+				return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceCreatedAt, seErr)
 			}
 			return diag.Errorf("errored while creating nodes with: %v", err)
 		}
@@ -186,6 +187,11 @@ func resourceNodeDelete(ctx context.Context, d *schema.ResourceData, meta interf
 func createNodes(ctx context.Context, runtime runtimes.Runtime, node k3d.K3Node, timeout int, wait bool, startFrom int) error {
 	nodeTimeout := time.Duration(timeout) * time.Minute
 	nodesToCreate := make([]*k3d.K3Node, 0)
+
+	memory := node.Memory
+	if _, err := dockerunits.RAMInBytes(memory); memory != "" && err != nil {
+		fmt.Errorf("provided memory limit value is invalid")
+	}
 
 	for startFrom < node.Count {
 		nodesToCreate = append(nodesToCreate, &k3d.K3Node{
