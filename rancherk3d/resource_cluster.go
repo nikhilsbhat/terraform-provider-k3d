@@ -20,7 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceRANCHERK3D() *schema.Resource {
+func resourceCluster() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceRANCHERK3DCreate,
 		ReadContext:   resourceRANCHERK3DRead,

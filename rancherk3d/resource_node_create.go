@@ -190,7 +190,7 @@ func createNodes(ctx context.Context, runtime runtimes.Runtime, node k3d.K3Node,
 
 	memory := node.Memory
 	if _, err := dockerunits.RAMInBytes(memory); memory != "" && err != nil {
-		fmt.Errorf("provided memory limit value is invalid")
+		return fmt.Errorf("provided memory limit value is invalid")
 	}
 
 	for startFrom < node.Count {
@@ -204,11 +204,12 @@ func createNodes(ctx context.Context, runtime runtimes.Runtime, node k3d.K3Node,
 		startFrom++
 	}
 	if err := k3d.CreateNodeWithTimeout(ctx, runtime, node.ClusterAssociated, nodesToCreate, wait, nodeTimeout); err != nil {
+		log.Printf("creating nodes errord with: %v, cleaning up the created nodes to avoid dangling nodes", err)
 		for _, nodeToCreate := range nodesToCreate {
 			nd := nodeToCreate.GetNode()
 			log.Printf("cleaning up node: %s", nd.Name)
 			if err = k3d.DeleteNodesFromCluster(ctx, runtime, nd); err != nil {
-				return fmt.Errorf("errored while deleting node %s : %v", nd.Name, err)
+				log.Printf("errored while deleting node %s : %v", nd.Name, err)
 			}
 		}
 		log.Printf("creating nodes failed")

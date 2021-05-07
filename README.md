@@ -14,3 +14,7 @@ terraform provider support for [k3d](https://k3d.io/), which helps in performing
 |  `registry`  | yes        | yes          | yes      |  yes      |  no     |
 | `kubeconfig` | yes        | no           | no       |  yes      |  no     |
 |    `image`   | no         | no           | no       |  no       |  yes    |
+
+## TODO
+* [ ] Support for cluster creation
+* [ ] Support for configuring registry with config-file

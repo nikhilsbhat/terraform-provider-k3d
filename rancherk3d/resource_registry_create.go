@@ -149,6 +149,9 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 		if err = createRegistry(ctx, defaultConfig.K3DRuntime, registry); err != nil {
+			if seErr := d.Set(utils.TerraformResourceMetadata, ""); seErr != nil {
+				return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceMetadata, seErr)
+			}
 			diag.Errorf("oops errored while creating registry: %v", err)
 		}
 

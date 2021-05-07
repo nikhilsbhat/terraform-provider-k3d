@@ -74,6 +74,7 @@ func Provider() *schema.Provider {
 			"rancherk3d_node_action":      resourceNodeAction(),
 			"rancherk3d_node_create":      resourceNode(),
 			"rancherk3d_cluster_action":   resourceClusterAction(),
+			"rancherk3d_cluster_create":   resourceCluster(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{

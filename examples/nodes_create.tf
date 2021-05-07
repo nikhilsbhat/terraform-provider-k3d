@@ -12,6 +12,7 @@ resource "rancherk3d_node_create" "node-2" {
   cluster  = "k3s-default"
   role     = "agent"
   replicas = 2
+  // volume = "8g"
   //  wait     = true
   //  timeout  = 3
 }
