@@ -38,13 +38,13 @@ func resourceRegistrySchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Computed:    true,
 			Optional:    true,
-			Description: "creation timestamp of node",
+			Description: "creation timestamp of registry node",
 		},
 		"networks": {
 			Type:        schema.TypeList,
 			Computed:    true,
 			Optional:    true,
-			Description: "networks associated with the nodes",
+			Description: "networks associated with the registries",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 		},
 		"env": {

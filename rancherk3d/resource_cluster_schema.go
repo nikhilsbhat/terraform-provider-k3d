@@ -57,7 +57,7 @@ func resourceClusterSchema() map[string]*schema.Schema {
 			Type:        schema.TypeBool,
 			Computed:    true,
 			Optional:    true,
-			Description: "details of images and its tarball stored, if in case keep_tarball is enabled",
+			Description: "attribute that notifies the presence of loadbalancer in the cluster",
 		},
 		"image_volume": {
 			Type:        schema.TypeString,
