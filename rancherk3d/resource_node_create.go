@@ -27,14 +27,14 @@ func resourceNode() *schema.Resource {
 				Required:    true,
 				Computed:    false,
 				ForceNew:    true,
-				Description: "name the nodes to be create (index would be used to dynamically compute the names for nodes)",
+				Description: "name the nodes to be created (index would be used to dynamically compute the names for nodes)",
 			},
 			"cluster": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Computed:    false,
 				ForceNew:    true,
-				Description: "name of the cluster of which that nodes to be acted upon",
+				Description: "name of the cluster to which these nodes to be connected with",
 			},
 			"image": {
 				Type:        schema.TypeString,
@@ -48,7 +48,7 @@ func resourceNode() *schema.Resource {
 				Computed:    false,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "cluster to which the below images are stored",
+				Description: "role to be assigned to the node(agent)",
 			},
 			"replicas": {
 				Type:        schema.TypeInt,
@@ -69,7 +69,7 @@ func resourceNode() *schema.Resource {
 				Computed:    false,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "if enabled waits for cluster to be ready before returning",
+				Description: "if enabled waits for nodes to be ready before returning",
 			},
 			"timeout": {
 				Type:        schema.TypeInt,

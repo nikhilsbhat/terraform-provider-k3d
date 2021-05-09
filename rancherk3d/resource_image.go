@@ -51,9 +51,10 @@ func resourceImage() *schema.Resource {
 				Description: "enable to keep the tarball of the loaded images locally",
 			},
 			"images_stored": {
-				Type:     schema.TypeList,
-				Computed: true,
-				ForceNew: false,
+				Type:        schema.TypeList,
+				Computed:    true,
+				ForceNew:    false,
+				Description: "list of images loaded to the cluster",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cluster": {

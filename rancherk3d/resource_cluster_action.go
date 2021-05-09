@@ -53,7 +53,7 @@ func resourceClusterAction() *schema.Resource {
 				Computed:      false,
 				ForceNew:      true,
 				ConflictsWith: []string{"start"},
-				Description:   "if enabled it stops a running start",
+				Description:   "if enabled it stops a running cluster",
 			},
 			"state": {
 				Type:        schema.TypeString,

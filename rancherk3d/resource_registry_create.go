@@ -24,7 +24,7 @@ func resourceRegistry() *schema.Resource {
 				Required:    true,
 				Computed:    false,
 				ForceNew:    true,
-				Description: "name the nodes to be create (index would be used to dynamically compute the names for nodes)",
+				Description: "name the registry node to be created",
 			},
 			"image": {
 				Type:        schema.TypeString,
