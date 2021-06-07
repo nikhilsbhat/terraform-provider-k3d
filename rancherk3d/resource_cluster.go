@@ -25,7 +25,6 @@ func resourceCluster() *schema.Resource {
 		CreateContext: resourceRANCHERK3DCreate,
 		ReadContext:   resourceRANCHERK3DRead,
 		DeleteContext: resourceRANCHERK3DDelete,
-
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,

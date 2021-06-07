@@ -1,1 +1,16 @@
-theme: jekyll-theme-slate
+theme: just-the-docs
+title: [rancherk3d provider]
+description: [A utility to ease the development of terraform custom provider by generating scaffolds for provider and their components]
+show_downloads: ["false"]
+
+aux_links:
+  "terraform-provider-rancherk3d on GitHub":
+    - "//github.com/nikhilsbhat/terraform-provider-rancherk3d"
+aux_links_new_tab: true
+
+footer_content: "Copyright &copy; 2020-2021 Nikhil Bhat. Distributed by an <a href=\"https://github.com/nikhilsbhat/terraform-provider-rancherk3d/blob/master/LICENSE\">MIT license.</a>"
+gh_edit_link: true
+gh_edit_link_text: "Edit this page on GitHub."
+gh_edit_repository: "github.com/nikhilsbhat/terraform-provider-rancherk3d"
+gh_edit_branch: "master"
+gh_edit_view_mode: "tree"
