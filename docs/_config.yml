@@ -1,3 +1,4 @@
+remote_theme: pmarsceill/just-the-docs
 theme: just-the-docs
 title: [rancherk3d provider]
 description: [A utility to ease the development of terraform custom provider by generating scaffolds for provider and their components]
