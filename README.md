@@ -24,7 +24,7 @@
 ## Documentation
 
 * Examples on the provider can be found in [examples](https://github.com/nikhilsbhat/terraform-provider-rancherk3d/tree/master/examples). <br><br> 
-* Document that can help on how the [data_source](https://www.terraform.io/docs/language/data-sources/index.html) and [resource](https://www.terraform.io/docs/language/resources/syntax.html) could be used is [here](https://github.com/nikhilsbhat/terraform-provider-rancherk3d/tree/master/doc/README.md).
+* Document that can help on how the [data_source](https://www.terraform.io/docs/language/data-sources/index.html) and [resource](https://www.terraform.io/docs/language/resources/syntax.html) could be used is up [here](https://nikhilsbhat.github.io/terraform-provider-rancherk3d).
 
 ## TODO
 

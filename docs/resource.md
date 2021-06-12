@@ -1,202 +1,227 @@
+---
+layout: default 
+title: Resource 
+nav_order: 2
+---
+
 ## Resource
 
-### Usage of resource `rancherk3d_cluster_action`
-
----
+### Usage of resource `rancherk3d_cluster_action`{: .fs-3 }<br><br>
 This resource helps in `starting`/`stopping` clusters from the selected runtime.
-##### Sample `rancherk3d_cluster_action` config:
+
+##### Sample `rancherk3d_cluster_action`{: .fs-3 } config:
 
 ```terraform
 resource rancherk3d_cluster_action "start-k3s-cluster" {
-  clusters = ["k3s-default"]
-  start    = true
+  clusters = [
+    "k3s-default"]
+  start = true
 }
 ```
+
 #### Argument Reference
 {: .fw-700 }
-* `clusters`[`list`] - List of k3s clusters that has to be `started`/`stopped`.<br><br>
-* `all`[`boolean`] - If enabled selected clusters would be started/stopped.<br><br>
-* `start`[`boolean`] - If enabled it starts a stopped cluster.<br><br>
-* `stop`[`boolean`] - If enabled it stops a running cluster.<br><br>
 
+* `clusters`{: .fs-3 }[`list`{: .fs-3 }] - List of k3s clusters that has to be `started`/`stopped`.
+* `all`{: .fs-3 }[`boolean`{: .fs-3 }] - If enabled selected clusters would be started/stopped.
+* `start`{: .fs-3 }[`boolean`{: .fs-3 }] - If enabled it starts a stopped cluster.
+* `stop`{: .fs-3 }[`boolean`{: .fs-3 }] - If enabled it stops a running cluster.<br><br>
 
 #### Attributes Reference
 {: .fw-700 }
-* `state`[`string`] - Last state of selected clusters.<br><br>
-* `status`[`list`] - Updated status of clusters.<br><br>
-    * `name`: Cluster name that was fetched.<br><br>
-    * `nodes`: List of nodes present in the cluster.<br><br>
-    * `network`: Network associated with the cluster.<br><br>
-    * `cluster_token`: Token of the cluster.<br><br>
-    * `servers_count`: Number of server nodes present in the cluster.<br><br>
-    * `servers_running`: Number of server nodes running.<br><br>
-    * `agents_count`: Number of agents in the cluster.<br><br>
-    * `agents_running`: Number of agents running in the cluster.<br><br>
-    * `has_loadbalancer`: Attribute that notifies the presence of loadbalancer in the cluster.<br><br>
-    * `image_volume`: Volume to import images.<br><br>
 
-### Usage of resource `rancherk3d_node_action`
+* `state`{: .fs-3 }[`string`{: .fs-3 }] - Last state of selected clusters.
+* `status`{: .fs-3 }[`list`{: .fs-3 }] - Updated status of clusters.
+    * `name`: Cluster name that was fetched.
+    * `nodes`: List of nodes present in the cluster.
+    * `network`: Network associated with the cluster.
+    * `cluster_token`: Token of the cluster.
+    * `servers_count`: Number of server nodes present in the cluster.
+    * `servers_running`: Number of server nodes running.
+    * `agents_count`: Number of agents in the cluster.
+    * `agents_running`: Number of agents running in the cluster.
+    * `has_loadbalancer`: Attribute that notifies the presence of loadbalancer in the cluster.
+    * `image_volume`: Volume to import images.
 
----
+---  
+### Usage of resource `rancherk3d_node_action`{: .fs-3 }<br><br>
 This resource helps in `starting`/`stopping` nodes from the selected clusters.
-##### Sample `rancherk3d_node_action` config:
+
+##### Sample `rancherk3d_node_action`{: .fs-3 } config:
 
 ```terraform
 resource "rancherk3d_node_action" "k3s-default-nodes" {
-  nodes   = ["k3d-k3s-default-serverlb", "k3d-k3s-default-server-0"]
+  nodes = [
+    "k3d-k3s-default-serverlb",
+    "k3d-k3s-default-server-0"]
   cluster = "k3s-default"
-  start   = true
+  start = true
 }
 ```
+
 #### Argument Reference
 {: .fw-700 }
-* `nodes`[`list`] - List of k3s nodes that has to be `started`/`stopped`.<br><br>
-* `nodes`[`list`] - List of k3s nodes that has to be `started`/`stopped`.<br><br>
-* `cluster`[`string`] - Name of the cluster from which nodes to be acted upon.<br><br>
-* `all`[`boolean`] - If enabled selected nodes from a selected cluster would be started/stopped.<br><br>
-* `start`[`boolean`] - If enabled it starts a stopped nodes.<br><br>
-* `stop`[`boolean`] - If enabled it stops a running node.<br><br>
 
+* `nodes`{: .fs-3 }[`list`{: .fs-3 }] - List of k3s nodes that has to be `started`/`stopped`.
+* `nodes`{: .fs-3 }[`list`{: .fs-3 }] - List of k3s nodes that has to be `started`/`stopped`.
+* `cluster`{: .fs-3 }[`string`{: .fs-3 }] - Name of the cluster from which nodes to be acted upon.
+* `all`{: .fs-3 }[`boolean`{: .fs-3 }] - If enabled selected nodes from a selected cluster would be started/stopped.
+* `start`{: .fs-3 }[`boolean`{: .fs-3 }] - If enabled it starts a stopped nodes.
+* `stop`{: .fs-3 }[`boolean`{: .fs-3 }] - If enabled it stops a running node.<br><br>
 
 #### Attributes Reference
 {: .fw-700 }
-* `status`[`list`] - Updated status of nodes.<br><br>
-    * `node`: Node of which the current status is updated with.<br><br>
-    * `role`: Role of updated node.<br><br>
-    * `state`: Current state of the node specified.<br><br>
-    * `cluster`: Name of the cluster of to which node belongs.<br><br>
 
-### Usage of resource `rancherk3d_node_create`
+* `status`{: .fs-3 }[`list`{: .fs-3 }] - Updated status of nodes.
+    * `node`: Node of which the current status is updated with.
+    * `role`: Role of updated node.
+    * `state`: Current state of the node specified.
+    * `cluster`: Name of the cluster of to which node belongs.
 
 ---
+### Usage of resource `rancherk3d_node_create`{: .fs-3 }<br><br>
 This resource helps in creation of k3d nodes with preferred configurations.
-##### Sample `rancherk3d_node_create` config:
+
+##### Sample `rancherk3d_node_create`{: .fs-3 } config:
 
 ```terraform
 resource "rancherk3d_node_create" "test-nodes" {
-  name     = "test-node-terraform"
-  cluster  = "k3s-default"
-  role     = "agent"
+  name = "test-node-terraform"
+  cluster = "k3s-default"
+  role = "agent"
   replicas = 2
   volume = "8g"
 }
 ```
+
 #### Argument Reference
 {: .fw-700 }
-*`name`[`string`] - Name the nodes to be created (index would be used to dynamically compute the names for nodes).<br><br>
-*`cluster`[`string`] - Name of the cluster to which these nodes to be connected with.<br><br>
-*`image`[`string`] - Image to be used for nodes creation defaults to image declared in the provider.<br><br>
-*`role`[`string`] - Role to be assigned to the node(agent).<br><br>
-*`replicas`[`int`] - Total number of nodes to be created.<br><br>
-*`memory`[`string`] - Memory limit to be imposed on the node.<br><br>
-*`wait`[`boolean`] - If enabled waits for the nodes to be ready before returning.<br><br>
-*`timeout`[`int`] - Maximum waiting time for before canceling/returning in minutes.<br><br>
 
+* `name`{: .fs-3 }[`string`{: .fs-3 }] - Name the nodes to be created (index would be used to dynamically compute the names for nodes).
+* `cluster`{: .fs-3 }[`string`{: .fs-3 }] - Name of the cluster to which these nodes to be connected with.
+* `image`{: .fs-3 }[`string`{: .fs-3 }] - Image to be used for nodes creation defaults to image declared in the provider.
+* `role`{: .fs-3 }[`string`{: .fs-3 }] - Role to be assigned to the node(agent).
+* `replicas`{: .fs-3 }[`int`{: .fs-3 }] - Total number of nodes to be created.
+* `memory`{: .fs-3 }[`string`{: .fs-3 }] - Memory limit to be imposed on the node.
+* `wait`{: .fs-3 }[`boolean`{: .fs-3 }] - If enabled waits for the nodes to be ready before returning.
+* `timeout`{: .fs-3 }[`int`{: .fs-3 }] - Maximum waiting time for before canceling/returning in minutes.<br><br>
 
 #### Attributes Reference
 {: .fw-700 }
-* `node_list`[`list`] - List of node information created. This list would contain below attributes.<br><br>
-    * `name`: Name of the created node.<br><br>
-    * `role`: Role of node created.<br><br>
-    * `cluster`: Cluster to which the node belongs.<br><br>
-    * `state`: Current state of node (`running`/`exited`).<br><br>
-    * `created`: Creation time-stamp of node.<br><br>
-    * `memory`: Memory limit imposed on the node.<br><br>
-    * `volumes`: List of volumes associated with the nodes.<br><br>
-    * `networks`: List of networks associated with the nodes.<br><br>
-    * `env`: List of environment variables set in the node<br><br>
 
-### Usage of resource `rancherk3d_create_registry`
+* `node_list`{: .fs-3 }[`list`{: .fs-3 }] - List of node information created. This list would contain below attributes.
+    * `name`: Name of the created node.
+    * `role`: Role of node created.
+    * `cluster`: Cluster to which the node belongs.
+    * `state`: Current state of node (`running`/`exited`).
+    * `created`: Creation time-stamp of node.
+    * `memory`: Memory limit imposed on the node.
+    * `volumes`: List of volumes associated with the nodes.
+    * `networks`: List of networks associated with the nodes.
+    * `env`: List of environment variables set in the node
 
 ---
-This resource helps in creation of k3d registries with preferred configurations and associating it with the selected cluster.
-##### Sample `rancherk3d_create_registry` config:
+### Usage of resource `rancherk3d_create_registry`{: .fs-3 }<br><br>
+This resource helps in creation of k3d registries with preferred configurations and associating it with the selected
+cluster.
+
+##### Sample `rancherk3d_create_registry`{: .fs-3 } config:
 
 ```terraform
 resource "rancherk3d_create_registry" "registry" {
-  name     = "k3s-registry"
-  cluster  = "k3s-default"
+  name = "k3s-registry"
+  cluster = "k3s-default"
   protocol = "http"
-  host     = "test-registry.com"
+  host = "test-registry.com"
 }
 ```
+
 #### Argument Reference
 {: .fw-700 }
-* `name`[`string`] - Name the registry node to be created.<br><br>
-* `image`[`string`] - Image to be used for creation of registry(defaults to docker.io/library/registry:2).<br><br>
-* `cluster`[`string`] - Cluster to which the registry to be associated with.<br><br>
-* `protocol`[`string`] - Protocol to be used while running registry (defaults to http).<br><br>
-* `host`[`string`] - Host name to be assigned to the registry that would be created (defaults to name of registry).<br><br>
-* `config_file`[`string`] - Config file to be used for configuring registry.<br><br>
-* `expose`[`map`] - Host to port mapping.<br><br>
-* `use_proxy`[`boolean`] - If enabled proxy configuration provided at 'proxy' would be used for configuring registry.<br><br>
-* `proxy`[`map`] - Proxy configurations to be used while configuring registry if enabled.<br><br>
 
+* `name`{: .fs-3 }[`string`{: .fs-3 }] - Name the registry node to be created.
+* `image`{: .fs-3 }[`string`{: .fs-3 }] - Image to be used for creation of registry(defaults to docker.io/library/registry:2).
+* `cluster`{: .fs-3 }[`string`{: .fs-3 }] - Cluster to which the registry to be associated with.
+* `protocol`{: .fs-3 }[`string`{: .fs-3 }] - Protocol to be used while running registry (defaults to http).
+* `host`{: .fs-3 }[`string`{: .fs-3 }] - Host name to be assigned to the registry that would be created (defaults to name of registry).
+* `config_file`{: .fs-3 }[`string`{: .fs-3 }] - Config file to be used for configuring registry.
+* `expose`{: .fs-3 }[`map`{: .fs-3 }] - Host to port mapping.
+* `use_proxy`{: .fs-3 }[`boolean`{: .fs-3 }] - If enabled proxy configuration provided at 'proxy' would be used for configuring registry.
+* `proxy`{: .fs-3 }[`map`{: .fs-3 }] - Proxy configurations to be used while configuring registry if enabled.<br><br>
 
 #### Attributes Reference
 {: .fw-700 }
-* `registries_list`[`list`]: List of registries information those were created, This list would contain below attributes.<br><br>
-    * `name`: Name of the registry retrieved.<br><br>
-    * `role`: Role of registry retrieved.<br><br>
-    * `image`: Image used for registry creation.<br><br>
-    * `cluster`: Cluster to which the registry belongs.<br><br>
-    * `state`: Current state of registry node.<br><br>
-    * `created`: Creation time-stamp of registry.<br><br>
-    * `networks`: Networks associated with the registry node.<br><br>
-    * `env`: Environment variables set in the registry node.<br><br>
-    * `port_mappings`: Port mappings of the registry.<br><br>
 
-### Usage of resource `rancherk3d_connect_registry`
+* `registries_list`{: .fs-3 }[`list`{: .fs-3 }]: List of registries information those were created, This list would contain below
+  attributes.
+    * `name`: Name of the registry retrieved.
+    * `role`: Role of registry retrieved.
+    * `image`: Image used for registry creation.
+    * `cluster`: Cluster to which the registry belongs.
+    * `state`: Current state of registry node.
+    * `created`: Creation time-stamp of registry.
+    * `networks`: Networks associated with the registry node.
+    * `env`: Environment variables set in the registry node.
+    * `port_mappings`: Port mappings of the registry.
 
 ---
+### Usage of resource `rancherk3d_connect_registry`{: .fs-3 }<br><br>
 This resource helps in coupling/decoupling registry from the selected cluster.
-##### Sample `rancherk3d_connect_registry` config:
+
+##### Sample `rancherk3d_connect_registry`{: .fs-3 } config:
 
 ```terraform
 resource "rancherk3d_connect_registry" "k3s-registry-1" {
-  registries = ["k3s-registry-1"]
-  cluster    = "k3s-default"
-  connect    = true
+  registries = [
+    "k3s-registry-1"]
+  cluster = "k3s-default"
+  connect = true
 }
 ```
+
 #### Argument Reference
 {: .fw-700 }
-* `registries`[`list`] - List of registries to be connected/disconnected from the selected cluster.<br><br>
-* `cluster`[`string`] - Cluster to which registries to be associated with.<br><br>
-* `connect`[`boolean`] - Enable this flag if registries to be connected with specified cluster, when disabled it disconnects the registry from cluster.<br><br>
 
+* `registries`{: .fs-3 }[`list`{: .fs-3 }] - List of registries to be connected/disconnected from the selected cluster.
+* `cluster`{: .fs-3 }[`string`{: .fs-3 }] - Cluster to which registries to be associated with.
+* `connect`{: .fs-3 }[`boolean`{: .fs-3 }] - Enable this flag if registries to be connected with specified cluster, when disabled it
+  disconnects the registry from cluster.<br><br>
 
 #### Attributes Reference
 {: .fw-700 }
-* `status`[`list`] - Updated status of registry. This list would contain below attributes.<br><br>
-    * `registry`[`string`]: Name of the registry.<br><br>
-    * `cluster`[`string`]: Cluster to which the registry is either connected/disconnected.<br><br>
-    * `state`[`string`]: Updated state of registry, `connected`/`disconnected`.<br><br>
 
-### Usage of resource `rancherk3d_load_image`
+* `status`{: .fs-3 }[`list`{: .fs-3 }] - Updated status of registry. This list would contain below attributes.
+    * `registry`{: .fs-3 }[`string`{: .fs-3 }]: Name of the registry.
+    * `cluster`{: .fs-3 }[`string`{: .fs-3 }]: Cluster to which the registry is either connected/disconnected.
+    * `state`{: .fs-3 }[`string`{: .fs-3 }]: Updated state of registry, `connected`/`disconnected`.
 
 ---
+### Usage of resource `rancherk3d_load_image`{: .fs-3 }<br><br>
 This resource helps in loading a list of images to all selected clusters.
-##### Sample `rancherk3d_load_image` config:
+
+##### Sample `rancherk3d_load_image`{: .fs-3 } config:
 
 ```terraform
 resource "rancherk3d_load_image" "k3s-default" {
-  images       = ["basnik/terragen:latest"]
-  cluster      = "k3s-default"
+  images = [
+    "basnik/terragen:latest"]
+  cluster = "k3s-default"
   keep_tarball = false
 }
 ```
+
 #### Argument Reference
 {: .fw-700 }
-* `images`[`list`] - List of images to be imported to the existing cluster.<br><br>
-* `cluster`[`string`] - Name of the existing cluster to which the images has to be imported to.<br><br>
-* `all`: [`boolean`] - If enabled loads images to all available clusters in the selected runtime.<br><br>
-* `keep_tarball`[`boolean`] - Enable to keep the tarball of the loaded images locally.<br><br>
 
+* `images`{: .fs-3 }[`list`{: .fs-3 }] - List of images to be imported to the existing cluster.
+* `cluster`{: .fs-3 }[`string`{: .fs-3 }] - Name of the existing cluster to which the images has to be imported to.
+* `all`: [`boolean`{: .fs-3 }] - If enabled loads images to all available clusters in the selected runtime.
+* `keep_tarball`{: .fs-3 }[`boolean`{: .fs-3 }] - Enable to keep the tarball of the loaded images locally.<br><br>
 
 #### Attributes Reference
 {: .fw-700 }
-* `images_stored`[`list`] - list of images loaded to the cluster.<br><br>
-    * `cluster`[`string`]: Cluster to which the below images are stored.<br><br>
-    * `images`[`list`]: List of images and its tarball stored, if in case keep_tarball is enabled.<br><br>
+
+* `images_stored`{: .fs-3 }[`list`{: .fs-3 }] - list of images loaded to the cluster.
+    * `cluster`{: .fs-3 }[`string`{: .fs-3 }]: Cluster to which the below images are stored.
+    * `images`{: .fs-3 }[`list`{: .fs-3 }]: List of images and its tarball stored, if in case keep_tarball is enabled.
 

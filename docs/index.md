@@ -1,16 +1,25 @@
+---
+layout: default
+title: terraform-provider-rancherk3d
+nav_order: 1
+---
 # terraform-provider-rancherk3d
 
 ## Backdrop
-* Main reason why the provider was created is to simplify handling `kubernetes` resources creation.
-* Especially while working on `kubernetes native` applications, local cluster comes in handy. Manging these would be easier with this terraform provider.
-* Yes with `k3d cli` does the work, but bringing terraform layer will add more control over the resource `planning`/`creation`/`deletion`.
-* This provider `terraform-provider-rancherk3d` covers almost every task that one can accomplish with k3d cli with no k3d installed.<br><br>
+* Main reason why the provider was created is to simplify handling [`kubernetes`](https://kubernetes.io/) resources creation.
+* Especially while working on `kubernetes native` applications, local `kube` cluster provisioned with `k3d` comes in handy. Manging these would be easier with this terraform provider.
+* Yes [`k3d`](https://k3d.io/usage/commands/k3d/) cli does the work, but bringing in a layer of terraform will add more control over the resource `planning`/`creation`/`deletion`.
+* This provider `terraform-provider-rancherk3d` covers almost every task that one can accomplish with `k3d cli` with no `k3d` installed.
+
+## Prerequisites
+* [`Terraform`](https://www.terraform.io/downloads.html) v0.13.x [`tested`]
+* [`Docker`](https://www.docker.com/)
 
 ## Provider
 
-This expects few configurations to be passed while configuring provider.
+It is expected that few configurations to be passed while configuring provider.
 
-The configured values would be used by all data_source and resource available.
+The configured values would be used by all `data_source` and `resource` available.
 
 ##### Sample Provider config:
 
@@ -26,9 +35,13 @@ provider "rancherk3d" {
 ```
 
 #### Argument Reference
-* `kubernetes_version`: Rancher k3s kubernetes version to be used across all resource creation, including(cluster, node, registries)<br><br>
-* `k3d_api_version`: Rancher k3d api version to be used while creating a cluster.<br><br>
-* `registry`: Registries to be used, can be used as defaults and can be overridden during resource creation.<br><br>
-* `kind`: Defines the kind of config file to be used, at the moment supports just `Simple`, shall support more once k3d starts supporting.<br><br>
-* `runtime`: Runtime to be used, at the moment supports just `Docker`, shall support more once k3d starts supporting.<br><br>
-* `version`: `terraform-provider-rancherk3d` version to be used.<br><br>
+{: .fw-700 }
+
+* `kubernetes_version`{: .fs-3 }: Rancher k3s kubernetes version to be used across all resource creation, including(cluster, node, registries).
+* `k3d_api_version`{: .fs-3 }: Rancher k3d api version to be used while creating a cluster.
+* `registry`{: .fs-3 }: Registries to be used, can be used as defaults and can be overridden during resource creation.
+* `kind`{: .fs-3 }: Defines the kind of config file to be used, at the moment supports just `Simple`, shall support more once k3d starts supporting.
+* `runtime`{: .fs-3 }: Runtime to be used, at the moment supports just `Docker`, shall support more once k3d starts supporting.
+* `version`{: .fs-3 }: `terraform-provider-rancherk3d` version to be used.
+
+**Note**: Table on all supported features can be found [here](https://github.com/nikhilsbhat/terraform-provider-rancherk3d#features-supported-by-the-provider-at-the-moment).

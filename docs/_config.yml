@@ -4,7 +4,6 @@ title: rancherk3d provider
 heading_anchors: true
 back_to_top: true
 back_to_top_text: "Go Back to top"
-description: "A utility to ease the development of terraform custom provider by generating scaffolds for provider and their components"
 url: "https://nikhilsbhat.github.io/"
 permalink: pretty
 
