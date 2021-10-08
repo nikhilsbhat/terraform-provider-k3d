@@ -2,7 +2,6 @@ package k3d
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/docker/go-connections/nat"
@@ -281,8 +280,6 @@ func DeleteNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, node 
 func getPortMaps(p nat.PortMap) map[string]interface{} {
 	portM := make(map[string]interface{})
 	for key, value := range p {
-		log.Printf("value is : %v", value)
-		log.Printf("key is : %v", key)
 		portM[string(key)] = value
 	}
 	return portM
