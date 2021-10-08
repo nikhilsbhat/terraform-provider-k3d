@@ -1,11 +1,11 @@
-package k3d
+package client
 
 import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/utils"
+	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
 	"github.com/rancher/k3d/v4/pkg/runtimes"
 )
 
@@ -28,8 +28,8 @@ func GetK3dConfig(ctx context.Context, d *schema.ResourceData) (interface{}, dia
 		newConfig.KubeImageVersion = kubeVersion
 	}
 
-	if kubeVersion := utils.String(d.Get(utils.TerraformK3dRegistry)); len(kubeVersion) == 0 {
-		diag.Errorf("'%s' was not set", utils.TerraformK3dRegistry)
+	if kubeVersion := utils2.String(d.Get(utils2.TerraformK3dRegistry)); len(kubeVersion) == 0 {
+		diag.Errorf("'%s' was not set", utils2.TerraformK3dRegistry)
 	} else {
 		newConfig.K3DRegistry = getRegistry(d)
 	}
@@ -65,10 +65,10 @@ func getRuntime(runtime string) runtimes.Runtime {
 }
 
 func getRegistry(d *schema.ResourceData) string {
-	if len(utils.String(d.Get(utils.TerraformK3dRegistry))) == 0 {
-		return utils.K3DRepoDEFAULT
+	if len(utils2.String(d.Get(utils2.TerraformK3dRegistry))) == 0 {
+		return utils2.K3DRepoDEFAULT
 	}
-	return utils.String(d.Get(utils.TerraformK3dRegistry))
+	return utils2.String(d.Get(utils2.TerraformK3dRegistry))
 }
 
 func newK3dConfig() *Config {

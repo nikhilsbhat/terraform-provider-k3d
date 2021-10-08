@@ -7,8 +7,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/k3d"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/utils"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
+	k3dRegistry "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/registry"
+	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
 	"github.com/rancher/k3d/v4/pkg/runtimes"
 )
 
@@ -74,13 +77,13 @@ func resourceConnectRegistry() *schema.Resource {
 }
 
 func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.Config)
+	defaultConfig := meta.(*client.Config)
 
 	if d.IsNewResource() {
 		id := d.Id()
 
 		if len(id) == 0 {
-			newID, err := utils.GetRandomID()
+			newID, err := utils2.GetRandomID()
 			if err != nil {
 				d.SetId("")
 				return diag.Errorf("errored while fetching randomID %v", err)
@@ -88,10 +91,10 @@ func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData,
 			id = newID
 		}
 
-		connect := k3d.RegistryConnect{
-			Registries: getSlice(d.Get(utils.TerraformResourceRegistries)),
-			Cluster:    utils.String(d.Get(utils.TerraformResourceCluster)),
-			Connect:    utils.Bool(d.Get(utils.TerraformResourceConnect)),
+		connect := k3dRegistry.ConnectConfig{
+			Registries: getSlice(d.Get(utils2.TerraformResourceRegistries)),
+			Cluster:    utils2.String(d.Get(utils2.TerraformResourceCluster)),
+			Connect:    utils2.Bool(d.Get(utils2.TerraformResourceConnect)),
 		}
 
 		if err := connectRegistryToCluster(ctx, defaultConfig.K3DRuntime, connect); err != nil {
@@ -105,12 +108,12 @@ func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceConnectRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.Config)
+	defaultConfig := meta.(*client.Config)
 
-	connect := k3d.RegistryConnect{
-		Registries: getSlice(d.Get(utils.TerraformResourceRegistries)),
-		Cluster:    utils.String(d.Get(utils.TerraformResourceCluster)),
-		Connect:    utils.Bool(d.Get(utils.TerraformResourceConnect)),
+	connect := k3dRegistry.ConnectConfig{
+		Registries: getSlice(d.Get(utils2.TerraformResourceRegistries)),
+		Cluster:    utils2.String(d.Get(utils2.TerraformResourceCluster)),
+		Connect:    utils2.Bool(d.Get(utils2.TerraformResourceConnect)),
 	}
 
 	registryStatus, err := getRegistryStatus(ctx, defaultConfig.K3DRuntime, connect)
@@ -118,30 +121,30 @@ func resourceConnectRegistryRead(ctx context.Context, d *schema.ResourceData, me
 		return diag.Errorf("errored while retrieving updated registries status '%v' from cluster '%s,", connect.Registries, connect.Cluster)
 	}
 
-	if err = d.Set(utils.TerraformResourceStatus, registryStatus); err != nil {
-		return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceStatus, err)
+	if err = d.Set(utils2.TerraformResourceStatus, registryStatus); err != nil {
+		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceStatus, err)
 	}
 	return nil
 }
 
 func resourceConnectRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.Config)
+	defaultConfig := meta.(*client.Config)
 
-	if d.HasChange(utils.TerraformResourceRegistries) || d.HasChange(utils.TerraformResourceCluster) ||
-		d.HasChange(utils.TerraformResourceConnect) || d.HasChange(utils.TerraformResourceStop) {
+	if d.HasChange(utils2.TerraformResourceRegistries) || d.HasChange(utils2.TerraformResourceCluster) ||
+		d.HasChange(utils2.TerraformResourceConnect) || d.HasChange(utils2.TerraformResourceStop) {
 		connect := getUpdatedRegistriesChanges(d)
 		if err := connectRegistryToCluster(ctx, defaultConfig.K3DRuntime, connect); err != nil {
 			return diag.Errorf("errored while connecting/disconnecting registries '%v' with cluster '%s,", connect.Registries, connect.Cluster)
 		}
 
-		if err := d.Set(utils.TerraformResourceCluster, connect.Cluster); err != nil {
-			return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceCluster, err)
+		if err := d.Set(utils2.TerraformResourceCluster, connect.Cluster); err != nil {
+			return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceCluster, err)
 		}
-		if err := d.Set(utils.TerraformResourceRegistries, connect.Registries); err != nil {
-			return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceRegistries, err)
+		if err := d.Set(utils2.TerraformResourceRegistries, connect.Registries); err != nil {
+			return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceRegistries, err)
 		}
-		if err := d.Set(utils.TerraformResourceConnect, connect.Connect); err != nil {
-			return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceConnect, err)
+		if err := d.Set(utils2.TerraformResourceConnect, connect.Connect); err != nil {
+			return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceConnect, err)
 		}
 
 		return resourceConnectRegistryRead(ctx, d, meta)
@@ -151,7 +154,7 @@ func resourceConnectRegistryUpdate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceConnectRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.Config)
+	defaultConfig := meta.(*client.Config)
 	_ = defaultConfig
 	// could be properly implemented once k3d supports deleting loaded images from cluster.
 
@@ -163,38 +166,38 @@ func resourceConnectRegistryDelete(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func connectRegistryToCluster(ctx context.Context, runtime runtimes.Runtime, connect k3d.RegistryConnect) error {
+func connectRegistryToCluster(ctx context.Context, runtime runtimes.Runtime, connect k3dRegistry.ConnectConfig) error {
 	log.Printf("the connect data %v", connect)
-	registries, err := k3d.FilteredNodes(ctx, runtime, connect.Registries)
+	registries, err := node.FilteredNodes(ctx, runtime, connect.Registries)
 	if err != nil {
 		return err
 	}
 	if connect.Connect {
-		if err = k3d.ConnectRegistriesToCluster(ctx, runtime, []string{connect.Cluster}, registries); err != nil {
+		if err = k3dRegistry.ConnectRegistriesToCluster(ctx, runtime, []string{connect.Cluster}, registries); err != nil {
 			return err
 		}
 		return nil
 	}
-	if err = k3d.DisconnectRegistriesFormCluster(ctx, runtime, connect.Cluster, registries); err != nil {
+	if err = k3dRegistry.DisconnectRegistriesFormCluster(ctx, runtime, connect.Cluster, registries); err != nil {
 		return err
 	}
 	return nil
 }
 
-func getRegistryStatus(ctx context.Context, runtime runtimes.Runtime, connect k3d.RegistryConnect) ([]map[string]string, error) {
+func getRegistryStatus(ctx context.Context, runtime runtimes.Runtime, connect k3dRegistry.ConnectConfig) ([]map[string]string, error) {
 	updatedStatus := make([]map[string]string, 0)
-	cluster, err := k3d.GetCluster(ctx, runtime, connect.Cluster)
+	cluster, err := cluster.GetCluster(ctx, runtime, connect.Cluster)
 	if err != nil {
 		return nil, err
 	}
-	registries, err := k3d.FilteredNodes(ctx, runtime, connect.Registries)
+	registries, err := node.FilteredNodes(ctx, runtime, connect.Registries)
 	if err != nil {
 		return nil, err
 	}
 	for _, registry := range registries {
 		log.Printf("registry networks: %v", registry.Networks)
 		log.Printf("cluster network: %s", cluster.Network.Name)
-		if utils.Contains(registry.Networks, cluster.Network.Name) {
+		if utils2.Contains(registry.Networks, cluster.Network.Name) {
 			updatedStatus = append(updatedStatus, map[string]string{
 				"registry": registry.Name,
 				"cluster":  cluster.Name,
@@ -211,18 +214,18 @@ func getRegistryStatus(ctx context.Context, runtime runtimes.Runtime, connect k3
 	return updatedStatus, nil
 }
 
-func getUpdatedRegistriesChanges(d *schema.ResourceData) (registries k3d.RegistryConnect) {
-	oldRegistries, newRegistries := d.GetChange(utils.TerraformResourceRegistries)
+func getUpdatedRegistriesChanges(d *schema.ResourceData) (registries k3dRegistry.ConnectConfig) {
+	oldRegistries, newRegistries := d.GetChange(utils2.TerraformResourceRegistries)
 	if !cmp.Equal(oldRegistries, newRegistries) {
 		registries.Registries = getSlice(newRegistries)
 	}
-	oldCluster, newCluster := d.GetChange(utils.TerraformResourceCluster)
+	oldCluster, newCluster := d.GetChange(utils2.TerraformResourceCluster)
 	if !cmp.Equal(oldCluster, newCluster) {
-		registries.Cluster = utils.String(newCluster)
+		registries.Cluster = utils2.String(newCluster)
 	}
-	oldConnect, newConnect := d.GetChange(utils.TerraformResourceConnect)
+	oldConnect, newConnect := d.GetChange(utils2.TerraformResourceConnect)
 	if !cmp.Equal(oldConnect, newConnect) {
-		registries.Connect = utils.Bool(newConnect)
+		registries.Connect = utils2.Bool(newConnect)
 	}
 	return
 }

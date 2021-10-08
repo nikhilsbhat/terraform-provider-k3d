@@ -5,8 +5,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/k3d"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/utils"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
+	k3dNode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
+	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
 )
 
 func dataSourceNodeList() *schema.Resource {
@@ -47,12 +48,12 @@ func dataSourceNodeList() *schema.Resource {
 }
 
 func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.Config)
+	defaultConfig := meta.(*client.Config)
 
 	id := d.Id()
 
 	if len(id) == 0 {
-		newID, err := utils.GetRandomID()
+		newID, err := utils2.GetRandomID()
 		if err != nil {
 			d.SetId("")
 			return diag.Errorf("errored while fetching randomID %v", err)
@@ -60,9 +61,9 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 		id = newID
 	}
 
-	nodes := getSlice(d.Get(utils.TerraformResourceNodes))
-	cluster := utils.String(d.Get(utils.TerraformResourceCluster))
-	all := utils.Bool(d.Get(utils.TerraformResourceAll))
+	nodes := getSlice(d.Get(utils2.TerraformResourceNodes))
+	cluster := utils2.String(d.Get(utils2.TerraformResourceCluster))
+	all := utils2.Bool(d.Get(utils2.TerraformResourceAll))
 
 	k3dNodes, err := getNodesFromCluster(ctx, defaultConfig, cluster, nodes, all)
 	if err != nil {
@@ -70,30 +71,30 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("errored while fetching nodes: %v", err)
 	}
 
-	flattenedNodes, err := utils.MapSlice(k3dNodes)
+	flattenedNodes, err := utils2.MapSlice(k3dNodes)
 	if err != nil {
 		d.SetId("")
 		return diag.Errorf("errored while flattening nodes obtained: %v", err)
 	}
 	d.SetId(id)
-	if err := d.Set(utils.TerraformResourceNodesList, flattenedNodes); err != nil {
-		return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceNodesList, err)
+	if err := d.Set(utils2.TerraformResourceNodesList, flattenedNodes); err != nil {
+		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceNodesList, err)
 	}
 
 	return nil
 }
 
-func getNodesFromCluster(ctx context.Context, defaultConfig *k3d.Config, cluster string, nodes []string, all bool) ([]*k3d.K3Node, error) {
+func getNodesFromCluster(ctx context.Context, defaultConfig *client.Config, cluster string, nodes []string, all bool) ([]*k3dNode.K3Node, error) {
 	if all {
-		k3dNodes, err := k3d.GetFilteredNodesFromCluster(ctx, defaultConfig.K3DRuntime, cluster)
+		k3dNodes, err := k3dNode.GetFilteredNodesFromCluster(ctx, defaultConfig.K3DRuntime, cluster)
 		if err != nil {
 			return nil, err
 		}
 		return k3dNodes, err
 	}
-	return k3d.GetFilteredNodes(ctx, defaultConfig.K3DRuntime, nodes)
+	return k3dNode.GetFilteredNodes(ctx, defaultConfig.K3DRuntime, nodes)
 }
 
 func getSlice(data interface{}) []string {
-	return utils.GetSlice(data.([]interface{}))
+	return utils2.GetSlice(data.([]interface{}))
 }

@@ -6,8 +6,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/k3d"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/utils"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
+	k3d2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/config"
+	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
 	K3D "github.com/rancher/k3d/v4/pkg/types"
 )
 
@@ -47,12 +49,12 @@ func dataSourceKubeConfig() *schema.Resource {
 }
 
 func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.Config)
+	defaultConfig := meta.(*client.Config)
 
 	id := d.Id()
 	if len(id) == 0 {
 		log.Printf("fetching new ID for kubeconfig: %s", id)
-		newID, err := utils.GetRandomID()
+		newID, err := utils2.GetRandomID()
 		if err != nil {
 			d.SetId("")
 			return diag.Errorf("errored while fetching randomID %v", err)
@@ -60,39 +62,39 @@ func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta 
 		id = newID
 	}
 
-	clusters := getClusters(d.Get(utils.TerraformResourceClusters))
-	all := utils.Bool(d.Get(utils.TerraformResourceAll))
-	notEncode := utils.Bool(d.Get(utils.TerraformResourceNotEncode))
+	clusters := getClusters(d.Get(utils2.TerraformResourceClusters))
+	all := utils2.Bool(d.Get(utils2.TerraformResourceAll))
+	notEncode := utils2.Bool(d.Get(utils2.TerraformResourceNotEncode))
 
 	fetchedClusters, err := getUnfilteredCluster(ctx, defaultConfig, clusters, all)
 	if err != nil {
 		d.SetId("")
 		return diag.Errorf("oops errored while fetching clusters info: %v", err)
 	}
-	kubeConfig, err := k3d.GetKubeConfig(ctx, defaultConfig.K3DRuntime, fetchedClusters, notEncode)
+	kubeConfig, err := k3d2.GetKubeConfig(ctx, defaultConfig.K3DRuntime, fetchedClusters, notEncode)
 	if err != nil {
 		d.SetId("")
 		return diag.Errorf("errored while fetching kube-config: %v", err)
 	}
 
 	d.SetId(id)
-	if seRrr := d.Set(utils.TerraformResourceKubeConfig, kubeConfig); seRrr != nil {
-		return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceKubeConfig, seRrr)
+	if seRrr := d.Set(utils2.TerraformResourceKubeConfig, kubeConfig); seRrr != nil {
+		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceKubeConfig, seRrr)
 	}
 
 	return nil
 }
 
-func getUnfilteredCluster(ctx context.Context, defaultConfig *k3d.Config, clusters []string, all bool) ([]*K3D.Cluster, error) {
+func getUnfilteredCluster(ctx context.Context, defaultConfig *client.Config, clusters []string, all bool) ([]*K3D.Cluster, error) {
 	var fetchedClusters []*K3D.Cluster
 	if all {
-		allClusters, err := k3d.GetClusters(ctx, defaultConfig.K3DRuntime)
+		allClusters, err := cluster.GetClusters(ctx, defaultConfig.K3DRuntime)
 		if err != nil {
 			return nil, err
 		}
 		fetchedClusters = allClusters
 	} else {
-		allClusters, err := k3d.GetFilteredClusters(ctx, defaultConfig.K3DRuntime, clusters)
+		allClusters, err := cluster.GetFilteredClusters(ctx, defaultConfig.K3DRuntime, clusters)
 		if err != nil {
 			return nil, err
 		}

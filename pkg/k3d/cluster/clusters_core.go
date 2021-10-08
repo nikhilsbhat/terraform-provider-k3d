@@ -1,4 +1,4 @@
-package k3d
+package cluster
 
 import (
 	"context"

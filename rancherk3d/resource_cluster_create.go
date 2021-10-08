@@ -5,8 +5,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/k3d"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/utils"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
+	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
 	"github.com/rancher/k3d/v4/pkg/config/v1alpha2"
 )
 
@@ -149,10 +149,10 @@ func resourceCluster() *schema.Resource {
 }
 
 func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	defaultConfig := meta.(*k3d.Config)
+	defaultConfig := meta.(*client.Config)
 	if d.IsNewResource() {
-		clusterName := utils.String(d.Get(utils.TerraformResourceName))
-
+		clusterName := utils2.String(d.Get(utils2.TerraformResourceName))
+		_ = defaultConfig
 
 		d.SetId(clusterName)
 	}
@@ -173,10 +173,8 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func createCluster(ctx context.Context, d *schema.ResourceData, defaultConfig *k3d.Config) error {
-	k3DSimpleConfig := &v1alpha2.SimpleConfig{
-
-	}
-
+func createCluster(ctx context.Context, d *schema.ResourceData, defaultConfig *client.Config) error {
+	k3DSimpleConfig := &v1alpha2.SimpleConfig{}
+	_ = k3DSimpleConfig
 	return nil
 }

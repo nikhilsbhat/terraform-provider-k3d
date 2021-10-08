@@ -49,12 +49,12 @@ const (
 	TerraformResourceK3dOptions       = "k3d_options"
 	TerraformResourceK3sOptions       = "k3s_options"
 
-	TerraformK3dLabel                 = "k3d.terraform"
-	TerraformK3dRegistry              = "registry"
-	TerraformKubernetesVersion        = "kubernetes_version"
-	TerraformK3dAPIVersion            = "k3d_api_version"
-	TerraformK3dKind                  = "kind"
-	TerraformK3dRuntime               = "runtime"
-	TerraformTimeOut5                 = 5
-	K3DRepoDEFAULT                    = "rancher/k3s"
+	TerraformK3dLabel          = "k3d.terraform"
+	TerraformK3dRegistry       = "registry"
+	TerraformKubernetesVersion = "kubernetes_version"
+	TerraformK3dAPIVersion     = "k3d_api_version"
+	TerraformK3dKind           = "kind"
+	TerraformK3dRuntime        = "runtime"
+	TerraformTimeOut5          = 5
+	K3DRepoDEFAULT             = "rancher/k3s"
 )

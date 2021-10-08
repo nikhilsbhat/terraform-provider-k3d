@@ -1,4 +1,4 @@
-package k3d
+package client
 
 import (
 	"reflect"

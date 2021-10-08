@@ -1,11 +1,12 @@
-package k3d
+package node
 
 import (
 	"context"
 	"time"
 
 	"github.com/docker/go-connections/nat"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/utils"
+	cluster2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
 	"github.com/rancher/k3d/v4/pkg/client"
 	"github.com/rancher/k3d/v4/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v4/pkg/types"
@@ -13,13 +14,13 @@ import (
 
 var (
 	// K3dclusterNameLabel is the label that holds cluster name in k3d node.
-	K3dclusterNameLabel = "k3d.cluster"
+	K3dclusterNameLabel = "cluster"
 )
 
 // Nodes fetches details of all available nodes in the specified cluster.
 func Nodes(ctx context.Context, runtime runtimes.Runtime, cluster string) ([]*K3D.Node, error) {
 	nodes, err := runtime.GetNodesByLabel(ctx, map[string]string{
-		"k3d.cluster": cluster,
+		"cluster": cluster,
 	})
 	if err != nil {
 		return nil, err
@@ -258,7 +259,7 @@ func CreateNodeWithTimeout(ctx context.Context, runtime runtimes.Runtime,
 	if wait {
 		nodeCreatOpts = K3D.NodeCreateOpts{Wait: wait, Timeout: timeout}
 	}
-	clusterFetched, err := GetCluster(ctx, runtime, cluster)
+	clusterFetched, err := cluster2.GetCluster(ctx, runtime, cluster)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package k3d
+package cluster
 
 import (
 	"context"
@@ -44,7 +44,7 @@ func TestGetCluster(t *testing.T) {
 		{
 			name:    "should be able to get cluster info without error",
 			args:    args{ctx: context.Background(), runtime: runtimes.Docker, cluster: "k3s-default"},
-			want:    &K3D.Cluster{},
+			want:    &K3D.Cluster{Name: "k3s-default"},
 			wantErr: false,
 		},
 	}
@@ -55,7 +55,7 @@ func TestGetCluster(t *testing.T) {
 				t.Errorf("GetCluster() error = %v, wantErr %v", err, tt.wantErr) //nolint:scopelint
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) { //nolint:scopelint
+			if !reflect.DeepEqual(got.Name, tt.want.Name) { //nolint:scopelint
 				t.Errorf("GetCluster() got = %v, want %v", got, tt.want) //nolint:scopelint
 			}
 		})

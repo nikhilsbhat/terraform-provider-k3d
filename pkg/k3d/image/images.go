@@ -1,20 +1,21 @@
-package k3d
+package image
 
 import (
 	"context"
 	"fmt"
 
+	cluster2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
 	"github.com/rancher/k3d/v4/pkg/runtimes"
 	"github.com/rancher/k3d/v4/pkg/tools"
 	K3D "github.com/rancher/k3d/v4/pkg/types"
 )
 
-// StoreImages stores images in a specified clusters, also stores the tarball locally if feature is enabled.
+// StoreImagesToCluster stores images in a specified clusters, also stores the tarball locally if feature is enabled.
 func StoreImagesToCluster(ctx context.Context, runtime runtimes.Runtime,
 	images []string, cluster string, storeTarball bool) error {
 	loadImageOpts := K3D.ImageImportOpts{KeepTar: storeTarball}
 
-	retrievedCluster, err := GetCluster(ctx, runtime, cluster)
+	retrievedCluster, err := cluster2.GetCluster(ctx, runtime, cluster)
 	if err != nil {
 		return err
 	}
@@ -30,7 +31,7 @@ func StoreImagesToClusters(ctx context.Context, runtime runtimes.Runtime,
 	images []string, storeTarball bool) error {
 	loadImageOpts := K3D.ImageImportOpts{KeepTar: storeTarball}
 
-	retrievedClusters, err := GetClusters(ctx, runtime)
+	retrievedClusters, err := cluster2.GetClusters(ctx, runtime)
 	if err != nil {
 		return err
 	}
@@ -46,7 +47,7 @@ func StoreImagesToClusters(ctx context.Context, runtime runtimes.Runtime,
 // GetImagesLoadedCluster returns list of images loaded to the cluster.
 func GetImagesLoadedCluster(ctx context.Context, runtime runtimes.Runtime,
 	images []string, cluster string) ([]*StoredImages, error) {
-	retrievedCluster, err := GetCluster(ctx, runtime, cluster)
+	retrievedCluster, err := cluster2.GetCluster(ctx, runtime, cluster)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func GetImagesLoadedCluster(ctx context.Context, runtime runtimes.Runtime,
 // GetImagesLoadedClusters returns list of images loaded to the clusters.
 func GetImagesLoadedClusters(ctx context.Context, runtime runtimes.Runtime,
 	images []string) ([]*StoredImages, error) {
-	retrievedClusters, err := GetClusters(ctx, runtime)
+	retrievedClusters, err := cluster2.GetClusters(ctx, runtime)
 	if err != nil {
 		return nil, err
 	}
@@ -75,6 +76,6 @@ func GetImagesLoadedClusters(ctx context.Context, runtime runtimes.Runtime,
 	return storedImages, nil
 }
 
-func NewK3dImages() *Images {
-	return &Images{}
+func NewK3dImages() *Config {
+	return &Config{}
 }

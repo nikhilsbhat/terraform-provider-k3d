@@ -1,9 +1,9 @@
-package k3d
+package config
 
 import (
 	"context"
 
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/utils"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
 	"github.com/rancher/k3d/v4/pkg/client"
 	"github.com/rancher/k3d/v4/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v4/pkg/types"

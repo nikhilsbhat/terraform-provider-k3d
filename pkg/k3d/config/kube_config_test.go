@@ -1,9 +1,10 @@
-package k3d
+package config
 
 import (
 	"context"
 	"testing"
 
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
 	"github.com/rancher/k3d/v4/pkg/runtimes"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,11 +37,11 @@ users:
 `,
 		}
 
-		clustersConfig, err := GetFilteredClusters(ctx, runtime, clusters)
+		clustersConfig, err := cluster.GetFilteredClusters(ctx, runtime, clusters)
 		assert.NoError(t, err)
 		assert.NotNil(t, clustersConfig)
 
-		actual, err := GetKubeConfig(ctx, runtime, clustersConfig, false)
+		actual, err := GetKubeConfig(ctx, runtime, clustersConfig, true)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, actual)
 	})
@@ -54,7 +55,7 @@ users:
 			"k3s-default": "YXBpVmVyc2lvbjogdjEKY2x1c3RlcnM6Ci0gY2x1c3RlcjoKICAgIGNlcnRpZmljYXRlLWF1==",
 		}
 
-		clustersConfig, err := GetFilteredClusters(ctx, runtime, clusters)
+		clustersConfig, err := cluster.GetFilteredClusters(ctx, runtime, clusters)
 		assert.NoError(t, err)
 		assert.NotNil(t, clustersConfig)
 

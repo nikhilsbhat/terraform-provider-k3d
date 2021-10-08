@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/k3d"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
 )
 
 // Provider returns a terraform.ResourceProvider.
@@ -61,7 +61,7 @@ func Provider() *schema.Provider {
 			"rancherk3d_node_action":      resourceNodeAction(),
 			"rancherk3d_node_create":      resourceNode(),
 			"rancherk3d_cluster_action":   resourceClusterAction(),
-			"rancherk3d_cluster_create":   resourceCluster(),
+			//"rancherk3d_cluster_create":   resourceCluster(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -71,7 +71,7 @@ func Provider() *schema.Provider {
 			"rancherk3d_registry_list": dataSourceRegistryList(),
 		},
 
-		ConfigureContextFunc: k3d.GetK3dConfig,
+		ConfigureContextFunc: client.GetK3dConfig,
 	}
 }
 
