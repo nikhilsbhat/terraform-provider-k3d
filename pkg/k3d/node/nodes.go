@@ -7,9 +7,9 @@ import (
 	"github.com/docker/go-connections/nat"
 	cluster2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	"github.com/rancher/k3d/v4/pkg/client"
-	"github.com/rancher/k3d/v4/pkg/runtimes"
-	K3D "github.com/rancher/k3d/v4/pkg/types"
+	"github.com/rancher/k3d/v5/pkg/client"
+	"github.com/rancher/k3d/v5/pkg/runtimes"
+	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
 var (
@@ -99,7 +99,7 @@ func GetFilteredNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, 
 		filteredNodes = append(filteredNodes, &K3Node{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
-			ClusterAssociated:    node.Labels[K3dclusterNameLabel],
+			ClusterAssociated:    node.K3sNodeLabels[K3dclusterNameLabel],
 			State:                node.State.Status,
 			Created:              node.Created,
 			Volumes:              node.Volumes,
@@ -121,7 +121,7 @@ func GetFilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []str
 		k3dNodes = append(k3dNodes, &K3Node{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
-			ClusterAssociated:    node.Labels[K3dclusterNameLabel],
+			ClusterAssociated:    node.K3sNodeLabels[K3dclusterNameLabel],
 			State:                node.State.Status,
 			Created:              node.Created,
 			Volumes:              node.Volumes,
@@ -143,7 +143,7 @@ func GetNodes(ctx context.Context, runtime runtimes.Runtime) ([]*K3Node, error) 
 		k3dNodes = append(k3dNodes, &K3Node{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
-			ClusterAssociated:    node.Labels[K3dclusterNameLabel],
+			ClusterAssociated:    node.K3sNodeLabels[K3dclusterNameLabel],
 			State:                node.State.Status,
 			Created:              node.Created,
 			Memory:               node.Memory,
@@ -167,7 +167,7 @@ func GetNodesByLabels(ctx context.Context, runtime runtimes.Runtime, label map[s
 		filteredNodes = append(filteredNodes, &K3Node{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
-			ClusterAssociated:    node.Labels[K3dclusterNameLabel],
+			ClusterAssociated:    node.K3sNodeLabels[K3dclusterNameLabel],
 			State:                node.State.Status,
 			Created:              node.Created,
 			Memory:               node.Memory,
@@ -242,7 +242,7 @@ func (c *K3Node) GetNode() *K3D.Node {
 	return &K3D.Node{
 		Name: c.Name,
 		Role: K3D.NodeRoles[c.Role],
-		Labels: map[string]string{
+		K3sNodeLabels: map[string]string{
 			K3D.LabelRole:           c.Role,
 			utils.TerraformK3dLabel: c.Created,
 		},

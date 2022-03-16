@@ -11,8 +11,7 @@ import (
 	k3dNode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
 	k3dRegistry "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/registry"
 	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	"github.com/rancher/k3d/v4/pkg/runtimes"
-	K3D "github.com/rancher/k3d/v4/pkg/types"
+	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
 func resourceRegistry() *schema.Resource {
@@ -143,19 +142,26 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 			Name:     utils2.String(d.Get(utils2.TerraformResourceName)),
 			Image:    utils2.String(d.Get(utils2.TerraformResourceImage)),
 			Cluster:  utils2.String(d.Get(utils2.TerraformResourceCluster)),
-			Host:     utils2.String(d.Get(utils2.TerraformResourceHost)),
+			Host:     validateAndSetHost(d),
 			Protocol: utils2.String(d.Get(utils2.TerraformResourceProtocol)),
-			Proxy:    proxy,
+			Proxy:    validateAndSetProxy(d, proxy),
 			UseProxy: utils2.Bool(d.Get(utils2.TerraformUseProxy)),
-			Expose:   expose,
+			Expose:   validateAndSetExpose(expose),
 		}
 
-		if err = createRegistry(ctx, defaultConfig.K3DRuntime, registry); err != nil {
-			if seErr := d.Set(utils2.TerraformResourceMetadata, ""); seErr != nil {
+		if err = registry.CreateRegistry(ctx, defaultConfig.K3DRuntime); err != nil {
+			if seErr := d.Set(utils2.TerraformResourceMetadata, nil); seErr != nil {
 				return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceMetadata, seErr)
 			}
-			diag.Errorf("oops errored while creating registry: %v", err)
+			return diag.Errorf("oops errored while creating registry: %v", err)
 		}
+
+		//if err = createRegistry(ctx, defaultConfig.K3DRuntime, registry); err != nil {
+		//	if seErr := d.Set(utils2.TerraformResourceMetadata, ""); seErr != nil {
+		//		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceMetadata, seErr)
+		//	}
+		//	diag.Errorf("oops errored while creating registry: %v", err)
+		//}
 
 		d.SetId(id)
 		return resourceRegistryRead(ctx, d, meta)
@@ -228,32 +234,42 @@ func getRegistriesFromState(ctx context.Context, d *schema.ResourceData, default
 	return k3dNodes, nil
 }
 
-func createRegistry(ctx context.Context, runtime runtimes.Runtime, registry *k3dRegistry.Config) error {
-	registryK3d := &K3D.Registry{}
-
-	registryK3d.ClusterRef = registry.Cluster
-	registryK3d.Protocol = registry.Protocol
-	registryK3d.Host = getHost(registry)
-	registryK3d.Image = registry.Image
-	k3dRegistry.GetExposureOpts(getExpose(registry.Expose), registryK3d)
-	if registry.UseProxy {
-		if !validateProxy(registry.Proxy) {
-			k3dRegistry.GetProxyConfig(registry.Proxy, registryK3d)
-		}
-		return fmt.Errorf("proxy config validation failed, config cannot be empty")
-	}
-
-	if err := k3dRegistry.CreateRegistry(ctx, runtime, registryK3d, []string{registry.Cluster}); err != nil {
-		return err
-	}
-	return nil
-}
+//func createRegistry(ctx context.Context, runtime runtimes.Runtime, registry *k3dRegistry.Config) error {
+//	registryK3d := &K3D.Registry{}
+//
+//	registryK3d.ClusterRef = registry.Cluster
+//	registryK3d.Protocol = registry.Protocol
+//	registryK3d.Host = validateAndSetHost(registry)
+//	registryK3d.Image = registry.Image
+//	k3dRegistry.GetExposureOpts(validateAndSetExpose(registry.Expose), registryK3d)
+//	if registry.UseProxy {
+//		if !validateProxy(registry.Proxy) {
+//			k3dRegistry.SetProxyConfig(registry.Proxy, registryK3d)
+//		}
+//		return fmt.Errorf("proxy config validation failed, config cannot be empty")
+//	}
+//
+//	if err := k3dRegistry.CreateRegistry(ctx, runtime, registryK3d, []string{registry.Cluster}); err != nil {
+//		return err
+//	}
+//	return nil
+//}
 
 func validateProxy(value map[string]string) bool {
 	if len(value["remoteURL"]) == 0 || len(value["username"]) == 0 || len(value["password"]) == 0 {
 		return false
 	}
 	return true
+}
+
+func validateAndSetProxy(d *schema.ResourceData, proxy map[string]string) map[string]string {
+	if utils2.Bool(d.Get(utils2.TerraformUseProxy)) {
+		if !validateProxy(proxy) {
+			return map[string]string{}
+		}
+		fmt.Printf("proxy config validation failed, config cannot be empty, dropping proxy config")
+	}
+	return nil
 }
 
 func validateExpose(value map[string]string) bool {
@@ -263,7 +279,7 @@ func validateExpose(value map[string]string) bool {
 	return true
 }
 
-func getExpose(expose map[string]string) map[string]string {
+func validateAndSetExpose(expose map[string]string) map[string]string {
 	if !validateExpose(expose) {
 		return map[string]string{
 			"hostIp":   "0.0.0.0",
@@ -273,11 +289,11 @@ func getExpose(expose map[string]string) map[string]string {
 	return expose
 }
 
-func getHost(registry *k3dRegistry.Config) string {
-	if len(registry.Host) == 0 {
-		return registry.Name
+func validateAndSetHost(d *schema.ResourceData) string {
+	if len(utils2.String(d.Get(utils2.TerraformResourceHost))) == 0 {
+		return utils2.String(d.Get(utils2.TerraformResourceName))
 	}
-	return registry.Host
+	return utils2.String(d.Get(utils2.TerraformResourceHost))
 }
 
 func getMetadata(d *schema.ResourceData) map[string]string {

@@ -8,7 +8,7 @@ import (
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
 	k3dCluster "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
 	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	K3D "github.com/rancher/k3d/v4/pkg/types"
+	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
 func dataSourceClusterList() *schema.Resource {

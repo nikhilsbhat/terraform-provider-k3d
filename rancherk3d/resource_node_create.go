@@ -13,8 +13,8 @@ import (
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
 	k3dnode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	"github.com/rancher/k3d/v4/pkg/runtimes"
-	K3D "github.com/rancher/k3d/v4/pkg/types"
+	"github.com/rancher/k3d/v5/pkg/runtimes"
+	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
 func resourceNode() *schema.Resource {

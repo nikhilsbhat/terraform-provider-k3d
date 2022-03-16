@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/rancher/k3d/v4/pkg/runtimes"
-	K3D "github.com/rancher/k3d/v4/pkg/types"
+	"github.com/rancher/k3d/v5/pkg/runtimes"
+	K3D "github.com/rancher/k3d/v5/pkg/types"
 	"github.com/stretchr/testify/assert"
 )
 

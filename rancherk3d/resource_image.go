@@ -11,7 +11,7 @@ import (
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/image"
 	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	"github.com/rancher/k3d/v4/pkg/runtimes"
+	"github.com/rancher/k3d/v5/pkg/runtimes"
 )
 
 func resourceImage() *schema.Resource {

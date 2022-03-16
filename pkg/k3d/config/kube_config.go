@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	"github.com/rancher/k3d/v4/pkg/client"
-	"github.com/rancher/k3d/v4/pkg/runtimes"
-	K3D "github.com/rancher/k3d/v4/pkg/types"
+	"github.com/rancher/k3d/v5/pkg/client"
+	"github.com/rancher/k3d/v5/pkg/runtimes"
+	K3D "github.com/rancher/k3d/v5/pkg/types"
 	"k8s.io/client-go/tools/clientcmd"
 )
 

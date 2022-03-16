@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/rancher/k3d/v4/pkg/runtimes"
+	"github.com/rancher/k3d/v5/pkg/runtimes"
 )
 
 func Test_getRuntime(t *testing.T) {

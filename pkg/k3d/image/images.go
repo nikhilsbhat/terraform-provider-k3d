@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	cluster2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
-	"github.com/rancher/k3d/v4/pkg/runtimes"
-	"github.com/rancher/k3d/v4/pkg/tools"
-	K3D "github.com/rancher/k3d/v4/pkg/types"
+	"github.com/rancher/k3d/v5/pkg/client"
+	"github.com/rancher/k3d/v5/pkg/runtimes"
+	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
 // StoreImagesToCluster stores images in a specified clusters, also stores the tarball locally if feature is enabled.
@@ -20,7 +20,7 @@ func StoreImagesToCluster(ctx context.Context, runtime runtimes.Runtime,
 		return err
 	}
 
-	if err = tools.ImageImportIntoClusterMulti(ctx, runtime, images, retrievedCluster, loadImageOpts); err != nil {
+	if err = client.ImageImportIntoClusterMulti(ctx, runtime, images, retrievedCluster, loadImageOpts); err != nil {
 		return fmt.Errorf("failed to import image(s) into cluster '%s': %+v", retrievedCluster.Name, err)
 	}
 	return nil
@@ -37,7 +37,7 @@ func StoreImagesToClusters(ctx context.Context, runtime runtimes.Runtime,
 	}
 
 	for _, retrievedCluster := range retrievedClusters {
-		if err = tools.ImageImportIntoClusterMulti(ctx, runtime, images, retrievedCluster, loadImageOpts); err != nil {
+		if err = client.ImageImportIntoClusterMulti(ctx, runtime, images, retrievedCluster, loadImageOpts); err != nil {
 			return fmt.Errorf("failed to import image(s) into cluster '%s': %+v", retrievedCluster.Name, err)
 		}
 	}

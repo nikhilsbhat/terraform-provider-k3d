@@ -3,16 +3,16 @@ package cluster
 import (
 	"context"
 	"fmt"
+	"github.com/rancher/k3d/v5/pkg/config/v1alpha4"
 	"log"
 
-	"github.com/rancher/k3d/v4/pkg/client"
-	"github.com/rancher/k3d/v4/pkg/config"
-	"github.com/rancher/k3d/v4/pkg/config/v1alpha2"
-	"github.com/rancher/k3d/v4/pkg/runtimes"
-	K3D "github.com/rancher/k3d/v4/pkg/types"
+	"github.com/rancher/k3d/v5/pkg/client"
+	"github.com/rancher/k3d/v5/pkg/config"
+	"github.com/rancher/k3d/v5/pkg/runtimes"
+	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
-func CreateCluster(ctx context.Context, runtime runtimes.Runtime, cfg *v1alpha2.SimpleConfig) error {
+func CreateCluster(ctx context.Context, runtime runtimes.Runtime, cfg *v1alpha4.SimpleConfig) error {
 	// transform simple config to cluster config
 
 	clusterConfig, err := config.TransformSimpleToClusterConfig(ctx, runtime, *cfg)
