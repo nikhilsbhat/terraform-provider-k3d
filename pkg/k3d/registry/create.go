@@ -8,20 +8,7 @@ import (
 	"log"
 )
 
-// CreateRegistry creates registry and connects it to specified cluster.
-func CreateRegistry(ctx context.Context, runtime runtimes.Runtime, reg *K3D.Registry, clusters []string) error {
-	regNode, err := client.RegistryRun(ctx, runtime, reg)
-	if err != nil {
-		return err
-	}
-	if len(clusters) != 0 {
-		log.Printf("connecting the registry with cluster %v", clusters)
-		return ConnectRegistryToCluster(ctx, runtimes.SelectedRuntime, clusters, regNode)
-	}
-	return nil
-}
-
-func (registry *Config) CreateRegistry(ctx context.Context, runtime runtimes.Runtime) error {
+func (registry *Config) Create(ctx context.Context, runtime runtimes.Runtime) error {
 	registryK3d := &K3D.Registry{}
 
 	registryK3d.ClusterRef = registry.Cluster
@@ -33,8 +20,14 @@ func (registry *Config) CreateRegistry(ctx context.Context, runtime runtimes.Run
 		SetProxyConfig(registry.Proxy, registryK3d)
 	}
 
-	if err := CreateRegistry(ctx, runtime, registryK3d, []string{registry.Cluster}); err != nil {
+	_, err := client.RegistryRun(ctx, runtime, registryK3d)
+	if err != nil {
 		return err
 	}
+	if len(registry.Cluster) != 0 {
+		log.Printf("connecting the registry with cluster %v", registry.Cluster)
+		return registry.Connect(ctx, runtime)
+	}
+
 	return nil
 }

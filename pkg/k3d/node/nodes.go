@@ -14,7 +14,7 @@ import (
 
 var (
 	// K3dclusterNameLabel is the label that holds cluster name in k3d node.
-	K3dclusterNameLabel = "cluster"
+	K3dclusterNameLabel = "k3d.cluster"
 )
 
 // Nodes fetches details of all available nodes in the specified cluster.
@@ -99,7 +99,7 @@ func GetFilteredNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, 
 		filteredNodes = append(filteredNodes, &K3Node{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
-			ClusterAssociated:    node.K3sNodeLabels[K3dclusterNameLabel],
+			ClusterAssociated:    node.RuntimeLabels[K3dclusterNameLabel],
 			State:                node.State.Status,
 			Created:              node.Created,
 			Volumes:              node.Volumes,
@@ -121,7 +121,7 @@ func GetFilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []str
 		k3dNodes = append(k3dNodes, &K3Node{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
-			ClusterAssociated:    node.K3sNodeLabels[K3dclusterNameLabel],
+			ClusterAssociated:    node.RuntimeLabels[K3dclusterNameLabel],
 			State:                node.State.Status,
 			Created:              node.Created,
 			Volumes:              node.Volumes,
@@ -143,7 +143,7 @@ func GetNodes(ctx context.Context, runtime runtimes.Runtime) ([]*K3Node, error) 
 		k3dNodes = append(k3dNodes, &K3Node{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
-			ClusterAssociated:    node.K3sNodeLabels[K3dclusterNameLabel],
+			ClusterAssociated:    node.RuntimeLabels[K3dclusterNameLabel],
 			State:                node.State.Status,
 			Created:              node.Created,
 			Memory:               node.Memory,
@@ -167,13 +167,14 @@ func GetNodesByLabels(ctx context.Context, runtime runtimes.Runtime, label map[s
 		filteredNodes = append(filteredNodes, &K3Node{
 			Name:                 node.Name,
 			Role:                 string(node.Role),
-			ClusterAssociated:    node.K3sNodeLabels[K3dclusterNameLabel],
+			ClusterAssociated:    node.RuntimeLabels[K3dclusterNameLabel],
 			State:                node.State.Status,
 			Created:              node.Created,
 			Memory:               node.Memory,
 			Volumes:              node.Volumes,
 			Networks:             node.Networks,
 			EnvironmentVariables: node.Env,
+			Image:                node.Image,
 			// dropping PortMapping as terraform schema format is yet to be figured.
 			//PortMapping:          getPortMaps(node.Ports),
 		})
@@ -242,7 +243,7 @@ func (c *K3Node) GetNode() *K3D.Node {
 	return &K3D.Node{
 		Name: c.Name,
 		Role: K3D.NodeRoles[c.Role],
-		K3sNodeLabels: map[string]string{
+		RuntimeLabels: map[string]string{
 			K3D.LabelRole:           c.Role,
 			utils.TerraformK3dLabel: c.Created,
 		},

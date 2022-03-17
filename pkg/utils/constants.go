@@ -57,4 +57,6 @@ const (
 	TerraformK3dRuntime        = "runtime"
 	TerraformTimeOut5          = 5
 	K3DRepoDEFAULT             = "rancher/k3s"
+	RegistryConnectedState     = "connected"
+	RegistryDisconnectedState  = "disconnected"
 )

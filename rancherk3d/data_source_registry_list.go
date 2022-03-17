@@ -6,8 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
-	k3dNode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/registry"
+	k3dRegistry "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/registry"
 	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
 )
 
@@ -62,11 +61,13 @@ func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, met
 		id = newID
 	}
 
-	registries := getSlice(d.Get(utils2.TerraformResourceRegistries))
-	cluster := utils2.String(d.Get(utils2.TerraformResourceCluster))
-	all := utils2.Bool(d.Get(utils2.TerraformResourceAll))
+	registry := &k3dRegistry.Config{
+		Name:    getSlice(d.Get(utils2.TerraformResourceRegistries)),
+		Cluster: utils2.String(d.Get(utils2.TerraformResourceCluster)),
+		All:     utils2.Bool(d.Get(utils2.TerraformResourceAll)),
+	}
 
-	k3dNodes, err := getRegistries(ctx, defaultConfig, cluster, registries, all)
+	k3dNodes, err := registry.Get(ctx, defaultConfig.K3DRuntime)
 	if err != nil {
 		d.SetId("")
 		return diag.Errorf("errored while fetching registry nodes: %v", err)
@@ -87,11 +88,4 @@ func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, met
 		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceRegistriesList, err)
 	}
 	return nil
-}
-
-func getRegistries(ctx context.Context, defaultConfig *client.Config, cluster string, registries []string, all bool) ([]*k3dNode.K3Node, error) {
-	if all {
-		return registry.GetRegistries(ctx, defaultConfig.K3DRuntime, cluster)
-	}
-	return registry.GetRegistriesWithName(ctx, defaultConfig.K3DRuntime, cluster, registries)
 }

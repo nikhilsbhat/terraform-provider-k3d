@@ -2,8 +2,6 @@ package rancherk3d
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/mapstructure"
@@ -89,13 +87,13 @@ func resourceRegistry() *schema.Resource {
 				Description:  "proxy configurations to be used while configuring registry if enabled",
 				Elem:         &schema.Schema{Type: schema.TypeString},
 			},
-			"metadata": {
-				Type:        schema.TypeMap,
-				Optional:    true,
-				Computed:    true,
-				Description: "meta data to be used for filtering registries internally",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
+			//"metadata": {
+			//	Type:        schema.TypeMap,
+			//	Optional:    true,
+			//	Computed:    true,
+			//	Description: "meta data to be used for filtering registries internally",
+			//	Elem:        &schema.Schema{Type: schema.TypeString},
+			//},
 			"registries_list": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -134,12 +132,12 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 			return diag.Errorf("errored while flattening '%s' with :%v", utils2.TerraformResourceExpose, err)
 		}
 
-		if err = d.Set(utils2.TerraformResourceMetadata, getMetadata(d)); err != nil {
-			return diag.Errorf("errored while setting '%s' with :%v", utils2.TerraformResourceHost, err)
-		}
+		//if err = d.Set(utils2.TerraformResourceMetadata, getMetadata(d)); err != nil {
+		//	return diag.Errorf("errored while setting '%s' with :%v", utils2.TerraformResourceHost, err)
+		//}
 
 		registry := &k3dRegistry.Config{
-			Name:     utils2.String(d.Get(utils2.TerraformResourceName)),
+			Name:     []string{utils2.String(d.Get(utils2.TerraformResourceName))},
 			Image:    utils2.String(d.Get(utils2.TerraformResourceImage)),
 			Cluster:  utils2.String(d.Get(utils2.TerraformResourceCluster)),
 			Host:     validateAndSetHost(d),
@@ -149,19 +147,12 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 			Expose:   validateAndSetExpose(expose),
 		}
 
-		if err = registry.CreateRegistry(ctx, defaultConfig.K3DRuntime); err != nil {
-			if seErr := d.Set(utils2.TerraformResourceMetadata, nil); seErr != nil {
-				return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceMetadata, seErr)
-			}
+		if err = registry.Create(ctx, defaultConfig.K3DRuntime); err != nil {
+			//if seErr := d.Set(utils2.TerraformResourceMetadata, nil); seErr != nil {
+			//	return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceMetadata, seErr)
+			//}
 			return diag.Errorf("oops errored while creating registry: %v", err)
 		}
-
-		//if err = createRegistry(ctx, defaultConfig.K3DRuntime, registry); err != nil {
-		//	if seErr := d.Set(utils2.TerraformResourceMetadata, ""); seErr != nil {
-		//		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceMetadata, seErr)
-		//	}
-		//	diag.Errorf("oops errored while creating registry: %v", err)
-		//}
 
 		d.SetId(id)
 		return resourceRegistryRead(ctx, d, meta)
@@ -173,17 +164,19 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 func resourceRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
-	cluster := utils2.String(d.Get(utils2.TerraformResourceCluster))
-	metadata, err := utils2.Map(d.Get(utils2.TerraformResourceMetadata))
-	if err != nil {
-		return diag.Errorf("errored while fetching '%s'", utils2.TerraformResourceMetadata)
-	}
-	k3dNodes, err := k3dRegistry.GetRegistry(ctx, defaultConfig.K3DRuntime, cluster, metadata["host"])
-	if err != nil {
-		return diag.Errorf("errored while fetching created registries: %v", k3dNodes)
+	registryName := utils2.String(d.Get(utils2.TerraformResourceName))
+	registry := &k3dRegistry.Config{
+		Cluster: utils2.String(d.Get(utils2.TerraformResourceCluster)),
+		Name:    []string{registryName},
 	}
 
-	flattenedRegistryNodes, err := utils2.MapSlice(k3dNodes)
+	registries, err := registry.Get(ctx, defaultConfig.K3DRuntime)
+
+	if err != nil {
+		return diag.Errorf("errored while fetching registries: '%s'", registryName)
+	}
+
+	flattenedRegistryNodes, err := utils2.MapSlice(registries)
 	if err != nil {
 		return diag.Errorf("errored while flattening obtained created nodes : %v", err)
 	}
@@ -232,76 +225,4 @@ func getRegistriesFromState(ctx context.Context, d *schema.ResourceData, default
 		k3dNodes = append(k3dNodes, nd)
 	}
 	return k3dNodes, nil
-}
-
-//func createRegistry(ctx context.Context, runtime runtimes.Runtime, registry *k3dRegistry.Config) error {
-//	registryK3d := &K3D.Registry{}
-//
-//	registryK3d.ClusterRef = registry.Cluster
-//	registryK3d.Protocol = registry.Protocol
-//	registryK3d.Host = validateAndSetHost(registry)
-//	registryK3d.Image = registry.Image
-//	k3dRegistry.GetExposureOpts(validateAndSetExpose(registry.Expose), registryK3d)
-//	if registry.UseProxy {
-//		if !validateProxy(registry.Proxy) {
-//			k3dRegistry.SetProxyConfig(registry.Proxy, registryK3d)
-//		}
-//		return fmt.Errorf("proxy config validation failed, config cannot be empty")
-//	}
-//
-//	if err := k3dRegistry.CreateRegistry(ctx, runtime, registryK3d, []string{registry.Cluster}); err != nil {
-//		return err
-//	}
-//	return nil
-//}
-
-func validateProxy(value map[string]string) bool {
-	if len(value["remoteURL"]) == 0 || len(value["username"]) == 0 || len(value["password"]) == 0 {
-		return false
-	}
-	return true
-}
-
-func validateAndSetProxy(d *schema.ResourceData, proxy map[string]string) map[string]string {
-	if utils2.Bool(d.Get(utils2.TerraformUseProxy)) {
-		if !validateProxy(proxy) {
-			return map[string]string{}
-		}
-		fmt.Printf("proxy config validation failed, config cannot be empty, dropping proxy config")
-	}
-	return nil
-}
-
-func validateExpose(value map[string]string) bool {
-	if len(value["hostIp"]) == 0 || len(value["hostPort"]) == 0 {
-		return false
-	}
-	return true
-}
-
-func validateAndSetExpose(expose map[string]string) map[string]string {
-	if !validateExpose(expose) {
-		return map[string]string{
-			"hostIp":   "0.0.0.0",
-			"hostPort": "5200",
-		}
-	}
-	return expose
-}
-
-func validateAndSetHost(d *schema.ResourceData) string {
-	if len(utils2.String(d.Get(utils2.TerraformResourceHost))) == 0 {
-		return utils2.String(d.Get(utils2.TerraformResourceName))
-	}
-	return utils2.String(d.Get(utils2.TerraformResourceHost))
-}
-
-func getMetadata(d *schema.ResourceData) map[string]string {
-	metadata := make(map[string]string)
-	if host := utils2.String(d.Get(utils2.TerraformResourceHost)); len(host) == 0 {
-		metadata["host"] = utils2.String(d.Get(utils2.TerraformResourceName))
-		return metadata
-	}
-	metadata["host"] = utils2.String(d.Get(utils2.TerraformResourceHost))
-	return metadata
 }
