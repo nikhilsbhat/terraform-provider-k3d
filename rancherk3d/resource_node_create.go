@@ -2,18 +2,15 @@ package rancherk3d
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
-	dockerunits "github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/mapstructure"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
-	k3dnode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
+	k3dNode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
@@ -115,24 +112,23 @@ func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		if err := d.Set(utils.TerraformResourceCreatedAt, createInitiatedAt.String()); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceCreatedAt, err)
 		}
-		node := k3dnode.K3Node{
-			Name:              utils.String(d.Get(utils.TerraformResourceName)),
+		nodeConfig := k3dNode.Config{
+			Name:              []string{utils.String(d.Get(utils.TerraformResourceName))},
 			ClusterAssociated: utils.String(d.Get(utils.TerraformResourceCluster)),
 			Image:             setNodeImage(d, defaultConfig),
 			Role:              utils.String(d.Get(utils.TerraformResourceRole)),
 			Count:             utils.Int(d.Get(utils.TerraformResourceReplicas)),
 			Memory:            utils.String(d.Get(utils.TerraformResourceMemory)),
 			Created:           createInitiatedAt.String(),
+			Timeout:           time.Duration(utils.Int(d.Get(utils.TerraformResourceTimeout))) * time.Minute,
+			Wait:              utils.Bool(d.Get(utils.TerraformResourceWait)),
 		}
 
-		timeout := utils.Int(d.Get(utils.TerraformResourceTimeout))
-		wait := utils.Bool(d.Get(utils.TerraformResourceWait))
-
-		if err := createNodes(ctx, defaultConfig.K3DRuntime, node, timeout, wait, 0); err != nil {
+		if err := nodeConfig.CreateNodes(ctx, defaultConfig.K3DRuntime, 0); err != nil {
 			if seErr := d.Set(utils.TerraformResourceCreatedAt, ""); seErr != nil {
 				return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceCreatedAt, seErr)
 			}
-			return diag.Errorf("errored while creating nodes with: %v", err)
+			return diag.Errorf("errored while creating nodes with: %v", err.Error())
 		}
 
 		d.SetId(id)
@@ -145,17 +141,20 @@ func resourceNodeRead(ctx context.Context, d *schema.ResourceData, meta interfac
 	defaultConfig := meta.(*client.Config)
 
 	created := utils.String(d.Get(utils.TerraformResourceCreatedAt))
-	k3dNodes, err := k3dnode.GetNodesByLabels(ctx, defaultConfig.K3DRuntime, getTerraformTimestampLabel(created))
+
+	cfg := k3dNode.Config{Labels: getTerraformTimestampLabel(created)}
+
+	k3dNodes, err := cfg.GetNodesByLabels(ctx, defaultConfig.K3DRuntime)
 	if err != nil {
 		return diag.Errorf("errored while fetching created nodes: %v", k3dNodes)
 	}
 
-	flattenedk3dNodes, err := utils.MapSlice(k3dNodes)
+	flattenedK3dNodes, err := utils.MapSlice(k3dNodes)
 	if err != nil {
 		return diag.Errorf("errored while flattening obtained created nodes : %v", err)
 	}
 
-	if err = d.Set(utils.TerraformResourceNodes, flattenedk3dNodes); err != nil {
+	if err = d.Set(utils.TerraformResourceNodes, flattenedK3dNodes); err != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceNodes, err)
 	}
 
@@ -170,73 +169,41 @@ func resourceNodeDelete(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.Errorf("resource with the specified ID not found")
 	}
 
-	nodes, err := getNodesFromState(ctx, d, defaultConfig)
-	if err != nil {
-		return diag.Errorf("errored while retrieving nodes from state %v", err)
+	nodesFromState := d.Get(utils.TerraformResourceNodes)
+	var nodes []*k3dNode.Config
+	if err := mapstructure.Decode(nodesFromState, &nodes); err != nil {
+		return diag.Errorf("oops reading nodes from state errored with : %s", err.Error())
 	}
 
 	for _, node := range nodes {
-		if err = k3dnode.DeleteNodesFromCluster(ctx, defaultConfig.K3DRuntime, node); err != nil {
-			return diag.Errorf("errored while deleting node %s : %v", node.Name, err)
+		log.Printf("nodeNameFromState: %v", node.Name)
+		if err := node.DeleteNodesFromCluster(ctx, defaultConfig.K3DRuntime); err != nil {
+			return diag.Errorf("oops deleting node %s errored with : %s", node.Name[0], err.Error())
 		}
 	}
+
 	d.SetId("")
-	return nil
-}
-
-// createNodes creates number nodes specified in 'replicas', making this startFrom if in case we support update nodes on it.
-func createNodes(ctx context.Context, runtime runtimes.Runtime, node k3dnode.K3Node, timeout int, wait bool, startFrom int) error {
-	nodeTimeout := time.Duration(timeout) * time.Minute
-	nodesToCreate := make([]*k3dnode.K3Node, 0)
-
-	memory := node.Memory
-	if _, err := dockerunits.RAMInBytes(memory); memory != "" && err != nil {
-		return fmt.Errorf("provided memory limit value is invalid")
-	}
-
-	for startFrom < node.Count {
-		nodesToCreate = append(nodesToCreate, &k3dnode.K3Node{
-			Name:    fmt.Sprintf("%s-%d", node.Name, startFrom),
-			Role:    node.Role,
-			Image:   node.Image,
-			Memory:  node.Memory,
-			Created: node.Created,
-		})
-		startFrom++
-	}
-	if err := k3dnode.CreateNodeWithTimeout(ctx, runtime, node.ClusterAssociated, nodesToCreate, wait, nodeTimeout); err != nil {
-		log.Printf("creating nodes errord with: %v, cleaning up the created nodes to avoid dangling nodes", err)
-		for _, nodeToCreate := range nodesToCreate {
-			nd := nodeToCreate.GetNode()
-			log.Printf("cleaning up node: %s", nd.Name)
-			if err = k3dnode.DeleteNodesFromCluster(ctx, runtime, nd); err != nil {
-				log.Printf("errored while deleting node %s : %v", nd.Name, err)
-			}
-		}
-		log.Printf("creating nodes failed")
-		return fmt.Errorf("creating nodes failed")
-	}
 	return nil
 }
 
 func setNodeImage(d *schema.ResourceData, defaultConfig *client.Config) string {
 	image := utils.String(d.Get(utils.TerraformResourceImage))
 	if len(image) == 0 {
-		return getK3dImage(defaultConfig)
+		return defaultConfig.GetK3dImage()
 	}
 	return image
 }
 
 func getNodesFromState(ctx context.Context, d *schema.ResourceData, defaultConfig *client.Config) ([]*K3D.Node, error) {
 	nodesFromState := d.Get(utils.TerraformResourceNodes)
-	var nodes []*k3dnode.K3Node
+	var nodes []*k3dNode.Config
 	if err := mapstructure.Decode(nodesFromState, &nodes); err != nil {
 		return nil, err
 	}
 	k3dNodes := make([]*K3D.Node, 0)
 
 	for _, node := range nodes {
-		nd, err := k3dnode.Node(ctx, defaultConfig.K3DRuntime, node.Name)
+		nd, err := k3dNode.Node(ctx, defaultConfig.K3DRuntime, node.Name[0])
 		if err != nil {
 			return nil, err
 		}
@@ -249,8 +216,4 @@ func getTerraformTimestampLabel(time string) map[string]string {
 	return map[string]string{
 		utils.TerraformK3dLabel: time,
 	}
-}
-
-func getK3dImage(defaultConfig *client.Config) string {
-	return fmt.Sprintf("%s:v%s", defaultConfig.K3DRegistry, defaultConfig.KubeImageVersion)
 }

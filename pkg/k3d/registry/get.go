@@ -8,8 +8,9 @@ import (
 )
 
 // Get fetches the information of the list of selected registries.
-func (registry *Config) Get(ctx context.Context, runtime runtimes.Runtime) ([]*k3dNode.K3Node, error) {
-	regs, err := k3dNode.GetNodesByLabels(ctx, runtime, map[string]string{"k3d.role": "registry", "k3d.cluster": registry.Cluster})
+func (registry *Config) Get(ctx context.Context, runtime runtimes.Runtime) ([]*k3dNode.Config, error) {
+	cfg := k3dNode.Config{Labels: map[string]string{"k3d.role": "registry", "k3d.cluster": registry.Cluster}}
+	regs, err := cfg.GetNodesByLabels(ctx, runtime)
 	if err != nil {
 		return nil, err
 	}
@@ -18,12 +19,12 @@ func (registry *Config) Get(ctx context.Context, runtime runtimes.Runtime) ([]*k
 		return regs, nil
 	}
 
-	filteredRegistries := funk.Filter(regs, func(reg *k3dNode.K3Node) bool {
+	filteredRegistries := funk.Filter(regs, func(reg *k3dNode.Config) bool {
 		if funk.Contains(registry.Name, reg.Name) {
 			return true
 		}
 		return false
-	}).([]*k3dNode.K3Node)
+	}).([]*k3dNode.Config)
 
 	return filteredRegistries, nil
 }

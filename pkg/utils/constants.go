@@ -50,6 +50,7 @@ const (
 	TerraformResourceK3sOptions       = "k3s_options"
 
 	TerraformK3dLabel          = "k3d.terraform"
+	TerraformCreatedK3dLabel   = "k3d.terraform.created"
 	TerraformK3dRegistry       = "registry"
 	TerraformKubernetesVersion = "kubernetes_version"
 	TerraformK3dAPIVersion     = "k3d_api_version"

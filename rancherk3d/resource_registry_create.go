@@ -87,13 +87,6 @@ func resourceRegistry() *schema.Resource {
 				Description:  "proxy configurations to be used while configuring registry if enabled",
 				Elem:         &schema.Schema{Type: schema.TypeString},
 			},
-			//"metadata": {
-			//	Type:        schema.TypeMap,
-			//	Optional:    true,
-			//	Computed:    true,
-			//	Description: "meta data to be used for filtering registries internally",
-			//	Elem:        &schema.Schema{Type: schema.TypeString},
-			//},
 			"registries_list": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -148,9 +141,6 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 		if err = registry.Create(ctx, defaultConfig.K3DRuntime); err != nil {
-			//if seErr := d.Set(utils2.TerraformResourceMetadata, nil); seErr != nil {
-			//	return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceMetadata, seErr)
-			//}
 			return diag.Errorf("oops errored while creating registry: %v", err)
 		}
 
@@ -212,13 +202,13 @@ func resourceRegistryDelete(ctx context.Context, d *schema.ResourceData, meta in
 
 func getRegistriesFromState(ctx context.Context, d *schema.ResourceData, defaultConfig *client.Config) ([]*K3D.Node, error) {
 	registriesFromState := d.Get(utils2.TerraformResourceRegistriesList)
-	var nodes []*k3dNode.K3Node
+	var nodes []*k3dNode.Config
 	if err := mapstructure.Decode(registriesFromState, &nodes); err != nil {
 		return nil, err
 	}
 	k3dNodes := make([]*K3D.Node, 0)
 	for _, node := range nodes {
-		nd, err := k3dNode.Node(ctx, defaultConfig.K3DRuntime, node.Name)
+		nd, err := k3dNode.Node(ctx, defaultConfig.K3DRuntime, node.Name[0])
 		if err != nil {
 			return nil, err
 		}

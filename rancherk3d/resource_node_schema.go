@@ -5,16 +5,23 @@ import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 func resourceNodeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
-			Type:        schema.TypeString,
+			Type:        schema.TypeList,
 			Computed:    true,
 			Optional:    true,
 			Description: "name of the node",
+			Elem:        &schema.Schema{Type: schema.TypeString},
 		},
 		"role": {
 			Type:        schema.TypeString,
 			Computed:    true,
 			Optional:    true,
 			Description: "role of node created/retrieved",
+		},
+		"image": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Optional:    true,
+			Description: "image used for node",
 		},
 		"cluster": {
 			Type:        schema.TypeString,

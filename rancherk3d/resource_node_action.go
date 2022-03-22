@@ -142,11 +142,13 @@ func resourceNodeActionStartStop(ctx context.Context, d *schema.ResourceData, me
 func resourceNodeActionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
-	nodes := getSlice(d.Get(utils2.TerraformResourceNodes))
-	cluster := utils2.String(d.Get(utils2.TerraformResourceCluster))
-	all := utils2.Bool(d.Get(utils2.TerraformResourceAll))
+	cfg := k3dNode.Config{
+		Name:              getSlice(d.Get(utils2.TerraformResourceNodes)),
+		ClusterAssociated: utils2.String(d.Get(utils2.TerraformResourceCluster)),
+		All:               utils2.Bool(d.Get(utils2.TerraformResourceAll)),
+	}
 
-	nodeStatus, err := getNodeStatus(ctx, defaultConfig, cluster, nodes, all)
+	nodeStatus, err := getNodeStatus(ctx, defaultConfig, cfg)
 	if err != nil {
 		return diag.Errorf("errored while fetching nodes: %v", err)
 	}
@@ -248,15 +250,16 @@ func stopNodes(ctx context.Context, defaultConfig *client.Config, cluster string
 	return k3dNode.StopNodes(ctx, defaultConfig.K3DRuntime, nodes)
 }
 
-func getNodeStatus(ctx context.Context, defaultConfig *client.Config, cluster string, nodes []string, all bool) ([]*k3dNode.Status, error) {
-	k3dNodes, err := getNodesFromCluster(ctx, defaultConfig, cluster, nodes, all)
+func getNodeStatus(ctx context.Context, defaultConfig *client.Config, cfg k3dNode.Config) ([]*k3dNode.Status, error) {
+	k3dNodes, err := cfg.GetFilteredNodesFromCluster(ctx, defaultConfig.K3DRuntime)
 	if err != nil {
 		return nil, fmt.Errorf("an error occurred while fetching nodes information : %s", err.Error())
 	}
+
 	nodeCurrentStatus := make([]*k3dNode.Status, 0)
 	for _, node := range k3dNodes {
 		nodeCurrentStatus = append(nodeCurrentStatus, &k3dNode.Status{
-			Node:    node.Name,
+			Node:    node.Name[0],
 			Cluster: node.ClusterAssociated,
 			State:   node.State,
 			Role:    node.Role,

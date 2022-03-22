@@ -10,7 +10,7 @@ type Registry interface {
 	Create(context.Context, runtimes.Runtime) error
 	Connect(context.Context, runtimes.Runtime) error
 	Disconnect(context.Context, runtimes.Runtime) error
-	Get(context.Context, runtimes.Runtime) ([]*k3dNode.K3Node, error)
+	Get(context.Context, runtimes.Runtime) ([]*k3dNode.Config, error)
 }
 
 // Config helps to store filtered registry data the present in selected runtime.
@@ -26,11 +26,4 @@ type Config struct {
 	Proxy            map[string]string `json:"proxy,omitempty"`
 	All              bool              `json:"all,omitempty"`
 	ConnectToCluster bool              `json:"connect,omitempty"`
-}
-
-// ConnectConfig holds the status of registries connected to cluster.
-type ConnectConfig struct {
-	Registries []string `json:"registries,omitempty"`
-	Cluster    string   `json:"cluster,omitempty"`
-	Connect    bool     `json:"connect,omitempty"`
 }

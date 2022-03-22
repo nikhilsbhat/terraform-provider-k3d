@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -53,6 +54,10 @@ func GetK3dConfig(ctx context.Context, d *schema.ResourceData) (interface{}, dia
 	}
 
 	return newConfig, nil
+}
+
+func (cfg *Config) GetK3dImage() string {
+	return fmt.Sprintf("%s:v%s", cfg.K3DRegistry, cfg.KubeImageVersion)
 }
 
 func getRuntime(runtime string) runtimes.Runtime {

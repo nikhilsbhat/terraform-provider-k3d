@@ -52,9 +52,9 @@ func getRegistryStatus(ctx context.Context, runtime runtimes.Runtime, config k3d
 
 	for _, registry := range registries {
 		if utils2.Contains(registry.Networks, clusterData.Network.Name) {
-			updatedStatus = append(updatedStatus, config.GetRegistryStatus(registry.Name, utils2.RegistryConnectedState))
+			updatedStatus = append(updatedStatus, config.GetRegistryStatus(registry.Name[0], utils2.RegistryConnectedState))
 		} else {
-			updatedStatus = append(updatedStatus, config.GetRegistryStatus(registry.Name, utils2.RegistryDisconnectedState))
+			updatedStatus = append(updatedStatus, config.GetRegistryStatus(registry.Name[0], utils2.RegistryDisconnectedState))
 		}
 	}
 	return updatedStatus, nil
