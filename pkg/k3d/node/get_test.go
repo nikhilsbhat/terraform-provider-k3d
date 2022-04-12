@@ -20,3 +20,15 @@ func TestConfig_GetFilteredNodesFromCluster(t *testing.T) {
 		assert.Equal(t, 1, len(nodes))
 	})
 }
+
+func TestConfig_GetNodeStatus(t *testing.T) {
+	t.Run("should be able to get status of selected nodes", func(t *testing.T) {
+		cfg := Config{
+			ClusterAssociated: "k3s-default",
+			Name:              []string{"test-node-from-terraform-0"},
+		}
+		nodes, err := cfg.GetNodeStatus(context.Background(), runtimes.SelectedRuntime)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(nodes))
+	})
+}

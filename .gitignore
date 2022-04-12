@@ -1,5 +1,6 @@
 # dropping ide datas
 .idea
+.DS_Store
 
 # dropping vendor and other data directories
 vendor/

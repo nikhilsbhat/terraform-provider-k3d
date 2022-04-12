@@ -9,7 +9,6 @@ import (
 	k3dNode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
 	k3dRegistry "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/registry"
 	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
 func resourceRegistry() *schema.Resource {
@@ -156,12 +155,11 @@ func resourceRegistryRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	registryName := utils2.String(d.Get(utils2.TerraformResourceName))
 	registry := &k3dRegistry.Config{
-		Cluster: utils2.String(d.Get(utils2.TerraformResourceCluster)),
 		Name:    []string{registryName},
+		Cluster: utils2.String(d.Get(utils2.TerraformResourceCluster)),
 	}
 
 	registries, err := registry.Get(ctx, defaultConfig.K3DRuntime)
-
 	if err != nil {
 		return diag.Errorf("errored while fetching registries: '%s'", registryName)
 	}
@@ -186,33 +184,19 @@ func resourceRegistryDelete(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("resource with the specified ID not found")
 	}
 
-	nodes, err := getRegistriesFromState(ctx, d, defaultConfig)
-	if err != nil {
-		return diag.Errorf("errored while retrieving registries from state %v", err)
-	}
-
-	for _, node := range nodes {
-		if err = k3dNode.DeleteNodesFromCluster(ctx, defaultConfig.K3DRuntime, node); err != nil {
-			return diag.Errorf("errored while deleting registry node %s : %v", node.Name, err)
-		}
-	}
-	d.SetId("")
-	return nil
-}
-
-func getRegistriesFromState(ctx context.Context, d *schema.ResourceData, defaultConfig *client.Config) ([]*K3D.Node, error) {
 	registriesFromState := d.Get(utils2.TerraformResourceRegistriesList)
+
 	var nodes []*k3dNode.Config
 	if err := mapstructure.Decode(registriesFromState, &nodes); err != nil {
-		return nil, err
+		return diag.Errorf("oops decoding retrieved registries errored : %s", err.Error())
 	}
-	k3dNodes := make([]*K3D.Node, 0)
+
 	for _, node := range nodes {
-		nd, err := k3dNode.Node(ctx, defaultConfig.K3DRuntime, node.Name[0])
-		if err != nil {
-			return nil, err
+		if err := node.DeleteNodesFromCluster(ctx, defaultConfig.K3DRuntime); err != nil {
+			return diag.Errorf("oops errored while deleting registry node %s : %v", node.Name, err)
 		}
-		k3dNodes = append(k3dNodes, nd)
 	}
-	return k3dNodes, nil
+
+	d.SetId("")
+	return nil
 }

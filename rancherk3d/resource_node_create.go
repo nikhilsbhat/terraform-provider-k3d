@@ -2,16 +2,13 @@ package rancherk3d
 
 import (
 	"context"
-	"log"
-	"time"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/mapstructure"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
 	k3dNode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	K3D "github.com/rancher/k3d/v5/pkg/types"
+	"time"
 )
 
 func resourceNode() *schema.Resource {
@@ -176,7 +173,6 @@ func resourceNodeDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	for _, node := range nodes {
-		log.Printf("nodeNameFromState: %v", node.Name)
 		if err := node.DeleteNodesFromCluster(ctx, defaultConfig.K3DRuntime); err != nil {
 			return diag.Errorf("oops deleting node %s errored with : %s", node.Name[0], err.Error())
 		}
@@ -192,24 +188,6 @@ func setNodeImage(d *schema.ResourceData, defaultConfig *client.Config) string {
 		return defaultConfig.GetK3dImage()
 	}
 	return image
-}
-
-func getNodesFromState(ctx context.Context, d *schema.ResourceData, defaultConfig *client.Config) ([]*K3D.Node, error) {
-	nodesFromState := d.Get(utils.TerraformResourceNodes)
-	var nodes []*k3dNode.Config
-	if err := mapstructure.Decode(nodesFromState, &nodes); err != nil {
-		return nil, err
-	}
-	k3dNodes := make([]*K3D.Node, 0)
-
-	for _, node := range nodes {
-		nd, err := k3dNode.Node(ctx, defaultConfig.K3DRuntime, node.Name[0])
-		if err != nil {
-			return nil, err
-		}
-		k3dNodes = append(k3dNodes, nd)
-	}
-	return k3dNodes, nil
 }
 
 func getTerraformTimestampLabel(time string) map[string]string {

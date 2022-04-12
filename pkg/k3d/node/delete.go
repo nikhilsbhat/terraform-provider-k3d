@@ -45,7 +45,7 @@ func (cfg *Config) DeleteNodesFromCluster(ctx context.Context, runtime runtimes.
 
 	var errors []string
 	for _, filteredNode := range filteredNodes {
-		if err = client.NodeDelete(ctx, runtime, filteredNode, deleteOps); err != nil {
+		if delErr := client.NodeDelete(ctx, runtime, filteredNode, deleteOps); delErr != nil {
 			errors = append(errors, err.Error())
 		}
 	}

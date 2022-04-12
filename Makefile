@@ -50,7 +50,7 @@ generate.mock: ## generates mocks for the selected source packages.
 	@go generate ${SRC_PACKAGES}
 
 create.newversion.tfregistry: local.build ## Sets up the local terraform registry with the version specified.
-	mkdir -p ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_amd64/
+	mkdir -p ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/
 
 upload.newversion.provider: create.newversion.tfregistry ## Uploads the updated provider to local terraform registry.
-	cp terraform-provider-rancherk3d_v$(VERSION) ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_amd64/
+	cp terraform-provider-rancherk3d_v$(VERSION) ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/

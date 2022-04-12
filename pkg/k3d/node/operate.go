@@ -2,9 +2,12 @@ package node
 
 import (
 	"context"
+	"fmt"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
+	"github.com/thoas/go-funk"
 )
 
 // FilteredNodes fetches details of specified list of nodes.
@@ -24,72 +27,41 @@ func FilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string
 	return filteredNodes, nil
 }
 
-// StopNode stops the specified node.
-func StopNode(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node) error {
-	if err := runtime.StopNode(ctx, node); err != nil {
-		return err
-	}
-	return nil
-}
-
-// StartNode starts the specified node.
-func StartNode(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node) error {
-	if err := runtime.StartNode(ctx, node); err != nil {
-		return err
-	}
-	return nil
-}
-
-// StopNodes stops all specified nodes.
-func StopNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) error {
-	nodesRaw, err := FilteredNodes(ctx, runtime, nodes)
+func (cfg *Config) StartStopNode(ctx context.Context, runtime runtimes.Runtime) error {
+	nodes, err := runtime.GetNodesByLabel(ctx, map[string]string{
+		"k3d.cluster": cfg.ClusterAssociated,
+		"k3d.role":    "agent",
+	})
 	if err != nil {
 		return err
 	}
-	for _, node := range nodesRaw {
-		if err := StopNode(ctx, runtime, node); err != nil {
-			return err
+
+	var filteredNodes []*K3D.Node
+
+	if !cfg.All {
+		filteredNodes = funk.Filter(nodes, func(node *K3D.Node) bool {
+			if funk.Contains(cfg.Name, node.Name) {
+				return true
+			}
+			return false
+		}).([]*K3D.Node)
+	}
+
+	if len(filteredNodes) == 0 {
+		return fmt.Errorf("nodes %v not found to start/stop them", cfg.Name)
+	}
+
+	if cfg.Action == utils.TerraformResourceStart {
+		for _, filteredNode := range filteredNodes {
+			if err = runtime.StartNode(ctx, filteredNode); err != nil {
+				return err
+			}
 		}
+		return nil
 	}
-	return nil
-}
 
-// StopNodesFromCluster stops all available nodes from a specified cluster.
-func StopNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) error {
-	nodesRaw, err := Nodes(ctx, runtime, cluster)
-	if err != nil {
-		return err
-	}
-	for _, node := range nodesRaw {
-		if err := StopNode(ctx, runtime, node); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// StartNodes starts all specified of nodes.
-func StartNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string) error {
-	nodesRaw, err := FilteredNodes(ctx, runtime, nodes)
-	if err != nil {
-		return err
-	}
-	for _, node := range nodesRaw {
-		if err := StartNode(ctx, runtime, node); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// StartNodesFromCluster starts all available nodes from a specified cluster.
-func StartNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, cluster string) error {
-	nodesRaw, err := Nodes(ctx, runtime, cluster)
-	if err != nil {
-		return err
-	}
-	for _, node := range nodesRaw {
-		if err := StartNode(ctx, runtime, node); err != nil {
+	for _, filteredNode := range filteredNodes {
+		if err = runtime.StopNode(ctx, filteredNode); err != nil {
 			return err
 		}
 	}
