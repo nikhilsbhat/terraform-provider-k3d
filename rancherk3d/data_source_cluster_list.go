@@ -2,8 +2,6 @@ package rancherk3d
 
 import (
 	"context"
-	K3D "github.com/rancher/k3d/v5/pkg/types"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
@@ -78,50 +76,4 @@ func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	return nil
-}
-
-func getK3dCluster(ctx context.Context, defaultConfig *client.Config, clusters []string, all bool) ([]*k3dCluster.Config, error) {
-	var fetchedClusters []*K3D.Cluster
-	if all {
-		allClusters, err := k3dCluster.GetClusters(ctx, defaultConfig.K3DRuntime)
-		if err != nil {
-			return nil, err
-		}
-		fetchedClusters = allClusters
-	} else {
-		allClusters, err := k3dCluster.GetFilteredClusters(ctx, defaultConfig.K3DRuntime, clusters)
-		if err != nil {
-			return nil, err
-		}
-		fetchedClusters = allClusters
-	}
-	filteredClusterInfo := make([]*k3dCluster.Config, 0)
-	for _, cluster := range fetchedClusters {
-		serversRunning, serverCount := cluster.ServerCountRunning()
-		agentsCount, agentsRunning := cluster.AgentCountRunning()
-		filteredClusterInfo = append(filteredClusterInfo, &k3dCluster.Config{
-			Name:            cluster.Name,
-			Nodes:           getNodesList(cluster.Nodes),
-			Network:         cluster.Network.Name,
-			Token:           cluster.Token,
-			ServersCount:    serverCount,
-			ServersRunning:  serversRunning,
-			AgentsCount:     agentsCount,
-			AgentsRunning:   agentsRunning,
-			ImageVolume:     cluster.ImageVolume,
-			HasLoadBalancer: cluster.HasLoadBalancer(),
-		})
-	}
-	return filteredClusterInfo, nil
-}
-
-func getNodesList(rawNodes []*K3D.Node) (nodes []string) {
-	for _, node := range rawNodes {
-		nodes = append(nodes, node.Name)
-	}
-	return
-}
-
-func getClusterSlice(clusters interface{}) []string {
-	return utils2.GetSlice(clusters.([]interface{}))
 }

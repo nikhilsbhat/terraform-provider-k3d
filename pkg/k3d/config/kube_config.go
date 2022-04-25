@@ -32,10 +32,24 @@ func GetKubeConfig(ctx context.Context, runtime runtimes.Runtime,
 	return kubeConfigs, nil
 }
 
-// func getWriteKubeConfigOptions() *client.WriteKubeConfigOptions {
-//	return &client.WriteKubeConfigOptions{
-//		UpdateExisting:       true,
-//		UpdateCurrentContext: true,
-//		OverwriteExisting:    true,
-//	}
-// }
+// GetKubeConfig fetches kubernetes config from the specified clusters.
+func (cfg *Config) GetKubeConfig(ctx context.Context, runtime runtimes.Runtime) (map[string]string, error) {
+	kubeConfigs := make(map[string]string, len(cfg.Cluster))
+	for _, cluster := range cfg.Cluster {
+		clusterCfg := cluster.GetClusterConfig()
+		kubeConfig, err := client.KubeconfigGet(ctx, runtime, clusterCfg)
+		if err != nil {
+			return nil, err
+		}
+		kubeConfigBytes, err := clientcmd.Write(*kubeConfig)
+		if err != nil {
+			return nil, err
+		}
+		kubeConfigString := string(kubeConfigBytes)
+		if cfg.Encode {
+			kubeConfigString = utils.Encoder(kubeConfigString)
+		}
+		kubeConfigs[cluster.Name] = kubeConfigString
+	}
+	return kubeConfigs, nil
+}

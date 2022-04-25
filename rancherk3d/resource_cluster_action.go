@@ -9,9 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
-	k3d2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
+	k3dCluster "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
 	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
 func resourceClusterAction() *schema.Resource {
@@ -90,8 +89,7 @@ func resourceClusterActionStartStop(ctx context.Context, d *schema.ResourceData,
 			id = newID
 		}
 
-		clusters := getClusterSlice(d.Get(utils2.TerraformResourceClusters))
-		all := utils2.Bool(d.Get(utils2.TerraformResourceAll))
+		clusters := utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]interface{}))
 		start := utils2.Bool(d.Get(utils2.TerraformResourceStart))
 		stop := utils2.Bool(d.Get(utils2.TerraformResourceStop))
 
@@ -99,8 +97,13 @@ func resourceClusterActionStartStop(ctx context.Context, d *schema.ResourceData,
 		if !actionStatus {
 			diag.Errorf("cannot start/stop at the same time, %v", actionStatus)
 		}
-		if err := updateClusterStatus(ctx, defaultConfig, clusters, action, all); err != nil {
-			return diag.Errorf("creation failed with error: %v", err)
+
+		cfg := k3dCluster.Config{
+			All:    utils2.Bool(d.Get(utils2.TerraformResourceAll)),
+			Action: action,
+		}
+		if err := cfg.StartStopCluster(ctx, defaultConfig.K3DRuntime, clusters); err != nil {
+			return diag.Errorf("start/stop cluster failed with error: %v", err)
 		}
 
 		d.SetId(id)
@@ -112,8 +115,7 @@ func resourceClusterActionStartStop(ctx context.Context, d *schema.ResourceData,
 func resourceClusterActionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
-	clusters := getClusterSlice(d.Get(utils2.TerraformResourceClusters))
-	all := utils2.Bool(d.Get(utils2.TerraformResourceAll))
+	clusters := utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]interface{}))
 	start := utils2.Bool(d.Get(utils2.TerraformResourceStart))
 	stop := utils2.Bool(d.Get(utils2.TerraformResourceStop))
 
@@ -122,7 +124,12 @@ func resourceClusterActionRead(ctx context.Context, d *schema.ResourceData, meta
 		diag.Errorf("cannot start/stop at the same time, %v", actionStatus)
 	}
 
-	clusterStatus, err := getK3dCluster(ctx, defaultConfig, clusters, all)
+	cfg := k3dCluster.Config{
+		All:    utils2.Bool(d.Get(utils2.TerraformResourceAll)),
+		Action: action,
+	}
+
+	clusterStatus, err := cfg.GetClusters(ctx, defaultConfig.K3DRuntime, clusters)
 	if err != nil {
 		return diag.Errorf("errored while fetching cluster status: %v", err)
 	}
@@ -147,7 +154,7 @@ func resourceClusterActionUpdate(ctx context.Context, d *schema.ResourceData, me
 	log.Printf("uploading newer images to k3d clusters")
 	if d.HasChange(utils2.TerraformResourceClusters) || d.HasChange(utils2.TerraformResourceStart) ||
 		d.HasChange(utils2.TerraformResourceStop) {
-		all := utils2.Bool(d.Get(utils2.TerraformResourceAll))
+
 		clusters, start, stop := getUpdatedClustersActionChanges(d)
 
 		actionStatus, action := getAction(start, stop)
@@ -155,14 +162,18 @@ func resourceClusterActionUpdate(ctx context.Context, d *schema.ResourceData, me
 			diag.Errorf("cannot start/stop at the same time, %v", actionStatus)
 		}
 
-		if err := updateClusterStatus(ctx, defaultConfig, clusters, action, all); err != nil {
-			return diag.Errorf("creation failed with error: %v", err)
+		cfg := k3dCluster.Config{
+			All:    utils2.Bool(d.Get(utils2.TerraformResourceAll)),
+			Action: action,
+		}
+		if err := cfg.StartStopCluster(ctx, defaultConfig.K3DRuntime, clusters); err != nil {
+			return diag.Errorf("starting/stopping cluster failed with error: %v", err)
 		}
 
 		if err := d.Set(utils2.TerraformResourceClusters, clusters); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceCluster, err)
 		}
-		if err := d.Set(utils2.TerraformResourceAll, all); err != nil {
+		if err := d.Set(utils2.TerraformResourceAll, cfg.All); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceAll, err)
 		}
 		return resourceClusterActionRead(ctx, d, meta)
@@ -183,49 +194,6 @@ func resourceClusterActionDelete(ctx context.Context, d *schema.ResourceData, me
 	}
 	d.SetId("")
 	return nil
-}
-
-func updateClusterStatus(ctx context.Context, defaultConfig *client.Config, clusters []string, action string, all bool) error {
-	if action == utils2.TerraformResourceStart {
-		return startClusters(ctx, defaultConfig, clusters, all)
-	}
-	return stopClusters(ctx, defaultConfig, clusters, all)
-}
-
-func startClusters(ctx context.Context, defaultConfig *client.Config, clusters []string, all bool) error {
-	var fetchedClusters []*K3D.Cluster
-	if all {
-		cls, err := k3d2.GetClusters(ctx, defaultConfig.K3DRuntime)
-		if err != nil {
-			return err
-		}
-		fetchedClusters = cls
-	} else {
-		cls, err := k3d2.GetFilteredClusters(ctx, defaultConfig.K3DRuntime, clusters)
-		if err != nil {
-			return err
-		}
-		fetchedClusters = cls
-	}
-	return k3d2.StartClusters(ctx, defaultConfig.K3DRuntime, fetchedClusters, K3D.ClusterStartOpts{})
-}
-
-func stopClusters(ctx context.Context, defaultConfig *client.Config, clusters []string, all bool) error {
-	var fetchedClusters []*K3D.Cluster
-	if all {
-		cls, err := k3d2.GetClusters(ctx, defaultConfig.K3DRuntime)
-		if err != nil {
-			return err
-		}
-		fetchedClusters = cls
-	} else {
-		cls, err := k3d2.GetFilteredClusters(ctx, defaultConfig.K3DRuntime, clusters)
-		if err != nil {
-			return err
-		}
-		fetchedClusters = cls
-	}
-	return k3d2.StopClusters(ctx, defaultConfig.K3DRuntime, fetchedClusters)
 }
 
 func getUpdatedClustersActionChanges(d *schema.ResourceData) (clusters []string, start, stop bool) {

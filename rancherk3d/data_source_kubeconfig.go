@@ -7,10 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
-	k3d2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/config"
+	k3dCluster "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
+	k3dKube "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/config"
 	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
 func dataSourceKubeConfig() *schema.Resource {
@@ -62,16 +61,23 @@ func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta 
 		id = newID
 	}
 
-	clusters := getClusters(d.Get(utils2.TerraformResourceClusters))
-	all := utils2.Bool(d.Get(utils2.TerraformResourceAll))
-	notEncode := utils2.Bool(d.Get(utils2.TerraformResourceNotEncode))
-
-	fetchedClusters, err := getUnfilteredCluster(ctx, defaultConfig, clusters, all)
-	if err != nil {
-		d.SetId("")
-		return diag.Errorf("oops errored while fetching clusters info: %v", err)
+	cfg := k3dKube.Config{
+		All:    utils2.Bool(d.Get(utils2.TerraformResourceAll)),
+		Encode: !(utils2.Bool(d.Get(utils2.TerraformResourceNotEncode))),
 	}
-	kubeConfig, err := k3d2.GetKubeConfig(ctx, defaultConfig.K3DRuntime, fetchedClusters, notEncode)
+
+	clusterCfg := k3dCluster.Config{
+		All: cfg.All,
+	}
+
+	clusters, err := clusterCfg.GetClusters(ctx, defaultConfig.K3DRuntime, utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]interface{})))
+	if err != nil {
+		return diag.Errorf("fetching cluster information errored with: %v", err)
+	}
+
+	cfg.Cluster = clusters
+
+	kubeConfig, err := cfg.GetKubeConfig(ctx, defaultConfig.K3DRuntime)
 	if err != nil {
 		d.SetId("")
 		return diag.Errorf("errored while fetching kube-config: %v", err)
@@ -83,23 +89,4 @@ func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return nil
-}
-
-func getUnfilteredCluster(ctx context.Context, defaultConfig *client.Config, clusters []string, all bool) ([]*K3D.Cluster, error) {
-	var fetchedClusters []*K3D.Cluster
-	if all {
-		allClusters, err := cluster.GetClusters(ctx, defaultConfig.K3DRuntime)
-		if err != nil {
-			return nil, err
-		}
-		fetchedClusters = allClusters
-	} else {
-		allClusters, err := cluster.GetFilteredClusters(ctx, defaultConfig.K3DRuntime, clusters)
-		if err != nil {
-			return nil, err
-		}
-		fetchedClusters = allClusters
-	}
-
-	return fetchedClusters, nil
 }

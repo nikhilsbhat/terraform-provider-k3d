@@ -67,7 +67,7 @@ func (cfg *Config) GetClusters(ctx context.Context, runtime runtimes.Runtime, cl
 
 	clusterConfig := make([]*Config, 0)
 	for _, cluster := range clusters {
-		serversRunning, serverCount := cluster.ServerCountRunning()
+		serverCount, serversRunning := cluster.ServerCountRunning()
 		agentsCount, agentsRunning := cluster.AgentCountRunning()
 		clusterConfig = append(clusterConfig, &Config{
 			Name:            cluster.Name,
