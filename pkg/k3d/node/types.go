@@ -15,11 +15,13 @@ const (
 type K3DNode interface {
 	CreateNodeWithTimeout(context.Context, runtimes.Runtime, []*Config) error
 	CreateNodes(context.Context, runtimes.Runtime, int) error
-	GetNodesByLabels(context.Context, runtimes.Runtime) ([]*Config, error)
-	GetFilteredNodes(context.Context, runtimes.Runtime, []string) ([]*Config, error)
-	GetFilteredNodesFromCluster(context.Context, runtimes.Runtime) ([]*Config, error)
-	GetNodeFromConfig() *K3D.Node
 	DeleteNodesFromCluster(context.Context, runtimes.Runtime) error
+	GetFilteredNodesFromCluster(context.Context, runtimes.Runtime) ([]*Config, error)
+	GetFilteredNodes(context.Context, runtimes.Runtime) ([]*Config, error)
+	GetNodesByLabels(context.Context, runtimes.Runtime) ([]*Config, error)
+	GetNodeStatus(context.Context, runtimes.Runtime) ([]*Status, error)
+	GetNodeFromConfig() *K3D.Node
+	StartStopNode(context.Context, runtimes.Runtime) error
 }
 
 // Config stores filtered node data of k3d cluster.

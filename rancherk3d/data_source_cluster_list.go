@@ -2,13 +2,13 @@ package rancherk3d
 
 import (
 	"context"
+	K3D "github.com/rancher/k3d/v5/pkg/types"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
 	k3dCluster "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
 	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
 func dataSourceClusterList() *schema.Resource {
@@ -55,10 +55,13 @@ func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta
 		id = newID
 	}
 
-	clusters := getClusters(d.Get(utils2.TerraformResourceClusters))
-	all := utils2.Bool(d.Get(utils2.TerraformResourceAll))
+	clusters := utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]interface{}))
+	cfg := k3dCluster.Config{
+		All: utils2.Bool(d.Get(utils2.TerraformResourceAll)),
+	}
 
-	k3dClusters, err := getK3dCluster(ctx, defaultConfig, clusters, all)
+	k3dClusters, err := cfg.GetClusters(ctx, defaultConfig.K3DRuntime, clusters)
+
 	if err != nil {
 		d.SetId("")
 		return diag.Errorf("errored while fetching clusters: %v", err)
@@ -77,7 +80,7 @@ func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func getK3dCluster(ctx context.Context, defaultConfig *client.Config, clusters []string, all bool) ([]*k3dCluster.Cluster, error) {
+func getK3dCluster(ctx context.Context, defaultConfig *client.Config, clusters []string, all bool) ([]*k3dCluster.Config, error) {
 	var fetchedClusters []*K3D.Cluster
 	if all {
 		allClusters, err := k3dCluster.GetClusters(ctx, defaultConfig.K3DRuntime)
@@ -92,11 +95,11 @@ func getK3dCluster(ctx context.Context, defaultConfig *client.Config, clusters [
 		}
 		fetchedClusters = allClusters
 	}
-	filteredClusterInfo := make([]*k3dCluster.Cluster, 0)
+	filteredClusterInfo := make([]*k3dCluster.Config, 0)
 	for _, cluster := range fetchedClusters {
 		serversRunning, serverCount := cluster.ServerCountRunning()
 		agentsCount, agentsRunning := cluster.AgentCountRunning()
-		filteredClusterInfo = append(filteredClusterInfo, &k3dCluster.Cluster{
+		filteredClusterInfo = append(filteredClusterInfo, &k3dCluster.Config{
 			Name:            cluster.Name,
 			Nodes:           getNodesList(cluster.Nodes),
 			Network:         cluster.Network.Name,

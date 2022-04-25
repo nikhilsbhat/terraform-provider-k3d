@@ -60,8 +60,9 @@ func (cfg *Config) CreateNodes(ctx context.Context, runtime runtimes.Runtime, st
 		for _, nodeToCreate := range nodesToCreate {
 			nd := nodeToCreate.GetNodeFromConfig()
 			log.Printf("cleaning up node: %s", nd.Name)
-			if err := DeleteNodesFromCluster(ctx, runtime, nd); err != nil {
-				log.Printf("errored while deleting node %s : %v", nd.Name, err)
+
+			if err := nodeToCreate.DeleteNodesFromCluster(ctx, runtime); err != nil {
+				log.Printf("errored while deleting node %s : %v", nodeToCreate.Name[0], err)
 			}
 		}
 		log.Printf("creating nodes failed")

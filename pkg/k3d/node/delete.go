@@ -11,17 +11,6 @@ import (
 )
 
 // DeleteNodesFromCluster deletes the specified node.
-func DeleteNodesFromCluster(ctx context.Context, runtime runtimes.Runtime, node *K3D.Node) error {
-	deleteOps := K3D.NodeDeleteOpts{
-		SkipLBUpdate: false,
-	}
-	if err := client.NodeDelete(ctx, runtime, node, deleteOps); err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteNodesFromCluster deletes the specified node.
 func (cfg *Config) DeleteNodesFromCluster(ctx context.Context, runtime runtimes.Runtime) error {
 	nodeLabel := map[string]string{
 		"k3d.cluster": cfg.ClusterAssociated,
