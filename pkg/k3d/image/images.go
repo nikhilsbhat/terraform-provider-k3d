@@ -15,11 +15,12 @@ func StoreImagesToCluster(ctx context.Context, runtime runtimes.Runtime,
 	images []string, cluster string, storeTarball bool) error {
 	loadImageOpts := K3D.ImageImportOpts{KeepTar: storeTarball}
 
-	retrievedCluster, err := cluster2.GetCluster(ctx, runtime, cluster)
+	clusterCfg := cluster2.Config{}
+	clusters, err := clusterCfg.GetClusters(ctx, runtime, []string{cluster})
 	if err != nil {
 		return err
 	}
-
+	retrievedCluster := clusters[0].GetClusterConfig()
 	if err = client.ImageImportIntoClusterMulti(ctx, runtime, images, retrievedCluster, loadImageOpts); err != nil {
 		return fmt.Errorf("failed to import image(s) into cluster '%s': %+v", retrievedCluster.Name, err)
 	}
@@ -47,10 +48,13 @@ func StoreImagesToClusters(ctx context.Context, runtime runtimes.Runtime,
 // GetImagesLoadedCluster returns list of images loaded to the cluster.
 func GetImagesLoadedCluster(ctx context.Context, runtime runtimes.Runtime,
 	images []string, cluster string) ([]*StoredImages, error) {
-	retrievedCluster, err := cluster2.GetCluster(ctx, runtime, cluster)
+
+	clusterCfg := cluster2.Config{}
+	clusters, err := clusterCfg.GetClusters(ctx, runtime, []string{cluster})
 	if err != nil {
 		return nil, err
 	}
+	retrievedCluster := clusters[0].GetClusterConfig()
 
 	return []*StoredImages{{
 		Cluster: retrievedCluster.Name,

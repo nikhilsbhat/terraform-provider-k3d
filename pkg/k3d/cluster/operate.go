@@ -30,15 +30,3 @@ func (cfg *Config) StartStopCluster(ctx context.Context, runtime runtimes.Runtim
 	}
 	return nil
 }
-
-func (cfg *Config) GetClusterConfig() *K3D.Cluster {
-	var nodes []*K3D.Node
-	for _, node := range cfg.Nodes {
-		nodes = append(nodes, &K3D.Node{Name: node})
-	}
-	return &K3D.Cluster{
-		Name:  cfg.Name,
-		Token: cfg.Token,
-		Nodes: nodes,
-	}
-}

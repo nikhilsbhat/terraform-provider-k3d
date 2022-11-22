@@ -1,6 +1,13 @@
 package cluster
 
+import (
+	"context"
+	"github.com/rancher/k3d/v5/pkg/runtimes"
+)
+
 type Cluster interface {
+	GetClusters(context.Context, runtimes.Runtime, []string) ([]*Config, error)
+	StartStopCluster(context.Context, runtimes.Runtime, []string) error
 }
 
 // Config helps storing filtered cluster data of k3d cluster.

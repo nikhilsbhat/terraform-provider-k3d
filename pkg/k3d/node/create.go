@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	dockerunits "github.com/docker/go-units"
-	cluster2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
@@ -21,10 +21,14 @@ func (cfg *Config) CreateNodeWithTimeout(ctx context.Context, runtime runtimes.R
 	if cfg.Wait {
 		nodeCreatOpts = K3D.NodeCreateOpts{Wait: cfg.Wait, Timeout: cfg.Timeout}
 	}
-	clusterFetched, err := cluster2.GetCluster(ctx, runtime, cfg.ClusterAssociated)
+
+	clusterCfg := cluster.Config{}
+	clusters, err := clusterCfg.GetClusters(ctx, runtime, []string{cfg.ClusterAssociated})
 	if err != nil {
 		return err
 	}
+	clusterFetched := clusters[0].GetClusterConfig()
+
 	k3dNodes := make([]*K3D.Node, 0)
 	for _, node := range nodes {
 		k3dNodes = append(k3dNodes, node.GetNodeFromConfig())

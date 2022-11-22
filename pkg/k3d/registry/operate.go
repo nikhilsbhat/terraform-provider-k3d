@@ -2,16 +2,24 @@ package registry
 
 import (
 	"context"
-	cluster2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
 	k3dNode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
+	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
 func (registry *Config) Connect(ctx context.Context, runtime runtimes.Runtime) error {
-	k3dClusters, err := cluster2.GetFilteredClusters(ctx, runtime, []string{registry.Cluster})
+	var clusters []*K3D.Cluster
+	clusterCfg := cluster.Config{}
+
+	k3dClusters, err := clusterCfg.GetClusters(ctx, runtime, []string{registry.Cluster})
 	if err != nil {
 		return err
+	}
+
+	for _, k3dCluster := range k3dClusters {
+		clusters = append(clusters, k3dCluster.GetClusterConfig())
 	}
 
 	regs, err := k3dNode.FilteredNodes(ctx, runtime, registry.Name)
@@ -20,7 +28,7 @@ func (registry *Config) Connect(ctx context.Context, runtime runtimes.Runtime) e
 	}
 
 	for _, reg := range regs {
-		if err = client.RegistryConnectClusters(ctx, runtime, reg, k3dClusters); err != nil {
+		if err = client.RegistryConnectClusters(ctx, runtime, reg, clusters); err != nil {
 			return err
 		}
 	}
@@ -28,7 +36,9 @@ func (registry *Config) Connect(ctx context.Context, runtime runtimes.Runtime) e
 }
 
 func (registry *Config) Disconnect(ctx context.Context, runtime runtimes.Runtime) error {
-	k3dCluster, err := cluster2.GetCluster(ctx, runtime, registry.Cluster)
+	clusterCfg := cluster.Config{}
+
+	k3dClusters, err := clusterCfg.GetClusters(ctx, runtime, []string{registry.Cluster})
 	if err != nil {
 		return err
 	}
@@ -39,7 +49,7 @@ func (registry *Config) Disconnect(ctx context.Context, runtime runtimes.Runtime
 	}
 
 	for _, reg := range regs {
-		if err = runtime.DisconnectNodeFromNetwork(ctx, reg, k3dCluster.Network.Name); err != nil {
+		if err = runtime.DisconnectNodeFromNetwork(ctx, reg, k3dClusters[0].Network); err != nil {
 			return err
 		}
 	}

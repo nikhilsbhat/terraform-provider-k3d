@@ -94,7 +94,7 @@ func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData,
 		}
 
 		if err := connectRegistryToCluster(ctx, defaultConfig.K3DRuntime, connect); err != nil {
-			return diag.Errorf("errored while connecting/disconnecting registries '%v' with cluster '%s,", connect.Name, connect.Cluster)
+			return diag.Errorf("connecting/disconnecting registries '%v' with cluster '%s' errored with '%s'", connect.Name, connect.Cluster, err.Error())
 		}
 
 		d.SetId(id)

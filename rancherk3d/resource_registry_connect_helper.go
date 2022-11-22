@@ -40,7 +40,8 @@ func connectRegistryToCluster(ctx context.Context, runtime runtimes.Runtime, con
 
 func getRegistryStatus(ctx context.Context, runtime runtimes.Runtime, config k3dRegistry.Config) ([]map[string]string, error) {
 	updatedStatus := make([]map[string]string, 0)
-	clusterData, err := cluster.GetCluster(ctx, runtime, config.Cluster)
+	clusterCfg := cluster.Config{}
+	clusterData, err := clusterCfg.GetClusters(ctx, runtime, []string{config.Cluster})
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +52,7 @@ func getRegistryStatus(ctx context.Context, runtime runtimes.Runtime, config k3d
 	}
 
 	for _, registry := range registries {
-		if utils2.Contains(registry.Networks, clusterData.Network.Name) {
+		if utils2.Contains(registry.Networks, clusterData[0].Network) {
 			updatedStatus = append(updatedStatus, config.GetRegistryStatus(registry.Name[0], utils2.RegistryConnectedState))
 		} else {
 			updatedStatus = append(updatedStatus, config.GetRegistryStatus(registry.Name[0], utils2.RegistryDisconnectedState))

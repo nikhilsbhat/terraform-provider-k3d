@@ -53,4 +53,5 @@ create.newversion.tfregistry: local.build ## Sets up the local terraform registr
 	mkdir -p ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/
 
 upload.newversion.provider: create.newversion.tfregistry ## Uploads the updated provider to local terraform registry.
+	rm -rf  ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/terraform-provider-rancherk3d_v$(VERSION)
 	cp terraform-provider-rancherk3d_v$(VERSION) ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/
