@@ -2,12 +2,12 @@ package cluster
 
 import (
 	"context"
-	"github.com/thoas/go-funk"
 	"testing"
 
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/thoas/go-funk"
 )
 
 func TestMAP(t *testing.T) {

@@ -2,9 +2,10 @@ package node
 
 import (
 	"context"
+	"time"
+
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
-	"time"
 )
 
 const (

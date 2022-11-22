@@ -2,9 +2,9 @@ package image
 
 import (
 	"context"
-	"github.com/rancher/k3d/v5/pkg/runtimes"
 
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
+	"github.com/rancher/k3d/v5/pkg/runtimes"
 )
 
 type Images interface {

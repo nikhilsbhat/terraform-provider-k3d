@@ -163,8 +163,8 @@ func resourceLoadImageUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	log.Printf("uploading newer images to k3d clusters")
 	if d.HasChange(utils2.TerraformResourceCluster) || d.HasChange(utils2.TerraformResourceImages) {
 		updatedCluster, updatedImages := getUpdatedClusterAndImages(d)
-		//keepTarball := utils2.Bool(d.Get(utils2.TerraformResourceKeepTarball))
-		//all := utils2.Bool(d.Get(utils2.TerraformResourceAll))
+		// keepTarball := utils2.Bool(d.Get(utils2.TerraformResourceKeepTarball))
+		// all := utils2.Bool(d.Get(utils2.TerraformResourceAll))
 
 		imageCfg := image.Config{
 			Images:       updatedImages,

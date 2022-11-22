@@ -2,8 +2,9 @@ package node
 
 import (
 	"context"
-	"github.com/rancher/k3d/v5/pkg/runtimes"
 	"testing"
+
+	"github.com/rancher/k3d/v5/pkg/runtimes"
 )
 
 func TestConfig_DeleteNodesFromCluster(t *testing.T) {

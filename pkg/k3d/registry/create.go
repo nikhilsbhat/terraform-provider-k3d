@@ -2,10 +2,11 @@ package registry
 
 import (
 	"context"
+	"log"
+
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
-	"log"
 )
 
 func (registry *Config) Create(ctx context.Context, runtime runtimes.Runtime) error {

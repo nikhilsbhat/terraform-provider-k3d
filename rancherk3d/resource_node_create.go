@@ -2,13 +2,14 @@ package rancherk3d
 
 import (
 	"context"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/mapstructure"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
 	k3dNode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
-	"time"
 )
 
 func resourceNode() *schema.Resource {

@@ -77,8 +77,10 @@ func Provider() *schema.Provider {
 
 func ValidateKindFunc(v interface{}, k string) (warnings []string, errors []error) {
 	if v.(string) != "Simple" {
-		return nil, []error{fmt.Errorf("kind '%s' is unsupported only supported value is Simple", k),
-			fmt.Errorf("for more info refer 'https://k3d.io/usage/configfile/'")}
+		return nil, []error{
+			fmt.Errorf("kind '%s' is unsupported only supported value is Simple", k),
+			fmt.Errorf("for more info refer 'https://k3d.io/usage/configfile/'"),
+		}
 	}
 	return
 }

@@ -3,11 +3,12 @@ package node
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
 	"github.com/thoas/go-funk"
-	"strings"
 )
 
 // DeleteNodesFromCluster deletes the specified node.

@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
@@ -58,7 +59,7 @@ func (cfg *Config) GetNodesByLabels(ctx context.Context, runtime runtimes.Runtim
 			EnvironmentVariables: node.Env,
 			Image:                node.Image,
 			// dropping PortMapping as terraform schema format is yet to be figured.
-			//PortMapping:          getPortMaps(node.Ports),
+			// PortMapping:          getPortMaps(node.Ports),
 		})
 	}
 	return filteredNodes, err

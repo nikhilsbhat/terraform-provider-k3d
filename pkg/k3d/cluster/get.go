@@ -3,6 +3,7 @@ package cluster
 import (
 	"context"
 	"fmt"
+
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
@@ -11,7 +12,8 @@ import (
 
 // GetFilteredClusters returns the list of *K3D.Config of specified clusters.
 func GetFilteredClusters(ctx context.Context, runtime runtimes.Runtime,
-	clusters []string) ([]*K3D.Cluster, error) {
+	clusters []string,
+) ([]*K3D.Cluster, error) {
 	clustersList, err := client.ClusterList(ctx, runtime)
 	if err != nil {
 		return nil, err

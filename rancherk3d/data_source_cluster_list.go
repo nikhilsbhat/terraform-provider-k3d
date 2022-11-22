@@ -2,6 +2,7 @@ package rancherk3d
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
@@ -59,7 +60,6 @@ func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	k3dClusters, err := cfg.GetClusters(ctx, defaultConfig.K3DRuntime, clusters)
-
 	if err != nil {
 		d.SetId("")
 		return diag.Errorf("errored while fetching clusters: %v", err)

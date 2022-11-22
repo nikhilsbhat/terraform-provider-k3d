@@ -14,12 +14,12 @@
 package main
 
 import (
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/rancherk3d"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/rancherk3d"
 )
 
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: rancherk3d.Provider})
+		ProviderFunc: rancherk3d.Provider,
+	})
 }
