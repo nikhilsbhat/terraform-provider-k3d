@@ -12,6 +12,7 @@ import (
 	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
+//nolint:gochecknoinits
 func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
@@ -71,7 +72,9 @@ func (cfg *Config) CreateNodes(ctx context.Context, runtime runtimes.Runtime, st
 			}
 		}
 		log.Printf("creating nodes failed")
-		return fmt.Errorf("creating nodes failed with: %s", createRrr.Error())
+
+		return fmt.Errorf("creating nodes failed with: %w", createRrr)
 	}
+
 	return nil
 }

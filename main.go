@@ -11,6 +11,8 @@
 //	https://github.com/nikhilsbhat/terragen
 //
 // ----------------------------------------------------------------------------
+//
+//nolint:gocritic
 package main
 
 import (

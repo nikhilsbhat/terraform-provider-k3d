@@ -56,6 +56,7 @@ func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, met
 		newID, err := utils2.GetRandomID()
 		if err != nil {
 			d.SetId("")
+
 			return diag.Errorf("errored while fetching randomID %v", err)
 		}
 		id = newID
@@ -70,6 +71,7 @@ func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, met
 	k3dNodes, err := registry.Get(ctx, defaultConfig.K3DRuntime)
 	if err != nil {
 		d.SetId("")
+
 		return diag.Errorf("errored while fetching registry nodes: %v", err)
 	}
 
@@ -80,6 +82,7 @@ func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, met
 	flattenedNodes, err := utils2.MapSlice(k3dNodes)
 	if err != nil {
 		d.SetId("")
+
 		return diag.Errorf("errored while flattening registry nodes obtained: %v", err)
 	}
 
@@ -87,5 +90,6 @@ func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, met
 	if err = d.Set(utils2.TerraformResourceRegistriesList, flattenedNodes); err != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceRegistriesList, err)
 	}
+
 	return nil
 }

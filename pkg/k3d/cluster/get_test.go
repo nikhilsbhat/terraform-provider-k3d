@@ -1,9 +1,10 @@
-package cluster
+package cluster_test
 
 import (
 	"context"
 	"testing"
 
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
 	"github.com/stretchr/testify/assert"
@@ -26,7 +27,7 @@ func TestMAP(t *testing.T) {
 
 func TestConfig_GetClusters(t *testing.T) {
 	clusters := []string{"k3s-default"}
-	expected := []*Config{
+	expected := []*cluster.Config{
 		{
 			Name:            "k3s-default",
 			Nodes:           []string{"k3d-k3s-default-serverlb", "k3d-k3s-default-server-0"},
@@ -43,15 +44,15 @@ func TestConfig_GetClusters(t *testing.T) {
 	}
 
 	t.Run("should be able to fetch the filtered cluster responses", func(t *testing.T) {
-		cfg := Config{All: false}
+		cfg := cluster.Config{All: false}
 		clusters, err := cfg.GetClusters(context.Background(), runtimes.SelectedRuntime, clusters)
 		assert.Nil(t, err)
 		assert.ElementsMatch(t, expected, clusters)
 	})
 
 	t.Run("should be able to fetch all the available clusters", func(t *testing.T) {
-		cfg := Config{All: true}
-		expected = append(expected, &Config{
+		cfg := cluster.Config{All: true}
+		expected = append(expected, &cluster.Config{
 			Name:            "test",
 			Nodes:           []string{"k3d-test-serverlb", "k3d-test-server-0"},
 			Network:         "k3d-test",

@@ -25,6 +25,7 @@ func FilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string
 			}
 		}
 	}
+
 	return filteredNodes, nil
 }
 
@@ -41,10 +42,7 @@ func (cfg *Config) StartStopNode(ctx context.Context, runtime runtimes.Runtime) 
 
 	if !cfg.All {
 		filteredNodes = funk.Filter(nodes, func(node *K3D.Node) bool {
-			if funk.Contains(cfg.Name, node.Name) {
-				return true
-			}
-			return false
+			return funk.Contains(cfg.Name, node.Name)
 		}).([]*K3D.Node)
 	}
 
@@ -58,6 +56,7 @@ func (cfg *Config) StartStopNode(ctx context.Context, runtime runtimes.Runtime) 
 				return err
 			}
 		}
+
 		return nil
 	}
 
@@ -66,5 +65,6 @@ func (cfg *Config) StartStopNode(ctx context.Context, runtime runtimes.Runtime) 
 			return err
 		}
 	}
+
 	return nil
 }

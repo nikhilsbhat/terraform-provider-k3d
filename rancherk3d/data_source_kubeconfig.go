@@ -56,6 +56,7 @@ func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta 
 		newID, err := utils2.GetRandomID()
 		if err != nil {
 			d.SetId("")
+
 			return diag.Errorf("errored while fetching randomID %v", err)
 		}
 		id = newID
@@ -70,7 +71,8 @@ func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta 
 		All: cfg.All,
 	}
 
-	clusters, err := clusterCfg.GetClusters(ctx, defaultConfig.K3DRuntime, utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]interface{})))
+	clusters, err := clusterCfg.GetClusters(ctx, defaultConfig.K3DRuntime,
+		utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]interface{})))
 	if err != nil {
 		return diag.Errorf("fetching cluster information errored with: %v", err)
 	}
@@ -80,6 +82,7 @@ func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta 
 	kubeConfig, err := cfg.GetKubeConfig(ctx, defaultConfig.K3DRuntime)
 	if err != nil {
 		d.SetId("")
+
 		return diag.Errorf("errored while fetching kube-config: %v", err)
 	}
 

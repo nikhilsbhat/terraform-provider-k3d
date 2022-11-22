@@ -1,10 +1,11 @@
-package config
+package config_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/config"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	"github.com/stretchr/testify/assert"
 )
@@ -41,7 +42,7 @@ users:
 		assert.NoError(t, err)
 		assert.NotNil(t, clustersConfig)
 
-		actual, err := GetKubeConfig(ctx, runtime, clustersConfig, true)
+		actual, err := config.GetKubeConfig(ctx, runtime, clustersConfig, true)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, actual)
 	})
@@ -59,7 +60,7 @@ users:
 		assert.NoError(t, err)
 		assert.NotNil(t, clustersConfig)
 
-		actual, err := GetKubeConfig(ctx, runtime, clustersConfig, true)
+		actual, err := config.GetKubeConfig(ctx, runtime, clustersConfig, true)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, actual)
 	})

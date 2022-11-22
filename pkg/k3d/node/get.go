@@ -18,6 +18,7 @@ func (cfg *Config) GetFilteredNodesFromCluster(ctx context.Context, runtime runt
 	if cfg.All {
 		return cfg.GetNodesByLabels(ctx, runtime)
 	}
+
 	return cfg.GetFilteredNodes(ctx, runtime)
 }
 
@@ -29,10 +30,7 @@ func (cfg *Config) GetFilteredNodes(ctx context.Context, runtime runtimes.Runtim
 	}
 
 	filteredNodes := funk.Filter(k3dNodes, func(node *Config) bool {
-		if funk.Contains(cfg.Name, node.Name[0]) {
-			return true
-		}
-		return false
+		return funk.Contains(cfg.Name, node.Name[0])
 	}).([]*Config)
 
 	return filteredNodes, nil
@@ -62,6 +60,7 @@ func (cfg *Config) GetNodesByLabels(ctx context.Context, runtime runtimes.Runtim
 			// PortMapping:          getPortMaps(node.Ports),
 		})
 	}
+
 	return filteredNodes, err
 }
 

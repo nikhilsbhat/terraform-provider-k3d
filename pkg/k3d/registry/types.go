@@ -15,6 +15,8 @@ type Registry interface {
 }
 
 // Config helps to store filtered registry data the present in selected runtime.
+//
+//nolint:maligned
 type Config struct {
 	Name             []string          `json:"name,omitempty" mapstructure:"name"`
 	Image            string            `json:"image,omitempty"  mapstructure:"image"`

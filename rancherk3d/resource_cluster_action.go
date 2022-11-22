@@ -77,6 +77,7 @@ func resourceClusterAction() *schema.Resource {
 func resourceClusterActionStartStop(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
+	//nolint:nestif
 	if d.IsNewResource() {
 		id := d.Id()
 
@@ -84,6 +85,7 @@ func resourceClusterActionStartStop(ctx context.Context, d *schema.ResourceData,
 			newID, err := utils2.GetRandomID()
 			if err != nil {
 				d.SetId("")
+
 				return diag.Errorf("errored while fetching randomID %v", err)
 			}
 			id = newID
@@ -107,8 +109,10 @@ func resourceClusterActionStartStop(ctx context.Context, d *schema.ResourceData,
 		}
 
 		d.SetId(id)
+
 		return resourceClusterActionRead(ctx, d, meta)
 	}
+
 	return nil
 }
 
@@ -142,9 +146,11 @@ func resourceClusterActionRead(ctx context.Context, d *schema.ResourceData, meta
 	if err = d.Set(utils2.TerraformResourceStatus, flattenedClusterStatus); err != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceStatus, err)
 	}
+
 	if err = d.Set(utils2.TerraformResourceState, action); err != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceState, err)
 	}
+
 	return nil
 }
 
@@ -154,7 +160,6 @@ func resourceClusterActionUpdate(ctx context.Context, d *schema.ResourceData, me
 	log.Printf("uploading newer images to k3d clusters")
 	if d.HasChange(utils2.TerraformResourceClusters) || d.HasChange(utils2.TerraformResourceStart) ||
 		d.HasChange(utils2.TerraformResourceStop) {
-
 		clusters, start, stop := getUpdatedClustersActionChanges(d)
 
 		actionStatus, action := getAction(start, stop)
@@ -166,6 +171,7 @@ func resourceClusterActionUpdate(ctx context.Context, d *schema.ResourceData, me
 			All:    utils2.Bool(d.Get(utils2.TerraformResourceAll)),
 			Action: action,
 		}
+
 		if err := cfg.StartStopCluster(ctx, defaultConfig.K3DRuntime, clusters); err != nil {
 			return diag.Errorf("starting/stopping cluster failed with error: %v", err)
 		}
@@ -173,13 +179,16 @@ func resourceClusterActionUpdate(ctx context.Context, d *schema.ResourceData, me
 		if err := d.Set(utils2.TerraformResourceClusters, clusters); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceCluster, err)
 		}
+
 		if err := d.Set(utils2.TerraformResourceAll, cfg.All); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceAll, err)
 		}
+
 		return resourceClusterActionRead(ctx, d, meta)
 	}
 
 	log.Printf("nothing to update so skipping")
+
 	return nil
 }
 
@@ -193,9 +202,11 @@ func resourceClusterActionDelete(ctx context.Context, d *schema.ResourceData, me
 		return diag.Errorf("resource with the specified ID not found")
 	}
 	d.SetId("")
+
 	return nil
 }
 
+//nolint:nonamedreturns
 func getUpdatedClustersActionChanges(d *schema.ResourceData) (clusters []string, start, stop bool) {
 	oldClusters, newClusters := d.GetChange(utils2.TerraformResourceClusters)
 	if !cmp.Equal(oldClusters, newClusters) {
@@ -209,5 +220,6 @@ func getUpdatedClustersActionChanges(d *schema.ResourceData) (clusters []string,
 	if !cmp.Equal(oldStop, newStop) {
 		stop = utils2.Bool(newStop)
 	}
+
 	return
 }

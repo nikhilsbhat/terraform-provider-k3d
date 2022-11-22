@@ -6,9 +6,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"hash/crc32"
 
-	"github.com/hashicorp/errwrap"
 	"gopkg.in/yaml.v2"
 )
 
@@ -21,8 +21,9 @@ func GetRandomID() (string, error) {
 		return "", errors.New("generated insufficient random bytes")
 	}
 	if err != nil {
-		return "", errwrap.Wrapf("error generating random bytes: {{err}}", err)
+		return "", fmt.Errorf("error generating random bytes: %w", err)
 	}
+
 	return base64.RawURLEncoding.EncodeToString(bytes), nil
 }
 
@@ -40,11 +41,13 @@ func GetHash(s string) int {
 }
 
 // GetSlice returns StringSlice of passed interface array.
-func GetSlice(slice []interface{}) (stringSLice []string) {
+func GetSlice(slice []interface{}) []string {
+	stringSLice := make([]string, 0)
 	for _, sl := range slice {
 		stringSLice = append(stringSLice, sl.(string))
 	}
-	return
+
+	return stringSLice
 }
 
 // GetChecksum gets the checksum of passed string.
@@ -54,6 +57,7 @@ func GetChecksum(value string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return base64.URLEncoding.EncodeToString(cksm.Sum(nil)), nil
 }
 
@@ -83,6 +87,7 @@ func MapSlice(value interface{}) ([]map[string]interface{}, error) {
 	if err = json.Unmarshal(j, &mp); err != nil {
 		return nil, err
 	}
+
 	return mp, nil
 }
 
@@ -97,6 +102,7 @@ func Map(value interface{}) (map[string]string, error) {
 	if err = json.Unmarshal(j, &mp); err != nil {
 		return nil, err
 	}
+
 	return mp, nil
 }
 
@@ -105,21 +111,23 @@ func Encoder(value string) string {
 	return base64.StdEncoding.EncodeToString([]byte(value))
 }
 
-// Yaml returns yaml encoded data structure passed to it
+// Yaml returns yaml encoded data structure passed to it.
 func Yaml(data interface{}) (string, error) {
 	yml, err := yaml.Marshal(data)
 	if err != nil {
 		return "", err
 	}
+
 	return string(yml), err
 }
 
-// JSON returns json encoded data structure passed to it
+// JSON returns json encoded data structure passed to it.
 func JSON(data interface{}) (string, error) {
 	jsn, err := json.Marshal(data)
 	if err != nil {
 		return "", err
 	}
+
 	return string(jsn), err
 }
 
@@ -130,5 +138,6 @@ func Contains(s []string, searchTerm string) bool {
 			return true
 		}
 	}
+
 	return false
 }

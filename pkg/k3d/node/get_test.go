@@ -1,16 +1,17 @@
-package node
+package node_test
 
 import (
 	"context"
 	"testing"
 
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConfig_GetFilteredNodesFromCluster(t *testing.T) {
 	t.Run("should be able to fetch the nodes that matches the labels", func(t *testing.T) {
-		cfg := Config{
+		cfg := node.Config{
 			ClusterAssociated: "k3s-default",
 			Name:              []string{"test-node-from-terraform"},
 		}
@@ -24,7 +25,7 @@ func TestConfig_GetFilteredNodesFromCluster(t *testing.T) {
 
 func TestConfig_GetNodeStatus(t *testing.T) {
 	t.Run("should be able to get status of selected nodes", func(t *testing.T) {
-		cfg := Config{
+		cfg := node.Config{
 			ClusterAssociated: "k3s-default",
 			Name:              []string{"test-node-from-terraform-0"},
 		}

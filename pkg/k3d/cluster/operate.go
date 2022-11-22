@@ -21,6 +21,7 @@ func (cfg *Config) StartStopCluster(ctx context.Context, runtime runtimes.Runtim
 				return err
 			}
 		}
+
 		return nil
 	}
 
@@ -29,5 +30,6 @@ func (cfg *Config) StartStopCluster(ctx context.Context, runtime runtimes.Runtim
 			return err
 		}
 	}
+
 	return nil
 }

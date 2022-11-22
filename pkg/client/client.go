@@ -73,6 +73,7 @@ func getRegistry(d *schema.ResourceData) string {
 	if len(utils2.String(d.Get(utils2.TerraformK3dRegistry))) == 0 {
 		return utils2.K3DRepoDEFAULT
 	}
+
 	return utils2.String(d.Get(utils2.TerraformK3dRegistry))
 }
 

@@ -61,7 +61,7 @@ func Provider() *schema.Provider {
 			"rancherk3d_node_action":      resourceNodeAction(),
 			"rancherk3d_node_create":      resourceNode(),
 			"rancherk3d_cluster_action":   resourceClusterAction(),
-			//"rancherk3d_cluster_create":   resourceCluster(),
+			// "rancherk3d_cluster_create":   resourceCluster(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -75,12 +75,13 @@ func Provider() *schema.Provider {
 	}
 }
 
-func ValidateKindFunc(v interface{}, k string) (warnings []string, errors []error) {
+func ValidateKindFunc(v interface{}, k string) ([]string, []error) {
 	if v.(string) != "Simple" {
 		return nil, []error{
 			fmt.Errorf("kind '%s' is unsupported only supported value is Simple", k),
 			fmt.Errorf("for more info refer 'https://k3d.io/usage/configfile/'"),
 		}
 	}
-	return
+
+	return nil, nil
 }

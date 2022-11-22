@@ -23,10 +23,7 @@ func (cfg *Config) DeleteNodesFromCluster(ctx context.Context, runtime runtimes.
 	}
 
 	filteredNodes := funk.Filter(nodes, func(node *K3D.Node) bool {
-		if funk.Contains(cfg.Name, node.Name) {
-			return true
-		}
-		return false
+		return funk.Contains(cfg.Name, node.Name)
 	}).([]*K3D.Node)
 
 	deleteOps := K3D.NodeDeleteOpts{
@@ -43,5 +40,6 @@ func (cfg *Config) DeleteNodesFromCluster(ctx context.Context, runtime runtimes.
 	if len(errors) != 0 {
 		return fmt.Errorf("deleting nodes failed with: %s", strings.Join(errors, "\n"))
 	}
+
 	return nil
 }

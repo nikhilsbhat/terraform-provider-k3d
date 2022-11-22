@@ -19,7 +19,7 @@ func (image *Config) Upload(ctx context.Context, runtime runtimes.Runtime) error
 		All: image.All,
 	}
 
-	var clusters []*K3D.Cluster
+	clusters := make([]*K3D.Cluster, 0)
 	k3dClusters, err := clusterCfg.GetClusters(ctx, runtime, []string{image.Cluster})
 	if err != nil {
 		return err
@@ -29,7 +29,7 @@ func (image *Config) Upload(ctx context.Context, runtime runtimes.Runtime) error
 		clusters = append(clusters, k3dCluster.GetClusterConfig())
 	}
 
-	var errors []string
+	errors := make([]string, 0)
 	for _, cluster := range clusters {
 		if err = client.ImageImportIntoClusterMulti(ctx, runtime, image.Images, cluster, loadImageOpts); err != nil {
 			errors = append(errors, fmt.Sprintf("failed to import image(s) into cluster '%s': %+v", cluster.Name, err))
@@ -39,26 +39,6 @@ func (image *Config) Upload(ctx context.Context, runtime runtimes.Runtime) error
 	if len(errors) != 0 {
 		return fmt.Errorf("importing images to clusters errored with: \n%s", strings.Join(errors, "\n"))
 	}
+
 	return nil
-}
-
-// List returns list of images loaded to the clusters.
-func (image *Config) List(ctx context.Context, runtime runtimes.Runtime) ([]*StoredImages, error) {
-	clusterCfg := cluster2.Config{
-		All: image.All,
-	}
-
-	retrievedClusters, err := clusterCfg.GetClusters(ctx, runtime, []string{image.Cluster})
-	if err != nil {
-		return nil, err
-	}
-
-	storedImages := make([]*StoredImages, 0)
-	for _, retrievedCluster := range retrievedClusters {
-		storedImages = append(storedImages, &StoredImages{
-			Cluster: retrievedCluster.Name,
-			Images:  image.Images,
-		})
-	}
-	return storedImages, nil
 }

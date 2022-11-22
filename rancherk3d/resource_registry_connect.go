@@ -82,6 +82,7 @@ func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData,
 			newID, err := utils2.GetRandomID()
 			if err != nil {
 				d.SetId("")
+
 				return diag.Errorf("errored while fetching randomID %v", err)
 			}
 			id = newID
@@ -94,12 +95,15 @@ func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData,
 		}
 
 		if err := connectRegistryToCluster(ctx, defaultConfig.K3DRuntime, connect); err != nil {
-			return diag.Errorf("connecting/disconnecting registries '%v' with cluster '%s' errored with '%s'", connect.Name, connect.Cluster, err.Error())
+			return diag.Errorf("connecting/disconnecting registries '%v' with cluster '%s' errored with '%s'",
+				connect.Name, connect.Cluster, err.Error())
 		}
 
 		d.SetId(id)
+
 		return resourceConnectRegistryRead(ctx, d, meta)
 	}
+
 	return nil
 }
 
@@ -120,6 +124,7 @@ func resourceConnectRegistryRead(ctx context.Context, d *schema.ResourceData, me
 	if err = d.Set(utils2.TerraformResourceStatus, registryStatus); err != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceStatus, err)
 	}
+
 	return nil
 }
 
@@ -146,5 +151,6 @@ func resourceConnectRegistryUpdate(ctx context.Context, d *schema.ResourceData, 
 		return resourceConnectRegistryRead(ctx, d, meta)
 	}
 	log.Printf("nothing to update so skipping")
+
 	return nil
 }

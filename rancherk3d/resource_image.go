@@ -102,10 +102,12 @@ func resourceLoadImageLoad(ctx context.Context, d *schema.ResourceData, meta int
 			return diag.Errorf("%v", err)
 		}
 		d.SetId(id)
+
 		return resourceLoadImageRead(ctx, d, meta)
 	}
 
 	log.Printf("resource %s already exists", d.Id())
+
 	return nil
 }
 
@@ -121,26 +123,32 @@ func resourceLoadImageRead(ctx context.Context, d *schema.ResourceData, meta int
 	imagesToStore, err := imageCfg.List(ctx, defaultConfig.K3DRuntime)
 	if err != nil {
 		d.SetId("")
+
 		diag.Errorf("an error occurred while fetching images to be stored")
 	}
 
 	flattenedImagesToStore, err := utils2.MapSlice(imagesToStore)
 	if err != nil {
 		d.SetId("")
+
 		return diag.Errorf("errored while flattening images to store: %v", err)
 	}
 	if err := d.Set(utils2.TerraformResourceImagesStored, flattenedImagesToStore); err != nil {
 		d.SetId("")
+
 		return diag.Errorf("oops setting 'images_stored' errored with : %v", err)
 	}
 	if err := d.Set(utils2.TerraformResourceImages, imageCfg.Images); err != nil {
 		d.SetId("")
+
 		return diag.Errorf("oops setting 'images' errored with : %v", err)
 	}
 	if err := d.Set(utils2.TerraformResourceCluster, imageCfg.Cluster); err != nil {
 		d.SetId("")
+
 		return diag.Errorf("oops setting 'cluster' errored with : %v", err)
 	}
+
 	return nil
 }
 
@@ -154,6 +162,7 @@ func resourceLoadImageDelete(ctx context.Context, d *schema.ResourceData, meta i
 		return diag.Errorf("resource with the specified ID not found")
 	}
 	d.SetId("")
+
 	return nil
 }
 
@@ -180,16 +189,20 @@ func resourceLoadImageUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		if err := d.Set(utils2.TerraformResourceCluster, updatedCluster); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceCluster, err)
 		}
+
 		if err := d.Set(utils2.TerraformResourceImages, updatedImages); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceImages, err)
 		}
+
 		return resourceLoadImageRead(ctx, d, meta)
 	}
 
 	log.Printf("nothing to update so skipping")
+
 	return nil
 }
 
+//nolint:nonamedreturns
 func getUpdatedClusterAndImages(d *schema.ResourceData) (cluster string, images []string) {
 	oldCluster, newCluster := d.GetChange(utils2.TerraformResourceCluster)
 	if !cmp.Equal(oldCluster, newCluster) {
@@ -200,5 +213,6 @@ func getUpdatedClusterAndImages(d *schema.ResourceData) (cluster string, images 
 	if !cmp.Equal(oldImages, newImages) {
 		images = getSlice(newImages)
 	}
+
 	return
 }

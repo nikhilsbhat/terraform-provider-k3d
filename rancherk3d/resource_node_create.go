@@ -94,6 +94,7 @@ func resourceNode() *schema.Resource {
 func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
+	//nolint:nestif
 	if d.IsNewResource() {
 		id := d.Id()
 
@@ -101,6 +102,7 @@ func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interf
 			newID, err := utils.GetRandomID()
 			if err != nil {
 				d.SetId("")
+
 				return diag.Errorf("errored while fetching randomID %v", err)
 			}
 			id = newID
@@ -126,12 +128,15 @@ func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interf
 			if seErr := d.Set(utils.TerraformResourceCreatedAt, ""); seErr != nil {
 				return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceCreatedAt, seErr)
 			}
+
 			return diag.Errorf("errored while creating nodes with: %v", err.Error())
 		}
 
 		d.SetId(id)
+
 		return resourceNodeRead(ctx, d, meta)
 	}
+
 	return nil
 }
 
@@ -180,6 +185,7 @@ func resourceNodeDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	d.SetId("")
+
 	return nil
 }
 
@@ -188,6 +194,7 @@ func setNodeImage(d *schema.ResourceData, defaultConfig *client.Config) string {
 	if len(image) == 0 {
 		return defaultConfig.GetK3dImage()
 	}
+
 	return image
 }
 

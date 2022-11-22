@@ -10,6 +10,7 @@ import (
 	"github.com/rancher/k3d/v5/pkg/config/v1alpha2"
 )
 
+//nolint:deadcode,unused,funlen
 func resourceCluster() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceClusterCreate,
@@ -156,25 +157,31 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 		d.SetId(clusterName)
 	}
+
 	return nil
 }
 
+//nolint:deadcode,unused
 func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Your code goes here
 	return nil
 }
 
+//nolint:deadcode,unused
 func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Your code goes here
 	return nil
 }
 
+//nolint:deadcode,unused
 func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return nil
 }
 
+//nolint:deadcode,unused
 func createCluster(ctx context.Context, d *schema.ResourceData, defaultConfig *client.Config) error {
 	k3DSimpleConfig := &v1alpha2.SimpleConfig{}
 	_ = k3DSimpleConfig
+
 	return nil
 }

@@ -27,6 +27,7 @@ func (registry *Config) Create(ctx context.Context, runtime runtimes.Runtime) er
 	}
 	if len(registry.Cluster) != 0 {
 		log.Printf("connecting the registry with cluster %v", registry.Cluster)
+
 		return registry.Connect(ctx, runtime)
 	}
 

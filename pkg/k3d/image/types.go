@@ -14,13 +14,12 @@ type Images interface {
 
 // Config helps to store filtered images data that was loaded to k3d cluster.
 type Config struct {
-	Images       []string        `json:"images,omitempty"`
-	Cluster      string          `json:"cluster,omitempty"`
-	All          bool            `json:"all,omitempty"`
-	StoreTarBall bool            `json:"keep_tarball,omitempty"`
-	StoredImages StoredImages    `json:"images_stored,omitempty"`
-	Context      context.Context `json:"context,omitempty"`
-	Config       client.Config   `json:"config,omitempty"`
+	Images       []string      `json:"images,omitempty"`
+	Cluster      string        `json:"cluster,omitempty"`
+	All          bool          `json:"all,omitempty"`
+	StoreTarBall bool          `json:"keep_tarball,omitempty"`
+	StoredImages StoredImages  `json:"images_stored,omitempty"`
+	Config       client.Config `json:"config,omitempty"`
 }
 
 // StoredImages holds a data of cluster to images mapping of loaded images.

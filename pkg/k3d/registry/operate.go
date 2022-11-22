@@ -11,7 +11,7 @@ import (
 )
 
 func (registry *Config) Connect(ctx context.Context, runtime runtimes.Runtime) error {
-	var clusters []*K3D.Cluster
+	clusters := make([]*K3D.Cluster, 0)
 	clusterCfg := cluster.Config{}
 
 	k3dClusters, err := clusterCfg.GetClusters(ctx, runtime, []string{registry.Cluster})
@@ -33,6 +33,7 @@ func (registry *Config) Connect(ctx context.Context, runtime runtimes.Runtime) e
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -54,6 +55,7 @@ func (registry *Config) Disconnect(ctx context.Context, runtime runtimes.Runtime
 			return err
 		}
 	}
+
 	return nil
 }
 

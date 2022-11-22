@@ -21,10 +21,7 @@ func (registry *Config) Get(ctx context.Context, runtime runtimes.Runtime) ([]*k
 	}
 
 	filteredRegistries := funk.Filter(regs, func(reg *k3dNode.Config) bool {
-		if funk.Contains(registry.Name, reg.Name[0]) {
-			return false
-		}
-		return true
+		return funk.Contains(registry.Name, reg.Name[0])
 	}).([]*k3dNode.Config)
 
 	return filteredRegistries, nil

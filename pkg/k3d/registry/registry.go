@@ -15,6 +15,7 @@ func GetExposureOpts(expose map[string]string) K3D.ExposureOpts {
 	api.Port = nat.Port(expose["hostPort"])
 
 	api.Binding = binding
+
 	return *api
 }
 

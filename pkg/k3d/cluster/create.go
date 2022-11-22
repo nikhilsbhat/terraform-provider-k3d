@@ -32,7 +32,7 @@ func CreateCluster(ctx context.Context, runtime runtimes.Runtime, cfg *v1alpha4.
 
 	// check if a cluster with that name exists already
 	if _, err = client.ClusterGet(ctx, runtimes.SelectedRuntime, &clusterConfig.Cluster); err == nil {
-		return fmt.Errorf("failed to create cluster because a cluster with that name already exists: %v", err)
+		return fmt.Errorf("failed to create cluster because a cluster with that name already exists: %w", err)
 	}
 
 	// create cluster
@@ -40,14 +40,21 @@ func CreateCluster(ctx context.Context, runtime runtimes.Runtime, cfg *v1alpha4.
 		// rollback if creation failed
 		if deleteErr := client.ClusterDelete(ctx, runtimes.SelectedRuntime, &K3D.Cluster{Name: cfg.Name},
 			K3D.ClusterDeleteOpts{SkipRegistryCheck: false}); deleteErr != nil {
-			return fmt.Errorf("cluster creation FAILED, also FAILED to rollback changes!: %v", deleteErr)
+			return fmt.Errorf("cluster creation FAILED, also FAILED to rollback changes!: %w", deleteErr)
 		}
+
 		return err
 	}
 
 	// update default kubeconfig
 	if clusterConfig.KubeconfigOpts.UpdateDefaultKubeconfig {
-		if _, err := client.KubeconfigGetWrite(ctx, runtimes.SelectedRuntime, &clusterConfig.Cluster, "", &client.WriteKubeConfigOptions{UpdateExisting: true, OverwriteExisting: false, UpdateCurrentContext: cfg.Options.KubeconfigOptions.SwitchCurrentContext}); err != nil {
+		if _, err := client.KubeconfigGetWrite(ctx, runtimes.SelectedRuntime,
+			&clusterConfig.Cluster, "",
+			&client.WriteKubeConfigOptions{
+				UpdateExisting:       true,
+				OverwriteExisting:    false,
+				UpdateCurrentContext: cfg.Options.KubeconfigOptions.SwitchCurrentContext,
+			}); err != nil {
 			return err
 		}
 	}

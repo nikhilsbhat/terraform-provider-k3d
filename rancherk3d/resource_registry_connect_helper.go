@@ -23,6 +23,7 @@ func resourceConnectRegistryDelete(ctx context.Context, d *schema.ResourceData, 
 		return diag.Errorf("resource with the specified ID not found")
 	}
 	d.SetId("")
+
 	return nil
 }
 
@@ -31,11 +32,13 @@ func connectRegistryToCluster(ctx context.Context, runtime runtimes.Runtime, con
 		if err := config.Connect(ctx, runtime); err != nil {
 			return err
 		}
+
 		return nil
 	}
 	if err := config.Disconnect(ctx, runtime); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -59,9 +62,11 @@ func getRegistryStatus(ctx context.Context, runtime runtimes.Runtime, config k3d
 			updatedStatus = append(updatedStatus, config.GetRegistryStatus(registry.Name[0], utils2.RegistryDisconnectedState))
 		}
 	}
+
 	return updatedStatus, nil
 }
 
+//nolint:nonamedreturns
 func getUpdatedRegistriesChanges(d *schema.ResourceData) (registries k3dRegistry.Config) {
 	oldRegistries, newRegistries := d.GetChange(utils2.TerraformResourceRegistries)
 	if !cmp.Equal(oldRegistries, newRegistries) {
@@ -75,5 +80,6 @@ func getUpdatedRegistriesChanges(d *schema.ResourceData) (registries k3dRegistry
 	if !cmp.Equal(oldConnect, newConnect) {
 		registries.ConnectToCluster = utils2.Bool(newConnect)
 	}
+
 	return
 }

@@ -29,16 +29,8 @@ func GetFilteredClusters(ctx context.Context, runtime runtimes.Runtime,
 	if len(clusterConfig) == 0 {
 		return nil, fmt.Errorf("cluster %v not found", clusters)
 	}
-	return clusterConfig, nil
-}
 
-// GetClusters return the list of *K3D.Config of all clusters available in the specified runtime.
-func GetClusters(ctx context.Context, runtime runtimes.Runtime) ([]*K3D.Cluster, error) {
-	clustersList, err := client.ClusterList(ctx, runtime)
-	if err != nil {
-		return nil, err
-	}
-	return clustersList, nil
+	return clusterConfig, nil
 }
 
 func (cfg *Config) GetClusters(ctx context.Context, runtime runtimes.Runtime, clusterList []string) ([]*Config, error) {
@@ -49,10 +41,7 @@ func (cfg *Config) GetClusters(ctx context.Context, runtime runtimes.Runtime, cl
 
 	if !cfg.All {
 		filteredCluster := funk.Filter(clusters, func(cluster *K3D.Cluster) bool {
-			if funk.Contains(clusterList, cluster.Name) {
-				return true
-			}
-			return false
+			return funk.Contains(clusterList, cluster.Name)
 		}).([]*K3D.Cluster)
 		clusters = filteredCluster
 	}
@@ -74,14 +63,16 @@ func (cfg *Config) GetClusters(ctx context.Context, runtime runtimes.Runtime, cl
 			HasLoadBalancer: cluster.HasLoadBalancer(),
 		})
 	}
+
 	return clusterConfig, nil
 }
 
 func (cfg *Config) GetClusterConfig() *K3D.Cluster {
-	var nodes []*K3D.Node
+	nodes := make([]*K3D.Node, 0)
 	for _, node := range cfg.Nodes {
 		nodes = append(nodes, &K3D.Node{Name: node})
 	}
+
 	return &K3D.Cluster{
 		Name:  cfg.Name,
 		Token: cfg.Token,

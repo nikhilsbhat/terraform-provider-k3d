@@ -1,42 +1,23 @@
 ---
 linters:
   disable-all: false
-  enable:
-    - bodyclose
-    - deadcode
-    - depguard
-    - dogsled
-    - dupl
-    - errcheck
-    - funlen
-    - goconst
-    - gocritic
-    - gocyclo
-    - gofmt
-    - goimports
-    - golint
-    - gomnd
-    - goprintffuncname
-    - gosec
-    - gosimple
-    - govet
-    - ineffassign
-    - interfacer
-    - lll
-    - misspell
-    - nakedret
+  enable-all: true
+  disable:
     - nolintlint
-    - rowserrcheck
-    - scopelint
-    - staticcheck
-    - structcheck
-    - stylecheck
-    - typecheck
-    - unconvert
-    - unparam
+    - wrapcheck
+    - varnamelen
+    - paralleltest
+    - tagliatelle
+    - ifshort
+    - ireturn
+    - exhaustivestruct
+    - exhaustruct
+    - wsl
     - unused
-    - varcheck
-    - whitespace
+    - goerr113
+    - scopelint
+    - forcetypeassert
+    - forbidigo
 
 issues:
   exclude-rules:

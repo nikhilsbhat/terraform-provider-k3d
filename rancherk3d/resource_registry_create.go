@@ -103,6 +103,7 @@ func resourceRegistry() *schema.Resource {
 func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
+	//nolint:nestif
 	if d.IsNewResource() {
 		id := d.Id()
 
@@ -110,6 +111,7 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 			newID, err := utils2.GetRandomID()
 			if err != nil {
 				d.SetId("")
+
 				return diag.Errorf("errored while fetching randomID %v", err)
 			}
 			id = newID
@@ -125,9 +127,9 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 			return diag.Errorf("errored while flattening '%s' with :%v", utils2.TerraformResourceExpose, err)
 		}
 
-		//if err = d.Set(utils2.TerraformResourceMetadata, getMetadata(d)); err != nil {
+		// if err = d.Set(utils2.TerraformResourceMetadata, getMetadata(d)); err != nil {
 		//	return diag.Errorf("errored while setting '%s' with :%v", utils2.TerraformResourceHost, err)
-		//}
+		// }
 
 		registry := &k3dRegistry.Config{
 			Name:     []string{utils2.String(d.Get(utils2.TerraformResourceName))},
@@ -145,6 +147,7 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 		d.SetId(id)
+
 		return resourceRegistryRead(ctx, d, meta)
 	}
 
@@ -199,5 +202,6 @@ func resourceRegistryDelete(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	d.SetId("")
+
 	return nil
 }

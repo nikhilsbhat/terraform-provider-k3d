@@ -30,6 +30,7 @@ func GetKubeConfig(ctx context.Context, runtime runtimes.Runtime,
 		}
 		kubeConfigs[cluster.Name] = kubeConfigString
 	}
+
 	return kubeConfigs, nil
 }
 
@@ -52,5 +53,6 @@ func (cfg *Config) GetKubeConfig(ctx context.Context, runtime runtimes.Runtime) 
 		}
 		kubeConfigs[cluster.Name] = kubeConfigString
 	}
+
 	return kubeConfigs, nil
 }

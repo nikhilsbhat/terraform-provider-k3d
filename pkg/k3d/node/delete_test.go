@@ -1,21 +1,22 @@
-package node
+package node_test
 
 import (
 	"context"
 	"testing"
 
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 )
 
 func TestConfig_DeleteNodesFromCluster(t *testing.T) {
 	tests := []struct {
 		name    string
-		cfg     Config
+		cfg     node.Config
 		wantErr bool
 	}{
 		{
 			name: "Should be able to delete node test-node-from-terraform",
-			cfg: Config{
+			cfg: node.Config{
 				ClusterAssociated: "k3s-default",
 				Name:              []string{"test-node-from-terraform"},
 			},
@@ -23,7 +24,7 @@ func TestConfig_DeleteNodesFromCluster(t *testing.T) {
 		},
 		{
 			name: "Should be able to delete node test-node-terraform-0",
-			cfg: Config{
+			cfg: node.Config{
 				ClusterAssociated: "k3s-default",
 				Name:              []string{"test-node-terraform-0"},
 			},
@@ -31,7 +32,7 @@ func TestConfig_DeleteNodesFromCluster(t *testing.T) {
 		},
 		{
 			name: "Should be able to delete node test-node-terraform-1",
-			cfg: Config{
+			cfg: node.Config{
 				ClusterAssociated: "k3s-default",
 				Name:              []string{"test-node-terraform-1"},
 			},

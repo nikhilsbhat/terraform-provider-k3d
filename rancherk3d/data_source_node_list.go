@@ -56,6 +56,7 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 		newID, err := utils2.GetRandomID()
 		if err != nil {
 			d.SetId("")
+
 			return diag.Errorf("errored while fetching randomID %v", err)
 		}
 		id = newID
@@ -70,14 +71,17 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 	k3dNodes, err := cfg.GetFilteredNodesFromCluster(ctx, defaultConfig.K3DRuntime)
 	if err != nil {
 		d.SetId("")
+
 		return diag.Errorf("errored while fetching nodes: %v", err)
 	}
 
 	flattenedNodes, err := utils2.MapSlice(k3dNodes)
 	if err != nil {
 		d.SetId("")
+
 		return diag.Errorf("errored while flattening nodes obtained: %v", err)
 	}
+
 	d.SetId(id)
 	if err = d.Set(utils2.TerraformResourceNodesList, flattenedNodes); err != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceNodesList, err)

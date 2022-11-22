@@ -1,16 +1,17 @@
-package cluster
+package cluster_test
 
 import (
 	"context"
 	"testing"
 
+	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConfig_StartStopCluster(t *testing.T) {
 	t.Run("should stop selected cluster", func(t *testing.T) {
-		cfg := Config{
+		cfg := cluster.Config{
 			All:    false,
 			Action: "stop",
 		}

@@ -1,4 +1,4 @@
-package rancherk3d
+package rancherk3d_test
 
 // import (
 //	"os"

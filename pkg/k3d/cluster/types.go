@@ -12,6 +12,8 @@ type Cluster interface {
 }
 
 // Config helps storing filtered cluster data of k3d cluster.
+//
+//nolint:maligned
 type Config struct {
 	Name            string   `json:"name,omitempty" mapstructure:"name"`
 	Nodes           []string `json:"nodes,omitempty" mapstructure:"nodes"`
