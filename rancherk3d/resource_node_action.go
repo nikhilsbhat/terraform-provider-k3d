@@ -8,9 +8,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
-	k3dNode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
-	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
+	"github.com/nikhilsbhat/terraform-provider-k3d/pkg/client"
+	k3dNode "github.com/nikhilsbhat/terraform-provider-k3d/pkg/k3d/node"
+	utils2 "github.com/nikhilsbhat/terraform-provider-k3d/pkg/utils"
 )
 
 func resourceNodeAction() *schema.Resource {

@@ -5,8 +5,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
-	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
+	"github.com/nikhilsbhat/terraform-provider-k3d/pkg/client"
+	utils2 "github.com/nikhilsbhat/terraform-provider-k3d/pkg/utils"
 	"github.com/rancher/k3d/v5/pkg/config/v1alpha2"
 )
 

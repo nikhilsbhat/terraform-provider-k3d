@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
+	"github.com/nikhilsbhat/terraform-provider-k3d/pkg/client"
 )
 
 // Provider returns a terraform.ResourceProvider.

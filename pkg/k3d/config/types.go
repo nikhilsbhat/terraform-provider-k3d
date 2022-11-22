@@ -1,6 +1,6 @@
 package config
 
-import k3dCluster "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
+import k3dCluster "github.com/nikhilsbhat/terraform-provider-k3d/pkg/k3d/cluster"
 
 // Config helps in storing kubeconfig information.
 type Config struct {

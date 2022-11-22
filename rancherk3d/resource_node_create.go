@@ -7,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/mapstructure"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/client"
-	k3dNode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
+	"github.com/nikhilsbhat/terraform-provider-k3d/pkg/client"
+	k3dNode "github.com/nikhilsbhat/terraform-provider-k3d/pkg/k3d/node"
+	"github.com/nikhilsbhat/terraform-provider-k3d/pkg/utils"
 )
 
 func resourceNode() *schema.Resource {

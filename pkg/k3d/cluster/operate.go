@@ -3,7 +3,7 @@ package cluster
 import (
 	"context"
 
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
+	"github.com/nikhilsbhat/terraform-provider-k3d/pkg/utils"
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"

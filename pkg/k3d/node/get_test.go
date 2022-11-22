@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
+	"github.com/nikhilsbhat/terraform-provider-k3d/pkg/k3d/node"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	"github.com/stretchr/testify/assert"
 )

@@ -1,4 +1,4 @@
-module github.com/nikhilsbhat/terraform-provider-rancherk3d
+module github.com/nikhilsbhat/terraform-provider-k3d
 
 go 1.19
 

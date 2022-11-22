@@ -3,7 +3,7 @@ package registry
 import (
 	"context"
 
-	k3dNode "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/node"
+	k3dNode "github.com/nikhilsbhat/terraform-provider-k3d/pkg/k3d/node"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 )
 

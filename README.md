@@ -1,7 +1,7 @@
 # Terraform Provider For K3d
 
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/terraform-provider-rancherk3d)](https://goreportcard.com/report/github.com/nikhilsbhat/terraform-provider-rancherk3d)  [![shields](https://img.shields.io/badge/license-mit-brightgreen)](https://github.com/nikhilsbhat/terraform-provider-rancherk3d/blob/master/LICENSE) [![shields](https://godoc.org/github.com/nikhilsbhat/terraform-provider-rancherk3d?status.svg)](https://godoc.org/github.com/nikhilsbhat/terraform-provider-rancherk3d)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/terraform-provider-k3d)](https://goreportcard.com/report/github.com/nikhilsbhat/terraform-provider-k3d)  [![shields](https://img.shields.io/badge/license-mit-brightgreen)](https://github.com/nikhilsbhat/terraform-provider-k3d/blob/master/LICENSE) [![shields](https://godoc.org/github.com/nikhilsbhat/terraform-provider-k3d?status.svg)](https://godoc.org/github.com/nikhilsbhat/terraform-provider-k3d)
 
 [terraform](https://www.terraform.io/) provider for [k3d](https://k3d.io/), which helps in performing all operation that k3d does.
 
@@ -23,8 +23,8 @@
 
 ## Documentation
 
-* Examples on the provider can be found in [examples](https://github.com/nikhilsbhat/terraform-provider-rancherk3d/tree/master/examples). <br><br> 
-* Document that can help on how the [data_source](https://www.terraform.io/docs/language/data-sources/index.html) and [resource](https://www.terraform.io/docs/language/resources/syntax.html) could be used is up [here](https://nikhilsbhat.github.io/terraform-provider-rancherk3d).
+* Examples on the provider can be found in [examples](https://github.com/nikhilsbhat/terraform-provider-k3d/tree/master/examples). <br><br> 
+* Document that can help on how the [data_source](https://www.terraform.io/docs/language/data-sources/index.html) and [resource](https://www.terraform.io/docs/language/resources/syntax.html) could be used is up [here](https://nikhilsbhat.github.io/terraform-provider-k3d).
 
 ## TODO
 

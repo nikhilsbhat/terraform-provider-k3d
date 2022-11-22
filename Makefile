@@ -1,6 +1,6 @@
 
 GOFMT_FILES?=$$(find . -not -path "./vendor/*" -type f -name '*.go')
-APP_NAME?=terraform-provider-rancherk3d
+APP_NAME?=terraform-provider-k3d
 APP_DIR?=$$(git rev-parse --show-toplevel)
 SRC_PACKAGES=$(shell go list -mod=vendor ./... | grep -v "vendor" | grep -v "mocks")
 VERSION?=0.1.3
@@ -63,5 +63,5 @@ create.newversion.tfregistry: local.build ## Sets up the local terraform registr
 	@mkdir -p ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/
 
 upload.newversion.provider: create.newversion.tfregistry ## Uploads the updated provider to local terraform registry.
-	@rm -rf  ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/terraform-provider-rancherk3d_v$(VERSION)
-	@cp terraform-provider-rancherk3d_v$(VERSION) ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/
+	@rm -rf  ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/terraform-provider-k3d_v$(VERSION)
+	@cp terraform-provider-k3d_v$(VERSION) ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/

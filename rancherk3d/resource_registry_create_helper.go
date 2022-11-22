@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	utils2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/utils"
+	utils2 "github.com/nikhilsbhat/terraform-provider-k3d/pkg/utils"
 )
 
 func validateProxy(value map[string]string) bool {

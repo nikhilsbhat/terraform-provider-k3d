@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	cluster2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
+	cluster2 "github.com/nikhilsbhat/terraform-provider-k3d/pkg/k3d/cluster"
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"

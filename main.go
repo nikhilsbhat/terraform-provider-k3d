@@ -17,7 +17,7 @@ package main
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/nikhilsbhat/terraform-provider-rancherk3d/rancherk3d"
+	"github.com/nikhilsbhat/terraform-provider-k3d/rancherk3d"
 )
 
 func main() {
