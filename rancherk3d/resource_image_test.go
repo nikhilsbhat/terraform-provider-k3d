@@ -1,33 +1,24 @@
 package rancherk3d
 
-import (
-	"context"
-	"testing"
-
-	"github.com/rancher/k3d/v5/pkg/runtimes"
-	"github.com/stretchr/testify/assert"
-	// "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-)
-
-func Test_getImagesStored(t *testing.T) {
-	t.Run("should return the images to be stored in a required format", func(t *testing.T) {
-		cluster := "cluster1"
-		images := []string{"basnik/terragen:latest", "basnik/renderer:latest"}
-
-		expected := []map[string]interface{}{
-			{
-				"cluster": "cluster1",
-				"tarball_stored": map[string]string{
-					"basnik/renderer:latest": "basnik/renderer:latest",
-					"basnik/terragen:latest": "basnik/terragen:latest",
-				},
-			},
-		}
-		actual, err := getImagesToBeStored(context.Background(), runtimes.SelectedRuntime, images, cluster, false)
-		assert.NoError(t, err)
-		assert.Equal(t, expected, actual)
-	})
-}
+//func Test_getImagesStored(t *testing.T) {
+//	t.Run("should return the images to be stored in a required format", func(t *testing.T) {
+//		cluster := "cluster1"
+//		images := []string{"basnik/terragen:latest", "basnik/renderer:latest"}
+//
+//		expected := []map[string]interface{}{
+//			{
+//				"cluster": "cluster1",
+//				"tarball_stored": map[string]string{
+//					"basnik/renderer:latest": "basnik/renderer:latest",
+//					"basnik/terragen:latest": "basnik/terragen:latest",
+//				},
+//			},
+//		}
+//		actual, err := getImagesToBeStored(context.Background(), runtimes.SelectedRuntime, images, cluster, false)
+//		assert.NoError(t, err)
+//		assert.Equal(t, expected, actual)
+//	})
+//}
 
 // func Test_resourceImage(t *testing.T) {
 //	ri := acctest.RandInt()

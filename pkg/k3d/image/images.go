@@ -3,6 +3,7 @@ package image
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	cluster2 "github.com/nikhilsbhat/terraform-provider-rancherk3d/pkg/k3d/cluster"
 	"github.com/rancher/k3d/v5/pkg/client"
@@ -10,62 +11,44 @@ import (
 	K3D "github.com/rancher/k3d/v5/pkg/types"
 )
 
-// StoreImagesToCluster stores images in a specified clusters, also stores the tarball locally if feature is enabled.
-func StoreImagesToCluster(ctx context.Context, runtime runtimes.Runtime,
-	images []string, cluster string, storeTarball bool) error {
-	loadImageOpts := K3D.ImageImportOpts{KeepTar: storeTarball}
+// Upload uploads images to a specified clusters, also stores the tarball locally if feature is enabled.
+func (image *Config) Upload(ctx context.Context, runtime runtimes.Runtime) error {
+	loadImageOpts := K3D.ImageImportOpts{KeepTar: image.StoreTarBall}
 
-	clusterCfg := cluster2.Config{}
-	clusters, err := clusterCfg.GetClusters(ctx, runtime, []string{cluster})
-	if err != nil {
-		return err
+	clusterCfg := cluster2.Config{
+		All: image.All,
 	}
-	retrievedCluster := clusters[0].GetClusterConfig()
-	if err = client.ImageImportIntoClusterMulti(ctx, runtime, images, retrievedCluster, loadImageOpts); err != nil {
-		return fmt.Errorf("failed to import image(s) into cluster '%s': %+v", retrievedCluster.Name, err)
-	}
-	return nil
-}
 
-// StoreImagesToClusters stores images to all specified clusters.
-func StoreImagesToClusters(ctx context.Context, runtime runtimes.Runtime,
-	images []string, storeTarball bool) error {
-	loadImageOpts := K3D.ImageImportOpts{KeepTar: storeTarball}
-
-	retrievedClusters, err := cluster2.GetClusters(ctx, runtime)
+	var clusters []*K3D.Cluster
+	k3dClusters, err := clusterCfg.GetClusters(ctx, runtime, []string{image.Cluster})
 	if err != nil {
 		return err
 	}
 
-	for _, retrievedCluster := range retrievedClusters {
-		if err = client.ImageImportIntoClusterMulti(ctx, runtime, images, retrievedCluster, loadImageOpts); err != nil {
-			return fmt.Errorf("failed to import image(s) into cluster '%s': %+v", retrievedCluster.Name, err)
+	for _, k3dCluster := range k3dClusters {
+		clusters = append(clusters, k3dCluster.GetClusterConfig())
+	}
+
+	var errors []string
+	for _, cluster := range clusters {
+		if err = client.ImageImportIntoClusterMulti(ctx, runtime, image.Images, cluster, loadImageOpts); err != nil {
+			errors = append(errors, fmt.Sprintf("failed to import image(s) into cluster '%s': %+v", cluster.Name, err))
 		}
 	}
+
+	if len(errors) != 0 {
+		return fmt.Errorf("importing images to clusters errored with: \n%s", strings.Join(errors, "\n"))
+	}
 	return nil
 }
 
-// GetImagesLoadedCluster returns list of images loaded to the cluster.
-func GetImagesLoadedCluster(ctx context.Context, runtime runtimes.Runtime,
-	images []string, cluster string) ([]*StoredImages, error) {
-
-	clusterCfg := cluster2.Config{}
-	clusters, err := clusterCfg.GetClusters(ctx, runtime, []string{cluster})
-	if err != nil {
-		return nil, err
+// List returns list of images loaded to the clusters.
+func (image *Config) List(ctx context.Context, runtime runtimes.Runtime) ([]*StoredImages, error) {
+	clusterCfg := cluster2.Config{
+		All: image.All,
 	}
-	retrievedCluster := clusters[0].GetClusterConfig()
 
-	return []*StoredImages{{
-		Cluster: retrievedCluster.Name,
-		Images:  images,
-	}}, nil
-}
-
-// GetImagesLoadedClusters returns list of images loaded to the clusters.
-func GetImagesLoadedClusters(ctx context.Context, runtime runtimes.Runtime,
-	images []string) ([]*StoredImages, error) {
-	retrievedClusters, err := cluster2.GetClusters(ctx, runtime)
+	retrievedClusters, err := clusterCfg.GetClusters(ctx, runtime, []string{image.Cluster})
 	if err != nil {
 		return nil, err
 	}
@@ -74,12 +57,8 @@ func GetImagesLoadedClusters(ctx context.Context, runtime runtimes.Runtime,
 	for _, retrievedCluster := range retrievedClusters {
 		storedImages = append(storedImages, &StoredImages{
 			Cluster: retrievedCluster.Name,
-			Images:  images,
+			Images:  image.Images,
 		})
 	}
 	return storedImages, nil
-}
-
-func NewK3dImages() *Config {
-	return &Config{}
 }
