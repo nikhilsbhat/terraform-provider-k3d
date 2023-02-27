@@ -19,3 +19,9 @@ terraform.tfstate*
 docs/Gemfile.lock
 _site/
 .jekyll-metadata
+
+# dropping the templates
+templates-latest/
+
+# dropping local release folder
+dist/

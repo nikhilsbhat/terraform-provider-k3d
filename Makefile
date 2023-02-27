@@ -50,6 +50,12 @@ docker.publish.image: docker_login ## Publisies the image to the registered dock
 lint: ## Lint's application for errors, it is a linters aggregator (https://github.com/golangci/golangci-lint).
 	if [ -z "${DEV}" ]; then golangci-lint run --color always ; else docker run --rm -v $(APP_DIR):/app -w /app golangci/golangci-lint:v1.46.2-alpine golangci-lint run --color always ; fi
 
+test: ## runs test cases
+	@time go test $(TEST_FILES) -mod=vendor -coverprofile cover.out && go tool cover -html=cover.out -o cover.html && open cover.html
+
+copy.terraformrc: ## copies terraformrc to user's home directory that helps in local development of the provider.
+	cp terraformrc.sample ${HOME}/terraformrc
+
 report: ## Publishes the go-report of the appliction (uses go-reportcard)
 	@docker run --rm -v $(APP_DIR):/app -w /app basnik/goreportcard-cli:latest goreportcard-cli -v
 
@@ -59,9 +65,24 @@ dev.prerequisite.up: ## Sets up the development environment with all necessary c
 generate.mock: ## generates mocks for the selected source packages.
 	@go generate ${SRC_PACKAGES}
 
+generate.document:
+	tfplugindocs generate --website-source-dir templates/ --website-temp-dir templates-latest --examples-dir examples
+
+tflint:
+	@terraform fmt -write=false -check=true -diff=true examples/
+
 create.newversion.tfregistry: local.build ## Sets up the local terraform registry with the version specified.
 	@mkdir -p ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/
 
 upload.newversion.provider: create.newversion.tfregistry ## Uploads the updated provider to local terraform registry.
 	@rm -rf  ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/terraform-provider-k3d_v$(VERSION)
 	@cp terraform-provider-k3d_v$(VERSION) ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/
+
+local.build: local.check ## Generates the artifact with the help of 'go build'
+	GORELEASER_CURRENT_TAG=$(VERSION) BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} goreleaser build --rm-dist
+
+publish: local.check ## Builds and publishes the app
+	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} PLUGIN_PATH=${APP_DIR} goreleaser release --rm-dist
+
+mock.publish: local.check ## Builds and mocks app release
+	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} PLUGIN_PATH=${APP_DIR} goreleaser release --skip-publish --rm-dist
