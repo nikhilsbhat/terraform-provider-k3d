@@ -40,6 +40,7 @@ const (
 	TerraformResourceServersCount     = "servers_count"
 	TerraformResourceAgentsCount      = "agents_count"
 	TerraformResourceNetwork          = "network"
+	TerraformResourceSubnet           = "subnetwork"
 	TerraformResourceClusterToken     = "cluster_token"
 	TerraformResourceUpdateKubeConfig = "kubeconfig_update_default"
 	TerraformResourceSwitchKubeConfig = "kubeconfig_switch_context"

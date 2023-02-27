@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     rancherk3d = {
-      source  = "hashicorp/rancherk3d"
+      source  = "hashicorp/k3d"
       version = "0.1.3"
     }
   }

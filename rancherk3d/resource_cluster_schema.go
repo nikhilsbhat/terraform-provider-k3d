@@ -87,10 +87,11 @@ func resourceClusterRegistriesSchema() map[string]*schema.Schema {
 			Description: "some other k3d-managed registry",
 		},
 		"config": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Computed:    false,
-			Description: "define contents of the `registries.yaml` file (or reference a file); same as `--registry-config /path/to/config.yaml`",
+			Type:         schema.TypeString,
+			Optional:     true,
+			Computed:     false,
+			RequiredWith: []string{"create"},
+			Description:  "define contents of the `registries.yaml` file (or reference a file); same as `--registry-config /path/to/config.yaml`",
 		},
 	}
 }
@@ -127,6 +128,27 @@ func resourceClusterRuntimeSchema() map[string]*schema.Schema {
 			ForceNew:    true,
 			Optional:    true,
 			Description: "GPU devices to add to the cluster node containers ('all' to pass all GPUs) [From docker].",
+		},
+		"agents_memory": {
+			Type:        schema.TypeString,
+			ForceNew:    true,
+			Optional:    true,
+			Description: "Memory limit imposed on the agents nodes [From docker]",
+		},
+		"servers_memory": {
+			Type:        schema.TypeString,
+			ForceNew:    true,
+			Optional:    true,
+			Description: "Memory limit imposed on the server nodes [From docker]",
+		},
+		"labels": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Computed:    false,
+			Description: "Labels to be added node container.",
+			Elem: &schema.Resource{
+				Schema: resourceClusterEnvsAndLabelsSchema(),
+			},
 		},
 	}
 }
@@ -168,12 +190,6 @@ func resourceClusterK3dOptionsSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "Rollback changes if cluster couldn't be created in specified duration.",
 		},
-		"no_host_ip": {
-			Type:        schema.TypeBool,
-			ForceNew:    true,
-			Optional:    true,
-			Description: "Disable the automatic injection of the Host IP as 'host.k3d.internal' into the containers and CoreDNS.",
-		},
 		"no_image_volume": {
 			Type:        schema.TypeBool,
 			ForceNew:    true,
@@ -191,6 +207,13 @@ func resourceClusterK3dOptionsSchema() map[string]*schema.Schema {
 			ForceNew:    true,
 			Optional:    true,
 			Description: "Disable the automatic rollback actions, if anything goes wrong.",
+		},
+		"loadbalancer_config_overrides": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Computed:    false,
+			Description: "Use dotted YAML path syntax to override nginx loadbalancer settings",
+			Elem:        &schema.Schema{Type: schema.TypeString},
 		},
 	}
 }
@@ -244,6 +267,45 @@ func resourceClusterPortsConfig() map[string]*schema.Schema {
 			ForceNew: true,
 			Optional: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
+		},
+	}
+}
+
+func resourceHostAliasesConfig() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"ip": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Computed:    false,
+			Description: "ip address to which the list of hostnames to be mapped",
+		},
+		"hostnames": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Computed:    false,
+			Description: "list of hosts names mapped to an IP",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+		},
+	}
+}
+
+func resourceKubeconfigConfig() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"kubeconfig_update_default": {
+			Type:        schema.TypeBool,
+			ForceNew:    true,
+			Optional:    true,
+			Description: "Directly update the default kubeconfig with the new cluster's context.",
+			Default:     false,
+			Computed:    false,
+		},
+		"kubeconfig_switch_context": {
+			Type:        schema.TypeBool,
+			ForceNew:    true,
+			Optional:    true,
+			Description: "Directly switch the default kubeconfig's current-context to the new cluster's context",
+			Default:     false,
+			Computed:    false,
 		},
 	}
 }

@@ -1,6 +1,6 @@
 #resource rancherk3d_cluster_action "stop-k3s-cluster" {
-#  clusters = ["k3s-default"]
-#  stop     = true
+#  clusters = ["test"]
+#  stop     = false
 #}
 #
 #resource rancherk3d_cluster_action "start-k3s-cluster" {

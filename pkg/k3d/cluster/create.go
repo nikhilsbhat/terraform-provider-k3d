@@ -61,3 +61,7 @@ func CreateCluster(ctx context.Context, runtime runtimes.Runtime, cfg *v1alpha4.
 
 	return nil
 }
+
+func CreateK3DCluster(ctx context.Context, runtime runtimes.Runtime, cfg *v1alpha4.SimpleConfig) error {
+	return nil
+}
