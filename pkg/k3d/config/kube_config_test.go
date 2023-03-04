@@ -29,7 +29,7 @@ func TestGetKubeConfig(t *testing.T) {
 	//  user:
 	//    password: admin
 	//    username: admin==
-	//`,
+	// `,
 	//		}
 	//
 	//		clustersConfig, err := cluster.GetFilteredClusters(ctx, runtime, clusters)

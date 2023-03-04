@@ -27,7 +27,7 @@ local.check: local.fmt ## Loads all the dependencies to vendor directory
 	@go mod vendor
 	@go mod tidy
 
-local.build: local.check ## Generates the artifact with the help of 'go build'
+build.local: local.check ## Generates the artifact with the help of 'go build'
 	@go build -o $(APP_NAME)_v$(VERSION) -ldflags="-s -w"
 
 local.push: local.build ## Pushes built artifact to the specified location
@@ -71,12 +71,12 @@ generate.document:
 tflint:
 	@terraform fmt -write=false -check=true -diff=true examples/
 
-create.newversion.tfregistry: local.build ## Sets up the local terraform registry with the version specified.
-	@mkdir -p ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/
+create.newversion.tfregistry: build.local ## Sets up the local terraform registry with the version specified.
+	@mkdir -p ~/terraform-providers/registry.terraform.io/hashicorp/k3d/$(VERSION)/darwin_arm64/
 
 upload.newversion.provider: create.newversion.tfregistry ## Uploads the updated provider to local terraform registry.
-	@rm -rf  ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/terraform-provider-k3d_v$(VERSION)
-	@cp terraform-provider-k3d_v$(VERSION) ~/terraform-providers/registry.terraform.io/hashicorp/rancherk3d/$(VERSION)/darwin_arm64/
+	@rm -rf  ~/terraform-providers/registry.terraform.io/hashicorp/k3d/$(VERSION)/darwin_arm64/terraform-provider-k3d_v$(VERSION)
+	@cp terraform-provider-k3d_v$(VERSION) ~/terraform-providers/registry.terraform.io/hashicorp/k3d/$(VERSION)/darwin_arm64/
 
 local.build: local.check ## Generates the artifact with the help of 'go build'
 	GORELEASER_CURRENT_TAG=$(VERSION) BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} goreleaser build --rm-dist

@@ -9,29 +9,6 @@ import (
 	"github.com/thoas/go-funk"
 )
 
-//// GetFilteredClusters returns the list of *K3D.Config of specified clusters.
-//func GetFilteredClusters(ctx context.Context, runtime runtimes.Runtime,
-//	clusters []string,
-//) ([]*K3D.Cluster, error) {
-//	clustersList, err := client.ClusterList(ctx, runtime)
-//	if err != nil {
-//		return nil, err
-//	}
-//	var clusterConfig []*K3D.Cluster
-//	for _, clusterList := range clustersList {
-//		for _, cluster := range clusters {
-//			if clusterList.Name == cluster {
-//				clusterConfig = append(clusterConfig, clusterList)
-//			}
-//		}
-//	}
-//	if len(clusterConfig) == 0 {
-//		return nil, fmt.Errorf("cluster %v not found", clusters)
-//	}
-//
-//	return clusterConfig, nil
-//}
-
 func (cfg *Config) GetClusters(ctx context.Context, runtime runtimes.Runtime, clusterList []string) ([]*Config, error) {
 	clusters, err := client.ClusterList(ctx, runtime)
 	if err != nil {

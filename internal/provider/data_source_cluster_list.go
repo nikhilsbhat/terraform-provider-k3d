@@ -74,10 +74,11 @@ func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta
 		return diag.Errorf("errored while flattening nodes obtained: %v", err)
 	}
 
-	d.SetId(id)
-	if err := d.Set(utils2.TerraformResourceClusterList, flattenedClusters); err != nil {
+	if err = d.Set(utils2.TerraformResourceClusterList, flattenedClusters); err != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceClusterList, err)
 	}
+
+	d.SetId(id)
 
 	return nil
 }

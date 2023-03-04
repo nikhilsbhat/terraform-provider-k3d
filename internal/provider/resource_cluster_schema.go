@@ -87,11 +87,10 @@ func resourceClusterRegistriesSchema() map[string]*schema.Schema {
 			Description: "some other k3d-managed registry",
 		},
 		"config": {
-			Type:         schema.TypeString,
-			Optional:     true,
-			Computed:     false,
-			RequiredWith: []string{"create"},
-			Description:  "define contents of the `registries.yaml` file (or reference a file); same as `--registry-config /path/to/config.yaml`",
+			Type:        schema.TypeString,
+			Optional:    true,
+			Computed:    false,
+			Description: "define contents of the `registries.yaml` file (or reference a file); same as `--registry-config /path/to/config.yaml`",
 		},
 	}
 }
@@ -101,21 +100,23 @@ func resourceClusterEnvsAndLabelsSchema() map[string]*schema.Schema {
 		"key": {
 			Type:        schema.TypeString,
 			ForceNew:    true,
-			Required:    true,
-			Computed:    false,
+			Optional:    true,
 			Description: "key of key-value pair",
 		},
 		"value": {
 			Type:        schema.TypeString,
 			ForceNew:    true,
 			Optional:    true,
-			Computed:    false,
 			Description: "value of key-value pair",
 		},
-		"nodeFilters": {
+		"extra_args": {
+			Type:     schema.TypeString,
+			ForceNew: true,
+			Optional: true,
+		},
+		"node_filters": {
 			Type:     schema.TypeList,
 			Optional: true,
-			Computed: false,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 		},
 	}
@@ -140,6 +141,12 @@ func resourceClusterRuntimeSchema() map[string]*schema.Schema {
 			ForceNew:    true,
 			Optional:    true,
 			Description: "Memory limit imposed on the server nodes [From docker]",
+		},
+		"host_pid_mode": {
+			Type:        schema.TypeBool,
+			ForceNew:    true,
+			Optional:    true,
+			Description: "Enable host pid mode of server(s) and agent(s)",
 		},
 		"labels": {
 			Type:        schema.TypeList,
@@ -218,25 +225,6 @@ func resourceClusterK3dOptionsSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourceClusterK3sOptionsSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"k3s_agent_arg": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			Computed:    false,
-			Description: "Additional args passed to the k3s agent command on agent nodes",
-			Elem:        &schema.Schema{Type: schema.TypeString},
-		},
-		"k3s_server_arg": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			Computed:    false,
-			Description: "Additional args passed to the k3s server command on server nodes",
-			Elem:        &schema.Schema{Type: schema.TypeList},
-		},
-	}
-}
-
 func resourceClusterPortsConfig() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"host": {
@@ -291,7 +279,7 @@ func resourceHostAliasesConfig() map[string]*schema.Schema {
 
 func resourceKubeconfigConfig() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"kubeconfig_update_default": {
+		"update_default": {
 			Type:        schema.TypeBool,
 			ForceNew:    true,
 			Optional:    true,
@@ -299,7 +287,7 @@ func resourceKubeconfigConfig() map[string]*schema.Schema {
 			Default:     false,
 			Computed:    false,
 		},
-		"kubeconfig_switch_context": {
+		"switch_context": {
 			Type:        schema.TypeBool,
 			ForceNew:    true,
 			Optional:    true,

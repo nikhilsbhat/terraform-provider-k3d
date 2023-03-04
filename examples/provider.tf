@@ -1,14 +1,14 @@
 terraform {
   required_providers {
-    rancherk3d = {
+    k3d = {
       source  = "hashicorp/k3d"
       version = "0.1.3"
     }
   }
 }
 
-provider "rancherk3d" {
-  kubernetes_version = "1.20.2-k3s1"
+provider "k3d" {
+  kubernetes_version = "1.24.4-k3s1"
   k3d_api_version    = "k3d.io/v1alpha4"
   registry           = "rancher/k3s"
   kind               = "Simple"

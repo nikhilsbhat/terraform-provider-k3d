@@ -1,6 +1,6 @@
-resource "rancherk3d_node_create" "node-1" {
-  name     = "test-node-from-terraform"
-  cluster  = "k3s-default"
+resource "k3d_node_create" "node-1" {
+  name     = "sample-node-2"
+  cluster  = k3d_cluster_create.sample_cluster.name
   role     = "agent"
   replicas = 1
 #  memory   = "8g"
@@ -8,7 +8,7 @@ resource "rancherk3d_node_create" "node-1" {
   //  timeout  = 1
 }
 
-#resource "rancherk3d_node_create" "node-2" {
+#resource "k3d_node_create" "node-2" {
 #  name     = "test-node-terraform"
 #  cluster  = "k3s-default"
 #  role     = "agent"
