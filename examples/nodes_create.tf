@@ -3,7 +3,7 @@ resource "k3d_node_create" "node-1" {
   cluster  = k3d_cluster_create.sample_cluster.name
   role     = "agent"
   replicas = 1
-#  memory   = "8g"
+  #  memory   = "8g"
   //  wait     = false
   //  timeout  = 1
 }

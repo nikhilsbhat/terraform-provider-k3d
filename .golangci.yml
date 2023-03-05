@@ -51,8 +51,6 @@ run:
     - Makefile
     - README.md
     - Dockerfile
-    - rancherk3d/resource_cluster.go
-    - rancherk3d/data_source.go
 
 severity:
   default-severity: error
