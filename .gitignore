@@ -25,3 +25,7 @@ templates-latest/
 
 # dropping local release folder
 dist/
+
+# dropping all test results
+cover.out
+cover.html

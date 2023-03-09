@@ -1,6 +1,6 @@
-data "k3d_registry_list" "registry-1" {
+data "k3d_registry" "registry-1" {
   depends_on = [
-    k3d_create_registry.registry,
+    k3d_registry.registry,
   ]
   cluster = "k3s-default"
   registries = [
@@ -9,5 +9,5 @@ data "k3d_registry_list" "registry-1" {
 }
 
 #output "rancher_registry_list" {
-#  value = data.k3d_registry_list.registry-1.registries_list
+#  value = data.k3d_registry.registry-1.registries_list
 #}

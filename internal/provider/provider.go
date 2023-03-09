@@ -71,20 +71,20 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"k3d_create_registry":  resourceRegistry(),
+			"k3d_registry":         resourceRegistry(),
 			"k3d_connect_registry": resourceConnectRegistry(),
 			"k3d_load_image":       resourceImage(),
 			"k3d_node_action":      resourceNodeAction(),
-			"k3d_node_create":      resourceNode(),
+			"k3d_node":             resourceNode(),
 			"k3d_cluster_action":   resourceClusterAction(),
-			"k3d_cluster_create":   resourceCluster(),
+			"k3d_cluster":          resourceCluster(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"k3d_node_list":     dataSourceNodeList(),
-			"k3d_cluster_list":  dataSourceClusterList(),
-			"k3d_kubeconfig":    dataSourceKubeConfig(),
-			"k3d_registry_list": dataSourceRegistryList(),
+			"k3d_node":       dataSourceNodeList(),
+			"k3d_cluster":    dataSourceClusterList(),
+			"k3d_kubeconfig": dataSourceKubeConfig(),
+			"k3d_registry":   dataSourceRegistryList(),
 		},
 
 		ConfigureContextFunc: client.GetK3dConfig,

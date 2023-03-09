@@ -1,4 +1,4 @@
-resource "k3d_cluster_create" "sample_cluster" {
+resource "k3d_cluster" "sample_cluster" {
   name          = "default"
   servers_count = 1
   agents_count  = 2
