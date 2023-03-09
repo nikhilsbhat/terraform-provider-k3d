@@ -10,6 +10,7 @@ terraform-provider-k3d*
 terraform-provider-rancherk3d*
 
 # dropping terraform plans and states
+.terraform.lock.hcl
 terraform.tfstate*
 *.tfplan
 .terraform

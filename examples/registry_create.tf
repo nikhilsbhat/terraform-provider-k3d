@@ -12,12 +12,12 @@ resource "k3d_registry" "registry-1" {
   host     = "basnik.com"
 }
 
-#resource "k3d_registry" "registry-2" {
-#  name     = "k3s-registry-2"
-#  cluster  = "k3s-default"
-#  protocol = "http"
-#  expose = {
-#    "hostIp" : "0.0.0.0",
-#    "hostPort" : "5300",
-#  }
-#}
+resource "k3d_registry" "registry-2" {
+  name     = "k3s-registry-2"
+  cluster  = "k3s-default"
+  protocol = "http"
+  expose = {
+    "hostIp" : "0.0.0.0",
+    "hostPort" : "5300",
+  }
+}

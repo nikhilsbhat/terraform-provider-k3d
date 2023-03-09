@@ -49,7 +49,7 @@ const (
 	TerraformResourceVolumes          = "volumes"
 	TerraformResourceK3dOptions       = "k3d_options"
 	TerraformResourceK3sOptions       = "k3s_options"
-	TerraformHostAlias                = "hostAliases"
+	TerraformHostAlias                = "host_aliases"
 	TerraformKubeAPI                  = "kube_api"
 	TerrFormConfigYAML                = "config_yaml"
 	TerraformK3dLabel                 = "k3d.terraform"
