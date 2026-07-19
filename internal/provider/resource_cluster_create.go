@@ -413,6 +413,17 @@ func flattenKubeAPI(api interface{}) v1alpha4.SimpleExposureOpts {
 
 func flattenK3DOptions(k3d interface{}) (v1alpha4.SimpleConfigOptionsK3d, error) {
 	k3dList := k3d.(*schema.Set).List()
+
+	if len(k3dList) == 0 {
+		return v1alpha4.SimpleConfigOptionsK3d{
+			Wait:                true,
+			DisableLoadbalancer: false,
+			DisableImageVolume:  false,
+			NoRollback:          false,
+			Loadbalancer:        v1alpha4.SimpleConfigOptionsK3dLoadbalancer{},
+		}, nil
+	}
+
 	k := k3dList[0].(map[string]interface{})
 
 	k3DOptions := v1alpha4.SimpleConfigOptionsK3d{
@@ -451,11 +462,11 @@ func flattenK3SOptions(k3s interface{}) v1alpha4.SimpleConfigOptionsK3s {
 	return k3sOptions
 }
 
-func flattenExtraArgs(extraArgs interface{}) []v1alpha4.K3sArgWithNodeFilters {
+func flattenExtraArgs(extraArgs []interface{}) []v1alpha4.K3sArgWithNodeFilters {
 	k3sExtraArgs := make([]v1alpha4.K3sArgWithNodeFilters, 0)
 
-	for _, port := range schemaCollection(extraArgs) {
-		e := port.(map[string]interface{})
+	for _, arg := range extraArgs {
+		e := arg.(map[string]interface{})
 		k3sExtraArgs = append(k3sExtraArgs, v1alpha4.K3sArgWithNodeFilters{
 			Arg:         fmt.Sprintf("--%s=%s", e["key"].(string), e["value"].(string)),
 			NodeFilters: utils.GetSlice(e["node_filters"].([]interface{})),
@@ -465,11 +476,11 @@ func flattenExtraArgs(extraArgs interface{}) []v1alpha4.K3sArgWithNodeFilters {
 	return k3sExtraArgs
 }
 
-func flattenNodeLabels(nodeLabels interface{}) []v1alpha4.LabelWithNodeFilters {
+func flattenNodeLabels(nodeLabels []interface{}) []v1alpha4.LabelWithNodeFilters {
 	k3sNodeLabels := make([]v1alpha4.LabelWithNodeFilters, 0)
 
-	for _, port := range schemaCollection(nodeLabels) {
-		e := port.(map[string]interface{})
+	for _, nl := range nodeLabels {
+		e := nl.(map[string]interface{})
 		k3sNodeLabels = append(k3sNodeLabels, v1alpha4.LabelWithNodeFilters{
 			Label:       fmt.Sprintf("%s=%s", e["key"].(string), e["value"].(string)),
 			NodeFilters: utils.GetSlice(e["node_filters"].([]interface{})),
@@ -477,17 +488,6 @@ func flattenNodeLabels(nodeLabels interface{}) []v1alpha4.LabelWithNodeFilters {
 	}
 
 	return k3sNodeLabels
-}
-
-func schemaCollection(value interface{}) []interface{} {
-	switch v := value.(type) {
-	case []interface{}:
-		return v
-	case *schema.Set:
-		return v.List()
-	default:
-		return nil
-	}
 }
 
 func flattenKubeConfig(cfg interface{}) v1alpha4.SimpleConfigOptionsKubeconfig {
