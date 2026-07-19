@@ -34,6 +34,14 @@ resource "k3d_cluster" "sample_cluster" {
         no_image_volume = false
     }
 
+    k3s_options {
+        extra_args {
+            key          = "token"
+            value        = "12345"
+            node_filters = ["agent:0"]
+        }
+    }
+
     kube_config {
         update_default = true
         switch_context = true
@@ -214,5 +222,4 @@ Optional:
 
 - `node_filters` (List of String)
 - `source` (String) Source path of volume mount
-
 

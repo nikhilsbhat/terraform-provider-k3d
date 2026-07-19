@@ -17,13 +17,13 @@
 
 ## Features supported by the provider at the moment.
 
-| component    | list/fetch | start/stop   | create | delete | load    |
-| :----------: | :--------: | :----------: |:------:|:------:| ------: |
-|  `cluster`   | yes        | yes          |  yes   |  yes   |  no     |
-|  `node`      | yes        | yes          |  yes   |  yes   |  no     |
-|  `registry`  | yes        | yes          |  yes   |  yes   |  no     |
-| `kubeconfig` | yes        | no           |   no   |  yes   |  no     |
-|    `image`   | no         | no           |   no   |   no   |  yes    |
+|  component   | list/fetch | start/stop | create | delete | load |
+|:------------:|:----------:|:----------:|:------:|:------:|-----:|
+|  `cluster`   |    yes     |    yes     |  yes   |  yes   |   no |
+|    `node`    |    yes     |    yes     |  yes   |  yes   |   no |
+|  `registry`  |    yes     |    yes     |  yes   |  yes   |   no |
+| `kubeconfig` |    yes     |     no     |   no   |  yes   |   no |
+|   `image`    |     no     |     no     |   no   |   no   |  yes |
 
 ## Documentation
 
