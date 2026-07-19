@@ -221,5 +221,5 @@ Required:
 Optional:
 
 - `node_filters` (List of String)
-- `source` (String) Source path of volume mount
+- `source` (String) Source path of volume mount. This value should be suffixed with a colon; so for ``--volume /host/foo:/node/bar``, this value would be ``/host/foo:``.
 
