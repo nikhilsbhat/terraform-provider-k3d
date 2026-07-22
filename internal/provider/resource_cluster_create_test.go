@@ -13,7 +13,7 @@ func TestFlattenK3SOptionsWithExtraArgsBlocks(t *testing.T) {
 		map[string]interface{}{
 			"extra_args": []interface{}{
 				map[string]interface{}{
-					"key":          "token",
+					"key":          "--token",
 					"value":        "12345",
 					"node_filters": []interface{}{"agent:0"},
 				},

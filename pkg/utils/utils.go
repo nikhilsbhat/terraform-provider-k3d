@@ -42,7 +42,7 @@ func GetHash(s string) int {
 
 // GetSlice returns StringSlice of passed interface array.
 func GetSlice(slice []interface{}) []string {
-	stringSLice := make([]string, 0)
+	stringSLice := make([]string, 0, len(slice))
 	for _, sl := range slice {
 		stringSLice = append(stringSLice, sl.(string))
 	}

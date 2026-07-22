@@ -3,6 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -400,9 +402,9 @@ func flattenKubeAPI(api interface{}) v1alpha4.SimpleExposureOpts {
 	hostPort, _ := k3dCmdUtil.GetFreePort()
 
 	if a["host_port"].(int) == 0 {
-		exposureOpts.HostPort = fmt.Sprintf("%d", hostPort)
+		exposureOpts.HostPort = strconv.Itoa(hostPort)
 	} else {
-		exposureOpts.HostPort = fmt.Sprintf("%d", a["host_port"].(int))
+		exposureOpts.HostPort = strconv.Itoa(a["host_port"].(int))
 	}
 
 	exposureOpts.Host = a["host"].(string)
@@ -415,13 +417,7 @@ func flattenK3DOptions(k3d interface{}) (v1alpha4.SimpleConfigOptionsK3d, error)
 	k3dList := k3d.(*schema.Set).List()
 
 	if len(k3dList) == 0 {
-		return v1alpha4.SimpleConfigOptionsK3d{
-			Wait:                true,
-			DisableLoadbalancer: false,
-			DisableImageVolume:  false,
-			NoRollback:          false,
-			Loadbalancer:        v1alpha4.SimpleConfigOptionsK3dLoadbalancer{},
-		}, nil
+		return defaultK3DOptions(), nil
 	}
 
 	k := k3dList[0].(map[string]interface{})
@@ -447,6 +443,16 @@ func flattenK3DOptions(k3d interface{}) (v1alpha4.SimpleConfigOptionsK3d, error)
 	return k3DOptions, nil
 }
 
+func defaultK3DOptions() v1alpha4.SimpleConfigOptionsK3d {
+	return v1alpha4.SimpleConfigOptionsK3d{
+		Wait:                true,
+		DisableLoadbalancer: false,
+		DisableImageVolume:  false,
+		NoRollback:          false,
+		Loadbalancer:        v1alpha4.SimpleConfigOptionsK3dLoadbalancer{},
+	}
+}
+
 func flattenK3SOptions(k3s interface{}) v1alpha4.SimpleConfigOptionsK3s {
 	var k3sOptions v1alpha4.SimpleConfigOptionsK3s
 
@@ -463,12 +469,12 @@ func flattenK3SOptions(k3s interface{}) v1alpha4.SimpleConfigOptionsK3s {
 }
 
 func flattenExtraArgs(extraArgs []interface{}) []v1alpha4.K3sArgWithNodeFilters {
-	k3sExtraArgs := make([]v1alpha4.K3sArgWithNodeFilters, 0)
+	k3sExtraArgs := make([]v1alpha4.K3sArgWithNodeFilters, 0, len(extraArgs))
 
 	for _, arg := range extraArgs {
 		e := arg.(map[string]interface{})
 		k3sExtraArgs = append(k3sExtraArgs, v1alpha4.K3sArgWithNodeFilters{
-			Arg:         fmt.Sprintf("--%s=%s", e["key"].(string), e["value"].(string)),
+			Arg:         fmt.Sprintf("--%s=%s", normalizeK3SArgKey(e["key"].(string)), e["value"].(string)),
 			NodeFilters: utils.GetSlice(e["node_filters"].([]interface{})),
 		})
 	}
@@ -476,8 +482,12 @@ func flattenExtraArgs(extraArgs []interface{}) []v1alpha4.K3sArgWithNodeFilters 
 	return k3sExtraArgs
 }
 
+func normalizeK3SArgKey(key string) string {
+	return strings.TrimLeft(key, "-")
+}
+
 func flattenNodeLabels(nodeLabels []interface{}) []v1alpha4.LabelWithNodeFilters {
-	k3sNodeLabels := make([]v1alpha4.LabelWithNodeFilters, 0)
+	k3sNodeLabels := make([]v1alpha4.LabelWithNodeFilters, 0, len(nodeLabels))
 
 	for _, nl := range nodeLabels {
 		e := nl.(map[string]interface{})
