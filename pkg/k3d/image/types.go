@@ -18,8 +18,8 @@ type Config struct {
 	Cluster      string        `json:"cluster,omitempty"`
 	All          bool          `json:"all,omitempty"`
 	StoreTarBall bool          `json:"keep_tarball,omitempty"`
-	StoredImages StoredImages  `json:"images_stored,omitempty"`
-	Config       client.Config `json:"config,omitempty"`
+	StoredImages StoredImages  `json:"images_stored"`
+	Config       client.Config `json:"config"`
 }
 
 // StoredImages holds a data of cluster to images mapping of loaded images.

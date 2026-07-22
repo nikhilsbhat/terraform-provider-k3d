@@ -100,7 +100,7 @@ func resourceRegistry() *schema.Resource {
 	}
 }
 
-func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	//nolint:nestif
@@ -114,6 +114,7 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 
 				return diag.Errorf("errored while fetching randomID %v", err)
 			}
+
 			id = newID
 		}
 
@@ -154,7 +155,7 @@ func resourceRegistryCreate(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRegistryRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	registryName := utils2.String(d.Get(utils2.TerraformResourceName))
@@ -180,7 +181,7 @@ func resourceRegistryRead(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRegistryDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	id := d.Id()
@@ -190,7 +191,8 @@ func resourceRegistryDelete(ctx context.Context, d *schema.ResourceData, meta in
 
 	registriesFromState := d.Get(utils2.TerraformResourceRegistriesList)
 
-	var nodes []*k3dNode.Config
+	nodes := make([]*k3dNode.Config, 0)
+
 	if err := mapstructure.Decode(registriesFromState, &nodes); err != nil {
 		return diag.Errorf("oops decoding retrieved registries errored : %s", err.Error())
 	}

@@ -20,6 +20,7 @@ linters:
     - varnamelen
     - noinlineerr
     - tagliatelle
+    - wrapcheck
   settings:
     cyclop:
       max-complexity: 20

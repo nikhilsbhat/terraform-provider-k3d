@@ -91,7 +91,7 @@ func resourceNode() *schema.Resource {
 	}
 }
 
-func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	//nolint:nestif
@@ -105,6 +105,7 @@ func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interf
 
 				return diag.Errorf("errored while fetching randomID %v", err)
 			}
+
 			id = newID
 		}
 
@@ -112,6 +113,7 @@ func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		if err := d.Set(utils.TerraformResourceCreatedAt, createInitiatedAt.String()); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils.TerraformResourceCreatedAt, err)
 		}
+
 		nodeConfig := k3dNode.Config{
 			Name:              []string{utils.String(d.Get(utils.TerraformResourceName))},
 			ClusterAssociated: utils.String(d.Get(utils.TerraformResourceCluster)),
@@ -140,7 +142,7 @@ func resourceNodeCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourceNodeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	created := utils.String(d.Get(utils.TerraformResourceCreatedAt))
@@ -164,7 +166,7 @@ func resourceNodeRead(ctx context.Context, d *schema.ResourceData, meta interfac
 	return nil
 }
 
-func resourceNodeDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	id := d.Id()
@@ -173,7 +175,9 @@ func resourceNodeDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	nodesFromState := d.Get(utils.TerraformResourceNodes)
-	var nodes []*k3dNode.Config
+
+	nodes := make([]*k3dNode.Config, 0)
+
 	if err := mapstructure.Decode(nodesFromState, &nodes); err != nil {
 		return diag.Errorf("oops reading nodes from state errored with : %s", err.Error())
 	}

@@ -5,13 +5,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/nikhilsbhat/terraform-provider-k3d/pkg/client"
+	terraformErrors "github.com/nikhilsbhat/terraform-provider-k3d/pkg/errors"
 )
 
-func init() { //nolint:gochecknoinits
+//nolint:gochecknoinits
+func init() {
 	// Set descriptions to support markdown syntax, this will be used in document generation
 	// and the language server.
-	schema.DescriptionKind = schema.StringMarkdown
-
 	// Customize the content of descriptions when output. For example you can add defaults on
 	// to the exported descriptions if present.
 	// schema.SchemaDescriptionBuilder = func(s *schema.Schema) string {
@@ -21,6 +21,7 @@ func init() { //nolint:gochecknoinits
 	// 	}
 	// 	return strings.TrimSpace(desc)
 	// }
+	schema.DescriptionKind = schema.StringMarkdown
 }
 
 // Provider returns a terraform.ResourceProvider.
@@ -91,11 +92,11 @@ func Provider() *schema.Provider {
 	}
 }
 
-func ValidateKindFunc(v interface{}, k string) ([]string, []error) {
+func ValidateKindFunc(v any, k string) ([]string, []error) {
 	if v.(string) != "Simple" {
 		return nil, []error{
-			fmt.Errorf("kind '%s' is unsupported only supported value is Simple", k),
-			fmt.Errorf("for more info refer 'https://k3d.io/usage/configfile/'"),
+			fmt.Errorf("%w: %s", terraformErrors.ErrUnsupportedKind, k),
+			terraformErrors.ErrConfigFileReference,
 		}
 	}
 

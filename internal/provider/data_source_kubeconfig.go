@@ -47,18 +47,20 @@ func dataSourceKubeConfig() *schema.Resource {
 	}
 }
 
-func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	id := d.Id()
 	if len(id) == 0 {
 		log.Printf("fetching new ID for kubeconfig: %s", id)
+
 		newID, err := utils2.GetRandomID()
 		if err != nil {
 			d.SetId("")
 
 			return diag.Errorf("errored while fetching randomID %v", err)
 		}
+
 		id = newID
 	}
 
@@ -72,7 +74,7 @@ func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	clusters, err := clusterCfg.GetClusters(ctx, defaultConfig.K3DRuntime,
-		utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]interface{})))
+		utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]any)))
 	if err != nil {
 		return diag.Errorf("fetching cluster information errored with: %v", err)
 	}
@@ -87,6 +89,7 @@ func dataSourceKubeConfigRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(id)
+
 	if seRrr := d.Set(utils2.TerraformResourceKubeConfig, kubeConfig); seRrr != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceKubeConfig, seRrr)
 	}

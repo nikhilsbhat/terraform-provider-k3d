@@ -9,20 +9,20 @@ import (
 func TestFlattenK3SOptionsWithExtraArgsBlocks(t *testing.T) {
 	k3sOptionsSchema := resourceCluster().Schema["k3s_options"]
 	k3sOptionsHash := schema.HashResource(k3sOptionsSchema.Elem.(*schema.Resource))
-	k3sOptions := flattenK3SOptions(schema.NewSet(k3sOptionsHash, []interface{}{
-		map[string]interface{}{
-			"extra_args": []interface{}{
-				map[string]interface{}{
+	k3sOptions := flattenK3SOptions(schema.NewSet(k3sOptionsHash, []any{
+		map[string]any{
+			"extra_args": []any{
+				map[string]any{
 					"key":          "--token",
 					"value":        "12345",
-					"node_filters": []interface{}{"agent:0"},
+					"node_filters": []any{"agent:0"},
 				},
 			},
-			"node_labels": []interface{}{
-				map[string]interface{}{
+			"node_labels": []any{
+				map[string]any{
 					"key":          "role",
 					"value":        "worker",
-					"node_filters": []interface{}{"agent:*"},
+					"node_filters": []any{"agent:*"},
 				},
 			},
 		},

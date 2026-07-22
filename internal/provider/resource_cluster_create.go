@@ -22,6 +22,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+//nolint:funlen
 func resourceCluster() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceClusterCreate,
@@ -223,12 +224,13 @@ func resourceCluster() *schema.Resource {
 	}
 }
 
-func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	if !d.IsNewResource() {
 		return nil
 	}
+
 	id := d.Id()
 
 	if len(id) == 0 {
@@ -237,6 +239,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	clusterName := utils.String(d.Get(utils.TerraformResourceName))
+
 	k3dImage := utils.String(d.Get(utils.TerraformResourceImage))
 	if len(k3dImage) == 0 {
 		k3dImage = defaultConfig.GetK3dImage()
@@ -285,7 +288,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	return resourceClusterRead(ctx, d, meta)
 }
 
-func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceClusterRead(ctx context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
 	clusterName := utils.String(d.Get(utils.TerraformResourceName))
 
 	k3dCluster, err := k3dClient.ClusterGet(ctx, runtimes.SelectedRuntime, &types2.Cluster{Name: clusterName})
@@ -313,7 +316,7 @@ func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	id := d.Id()
@@ -329,67 +332,67 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func flattenPorts(ports interface{}) []v1alpha4.PortWithNodeFilters {
+func flattenPorts(ports any) []v1alpha4.PortWithNodeFilters {
 	k3dPorts := make([]v1alpha4.PortWithNodeFilters, 0)
 
 	for _, port := range ports.(*schema.Set).List() {
-		p := port.(map[string]interface{})
+		p := port.(map[string]any)
 		k3dPorts = append(k3dPorts, v1alpha4.PortWithNodeFilters{
 			Port:        getPortMappings(p),
-			NodeFilters: utils.GetSlice(p["node_filters"].([]interface{})),
+			NodeFilters: utils.GetSlice(p["node_filters"].([]any)),
 		})
 	}
 
 	return k3dPorts
 }
 
-func getPortMappings(p map[string]interface{}) string {
+func getPortMappings(p map[string]any) string {
 	return fmt.Sprintf("%s:%d:%d/%s", p["host"].(string), p["host_port"].(int), p["container_port"].(int), p["protocol"].(string))
 }
 
-func flattenVolumes(volumes interface{}) []v1alpha4.VolumeWithNodeFilters {
+func flattenVolumes(volumes any) []v1alpha4.VolumeWithNodeFilters {
 	k3dVolumes := make([]v1alpha4.VolumeWithNodeFilters, 0)
 
 	for _, volume := range volumes.(*schema.Set).List() {
-		v := volume.(map[string]interface{})
+		v := volume.(map[string]any)
 		k3dVolumes = append(k3dVolumes, v1alpha4.VolumeWithNodeFilters{
 			Volume:      fmt.Sprintf("%s/%s", v["source"].(string), v["destination"].(string)),
-			NodeFilters: utils.GetSlice(v["node_filters"].([]interface{})),
+			NodeFilters: utils.GetSlice(v["node_filters"].([]any)),
 		})
 	}
 
 	return k3dVolumes
 }
 
-func flattenHostAlias(alias interface{}) []types2.HostAlias {
+func flattenHostAlias(alias any) []types2.HostAlias {
 	k3dAlias := make([]types2.HostAlias, 0)
 
 	for _, port := range alias.(*schema.Set).List() {
-		a := port.(map[string]interface{})
+		a := port.(map[string]any)
 		k3dAlias = append(k3dAlias, types2.HostAlias{
 			IP:        a["ip"].(string),
-			Hostnames: utils.GetSlice(a["hostnames"].([]interface{})),
+			Hostnames: utils.GetSlice(a["hostnames"].([]any)),
 		})
 	}
 
 	return k3dAlias
 }
 
-func flattenEnvVars(envs interface{}) []v1alpha4.EnvVarWithNodeFilters {
+func flattenEnvVars(envs any) []v1alpha4.EnvVarWithNodeFilters {
 	k3dEnvs := make([]v1alpha4.EnvVarWithNodeFilters, 0)
 
 	for _, port := range envs.(*schema.Set).List() {
-		e := port.(map[string]interface{})
+		e := port.(map[string]any)
 		k3dEnvs = append(k3dEnvs, v1alpha4.EnvVarWithNodeFilters{
 			EnvVar:      fmt.Sprintf("%s=%s", e["key"].(string), e["value"].(string)),
-			NodeFilters: utils.GetSlice(e["node_filters"].([]interface{})),
+			NodeFilters: utils.GetSlice(e["node_filters"].([]any)),
 		})
 	}
 
 	return k3dEnvs
 }
 
-func flattenKubeAPI(api interface{}) v1alpha4.SimpleExposureOpts {
+func flattenKubeAPI(api any) v1alpha4.SimpleExposureOpts {
 	var exposureOpts v1alpha4.SimpleExposureOpts
 
 	if api.(*schema.Set).Len() == 0 {
@@ -397,7 +400,7 @@ func flattenKubeAPI(api interface{}) v1alpha4.SimpleExposureOpts {
 	}
 
 	apiList := api.(*schema.Set).List()
-	a := apiList[0].(map[string]interface{})
+	a := apiList[0].(map[string]any)
 
 	hostPort, _ := k3dCmdUtil.GetFreePort()
 
@@ -413,14 +416,14 @@ func flattenKubeAPI(api interface{}) v1alpha4.SimpleExposureOpts {
 	return exposureOpts
 }
 
-func flattenK3DOptions(k3d interface{}) (v1alpha4.SimpleConfigOptionsK3d, error) {
+func flattenK3DOptions(k3d any) (v1alpha4.SimpleConfigOptionsK3d, error) {
 	k3dList := k3d.(*schema.Set).List()
 
 	if len(k3dList) == 0 {
 		return defaultK3DOptions(), nil
 	}
 
-	k := k3dList[0].(map[string]interface{})
+	k := k3dList[0].(map[string]any)
 
 	k3DOptions := v1alpha4.SimpleConfigOptionsK3d{
 		Wait:                utils.Bool(k["wait"]),
@@ -428,7 +431,7 @@ func flattenK3DOptions(k3d interface{}) (v1alpha4.SimpleConfigOptionsK3d, error)
 		DisableImageVolume:  utils.Bool(k["no_image_volume"]),
 		NoRollback:          utils.Bool(k["no_rollback"]),
 		Loadbalancer: v1alpha4.SimpleConfigOptionsK3dLoadbalancer{
-			ConfigOverrides: utils.GetSlice(k["loadbalancer_config_overrides"].([]interface{})),
+			ConfigOverrides: utils.GetSlice(k["loadbalancer_config_overrides"].([]any)),
 		},
 	}
 
@@ -437,6 +440,7 @@ func flattenK3DOptions(k3d interface{}) (v1alpha4.SimpleConfigOptionsK3d, error)
 		if err != nil {
 			return k3DOptions, err
 		}
+
 		k3DOptions.Timeout = timeout
 	}
 
@@ -453,7 +457,7 @@ func defaultK3DOptions() v1alpha4.SimpleConfigOptionsK3d {
 	}
 }
 
-func flattenK3SOptions(k3s interface{}) v1alpha4.SimpleConfigOptionsK3s {
+func flattenK3SOptions(k3s any) v1alpha4.SimpleConfigOptionsK3s {
 	var k3sOptions v1alpha4.SimpleConfigOptionsK3s
 
 	if k3s.(*schema.Set).Len() == 0 {
@@ -461,21 +465,21 @@ func flattenK3SOptions(k3s interface{}) v1alpha4.SimpleConfigOptionsK3s {
 	}
 
 	k3sList := k3s.(*schema.Set).List()
-	k := k3sList[0].(map[string]interface{})
-	k3sOptions.ExtraArgs = flattenExtraArgs(k["extra_args"].([]interface{}))
-	k3sOptions.NodeLabels = flattenNodeLabels(k["node_labels"].([]interface{}))
+	k := k3sList[0].(map[string]any)
+	k3sOptions.ExtraArgs = flattenExtraArgs(k["extra_args"].([]any))
+	k3sOptions.NodeLabels = flattenNodeLabels(k["node_labels"].([]any))
 
 	return k3sOptions
 }
 
-func flattenExtraArgs(extraArgs []interface{}) []v1alpha4.K3sArgWithNodeFilters {
+func flattenExtraArgs(extraArgs []any) []v1alpha4.K3sArgWithNodeFilters {
 	k3sExtraArgs := make([]v1alpha4.K3sArgWithNodeFilters, 0, len(extraArgs))
 
 	for _, arg := range extraArgs {
-		e := arg.(map[string]interface{})
+		e := arg.(map[string]any)
 		k3sExtraArgs = append(k3sExtraArgs, v1alpha4.K3sArgWithNodeFilters{
 			Arg:         fmt.Sprintf("--%s=%s", normalizeK3SArgKey(e["key"].(string)), e["value"].(string)),
-			NodeFilters: utils.GetSlice(e["node_filters"].([]interface{})),
+			NodeFilters: utils.GetSlice(e["node_filters"].([]any)),
 		})
 	}
 
@@ -486,21 +490,21 @@ func normalizeK3SArgKey(key string) string {
 	return strings.TrimLeft(key, "-")
 }
 
-func flattenNodeLabels(nodeLabels []interface{}) []v1alpha4.LabelWithNodeFilters {
+func flattenNodeLabels(nodeLabels []any) []v1alpha4.LabelWithNodeFilters {
 	k3sNodeLabels := make([]v1alpha4.LabelWithNodeFilters, 0, len(nodeLabels))
 
 	for _, nl := range nodeLabels {
-		e := nl.(map[string]interface{})
+		e := nl.(map[string]any)
 		k3sNodeLabels = append(k3sNodeLabels, v1alpha4.LabelWithNodeFilters{
 			Label:       fmt.Sprintf("%s=%s", e["key"].(string), e["value"].(string)),
-			NodeFilters: utils.GetSlice(e["node_filters"].([]interface{})),
+			NodeFilters: utils.GetSlice(e["node_filters"].([]any)),
 		})
 	}
 
 	return k3sNodeLabels
 }
 
-func flattenKubeConfig(cfg interface{}) v1alpha4.SimpleConfigOptionsKubeconfig {
+func flattenKubeConfig(cfg any) v1alpha4.SimpleConfigOptionsKubeconfig {
 	var kubeConfig v1alpha4.SimpleConfigOptionsKubeconfig
 
 	if cfg.(*schema.Set).Len() == 0 {
@@ -508,7 +512,7 @@ func flattenKubeConfig(cfg interface{}) v1alpha4.SimpleConfigOptionsKubeconfig {
 	}
 
 	cfgList := cfg.(*schema.Set).List()
-	c := cfgList[0].(map[string]interface{})
+	c := cfgList[0].(map[string]any)
 
 	kubeConfig.SwitchCurrentContext = c["switch_context"].(bool)
 	kubeConfig.UpdateDefaultKubeconfig = c["update_default"].(bool)
@@ -516,7 +520,7 @@ func flattenKubeConfig(cfg interface{}) v1alpha4.SimpleConfigOptionsKubeconfig {
 	return kubeConfig
 }
 
-func flattenRuntime(run interface{}) v1alpha4.SimpleConfigOptionsRuntime {
+func flattenRuntime(run any) v1alpha4.SimpleConfigOptionsRuntime {
 	var runtime v1alpha4.SimpleConfigOptionsRuntime
 
 	if run.(*schema.Set).Len() == 0 {
@@ -524,29 +528,29 @@ func flattenRuntime(run interface{}) v1alpha4.SimpleConfigOptionsRuntime {
 	}
 
 	runList := run.(*schema.Set).List()
-	k := runList[0].(map[string]interface{})
+	k := runList[0].(map[string]any)
 
 	runtime.GPURequest = k["gpu_request"].(string)
 	runtime.ServersMemory = k["servers_memory"].(string)
 	runtime.AgentsMemory = k["agents_memory"].(string)
 	runtime.HostPidMode = k["host_pid_mode"].(bool)
-	runtime.Labels = flattenNodeLabels(k["labels"].([]interface{}))
+	runtime.Labels = flattenNodeLabels(k["labels"].([]any))
 
 	return runtime
 }
 
-func flattenRegistries(reg interface{}) v1alpha4.SimpleConfigRegistries {
+func flattenRegistries(reg any) v1alpha4.SimpleConfigRegistries {
 	regs := reg.(*schema.Set).List()
 	if len(regs) == 0 || regs[0] == nil {
 		return v1alpha4.SimpleConfigRegistries{}
 	}
 
-	r := regs[0].(map[string]interface{})
+	r := regs[0].(map[string]any)
 
 	create := r["create"].(bool)
 	if !create {
 		return v1alpha4.SimpleConfigRegistries{
-			Use: utils.GetSlice(r["use"].([]interface{})),
+			Use: utils.GetSlice(r["use"].([]any)),
 		}
 	}
 

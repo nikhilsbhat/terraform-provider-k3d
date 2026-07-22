@@ -72,7 +72,7 @@ func resourceConnectRegistry() *schema.Resource {
 	}
 }
 
-func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	if d.IsNewResource() {
@@ -85,6 +85,7 @@ func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData,
 
 				return diag.Errorf("errored while fetching randomID %v", err)
 			}
+
 			id = newID
 		}
 
@@ -107,7 +108,7 @@ func resourceConnectRegistryCluster(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceConnectRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceConnectRegistryRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	connect := k3dRegistry.Config{
@@ -128,12 +129,13 @@ func resourceConnectRegistryRead(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceConnectRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceConnectRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	if d.HasChange(utils2.TerraformResourceRegistries) || d.HasChange(utils2.TerraformResourceCluster) ||
 		d.HasChange(utils2.TerraformResourceConnect) || d.HasChange(utils2.TerraformResourceStop) {
 		connect := getUpdatedRegistriesChanges(d)
+
 		if err := connectRegistryToCluster(ctx, defaultConfig.K3DRuntime, connect); err != nil {
 			return diag.Errorf("errored while connecting/disconnecting registries '%v' with cluster '%s,", connect.Name, connect.Cluster)
 		}
@@ -141,15 +143,18 @@ func resourceConnectRegistryUpdate(ctx context.Context, d *schema.ResourceData, 
 		if err := d.Set(utils2.TerraformResourceCluster, connect.Cluster); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceCluster, err)
 		}
+
 		if err := d.Set(utils2.TerraformResourceRegistries, connect.Name); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceRegistries, err)
 		}
+
 		if err := d.Set(utils2.TerraformResourceConnect, connect.Connect); err != nil {
 			return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceConnect, err)
 		}
 
 		return resourceConnectRegistryRead(ctx, d, meta)
 	}
+
 	log.Printf("nothing to update so skipping")
 
 	return nil

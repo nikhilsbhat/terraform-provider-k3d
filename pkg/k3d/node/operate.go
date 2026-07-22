@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	terraformErrors "github.com/nikhilsbhat/terraform-provider-k3d/pkg/errors"
 	"github.com/nikhilsbhat/terraform-provider-k3d/pkg/utils"
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
@@ -17,7 +18,9 @@ func FilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string
 	if err != nil {
 		return nil, err
 	}
+
 	filteredNodes := make([]*K3D.Node, 0)
+
 	for _, k3dNode := range k3dNodes {
 		for _, node := range nodes {
 			if k3dNode.Name == node {
@@ -38,7 +41,7 @@ func (cfg *Config) StartStopNode(ctx context.Context, runtime runtimes.Runtime) 
 		return err
 	}
 
-	var filteredNodes []*K3D.Node
+	filteredNodes := make([]*K3D.Node, 0)
 
 	if !cfg.All {
 		filteredNodes = funk.Filter(nodes, func(node *K3D.Node) bool {
@@ -47,7 +50,7 @@ func (cfg *Config) StartStopNode(ctx context.Context, runtime runtimes.Runtime) 
 	}
 
 	if len(filteredNodes) == 0 {
-		return fmt.Errorf("nodes %v not found to start/stop them", cfg.Name)
+		return fmt.Errorf("%w: %v", terraformErrors.ErrNodeNotFound, cfg.Name)
 	}
 
 	if cfg.Action == utils.TerraformResourceStart {

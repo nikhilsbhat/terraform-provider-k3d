@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	terraformErrors "github.com/nikhilsbhat/terraform-provider-k3d/pkg/errors"
 	cluster2 "github.com/nikhilsbhat/terraform-provider-k3d/pkg/k3d/cluster"
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
@@ -20,6 +21,7 @@ func (image *Config) Upload(ctx context.Context, runtime runtimes.Runtime) error
 	}
 
 	clusters := make([]*K3D.Cluster, 0)
+
 	k3dClusters, err := clusterCfg.GetClusters(ctx, runtime, []string{image.Cluster})
 	if err != nil {
 		return err
@@ -30,6 +32,7 @@ func (image *Config) Upload(ctx context.Context, runtime runtimes.Runtime) error
 	}
 
 	errors := make([]string, 0)
+
 	for _, cluster := range clusters {
 		if err = client.ImageImportIntoClusterMulti(ctx, runtime, image.Images, cluster, loadImageOpts); err != nil {
 			errors = append(errors, fmt.Sprintf("failed to import image(s) into cluster '%s': %+v", cluster.Name, err))
@@ -37,7 +40,7 @@ func (image *Config) Upload(ctx context.Context, runtime runtimes.Runtime) error
 	}
 
 	if len(errors) != 0 {
-		return fmt.Errorf("importing images to clusters errored with: \n%s", strings.Join(errors, "\n"))
+		return fmt.Errorf("%w: \n%s", terraformErrors.ErrImportImagesFailed, strings.Join(errors, "\n"))
 	}
 
 	return nil

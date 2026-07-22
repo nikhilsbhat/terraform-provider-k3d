@@ -19,13 +19,17 @@ func (cfg *Config) GetClusters(ctx context.Context, runtime runtimes.Runtime, cl
 		filteredCluster := funk.Filter(clusters, func(cluster *K3D.Cluster) bool {
 			return funk.Contains(clusterList, cluster.Name)
 		}).([]*K3D.Cluster)
+
 		clusters = filteredCluster
 	}
 
 	clusterConfig := make([]*Config, 0)
+
 	for _, cluster := range clusters {
 		serverCount, serversRunning := cluster.ServerCountRunning()
+
 		agentsCount, agentsRunning := cluster.AgentCountRunning()
+
 		clusterConfig = append(clusterConfig, &Config{
 			Name:            cluster.Name,
 			Nodes:           funk.Get(cluster.Nodes, "Name").([]string),
@@ -45,6 +49,7 @@ func (cfg *Config) GetClusters(ctx context.Context, runtime runtimes.Runtime, cl
 
 func (cfg *Config) GetClusterConfig() *K3D.Cluster {
 	nodes := make([]*K3D.Node, 0)
+
 	for _, node := range cfg.Nodes {
 		nodes = append(nodes, &K3D.Node{Name: node})
 	}

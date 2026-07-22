@@ -15,6 +15,7 @@ func (cfg *Config) GetFilteredNodesFromCluster(ctx context.Context, runtime runt
 		"k3d.role":    "agent",
 		"k3d.cluster": cfg.ClusterAssociated,
 	}
+
 	if cfg.All {
 		return cfg.GetNodesByLabels(ctx, runtime)
 	}
@@ -72,6 +73,7 @@ func (cfg *Config) GetNodeStatus(ctx context.Context, runtime runtimes.Runtime) 
 	}
 
 	nodeCurrentStatus := make([]*Status, 0)
+
 	for _, node := range nodes {
 		nodeCurrentStatus = append(nodeCurrentStatus, &Status{
 			Node:    node.Name[0],

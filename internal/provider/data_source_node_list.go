@@ -47,7 +47,7 @@ func dataSourceNodeList() *schema.Resource {
 	}
 }
 
-func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	id := d.Id()
@@ -59,6 +59,7 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 
 			return diag.Errorf("errored while fetching randomID %v", err)
 		}
+
 		id = newID
 	}
 
@@ -83,6 +84,7 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	d.SetId(id)
+
 	if err = d.Set(utils2.TerraformResourceNodesList, flattenedNodes); err != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceNodesList, err)
 	}
@@ -90,6 +92,6 @@ func dataSourceListNodeRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func getSlice(data interface{}) []string {
-	return utils2.GetSlice(data.([]interface{}))
+func getSlice(data any) []string {
+	return utils2.GetSlice(data.([]any))
 }

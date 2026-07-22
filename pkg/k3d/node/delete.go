@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	terraformErrors "github.com/nikhilsbhat/terraform-provider-k3d/pkg/errors"
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
@@ -30,15 +31,16 @@ func (cfg *Config) DeleteNodesFromCluster(ctx context.Context, runtime runtimes.
 		SkipLBUpdate: false,
 	}
 
-	var errors []string
+	errors := make([]string, 0)
+
 	for _, filteredNode := range filteredNodes {
 		if delErr := client.NodeDelete(ctx, runtime, filteredNode, deleteOps); delErr != nil {
-			errors = append(errors, err.Error())
+			errors = append(errors, delErr.Error())
 		}
 	}
 
 	if len(errors) != 0 {
-		return fmt.Errorf("deleting nodes failed with: %s", strings.Join(errors, "\n"))
+		return fmt.Errorf("%w: %s", terraformErrors.ErrDeleteNodesFailed, strings.Join(errors, "\n"))
 	}
 
 	return nil

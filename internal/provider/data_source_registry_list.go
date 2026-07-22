@@ -47,7 +47,7 @@ func dataSourceRegistryList() *schema.Resource {
 	}
 }
 
-func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	id := d.Id()
@@ -59,6 +59,7 @@ func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, met
 
 			return diag.Errorf("errored while fetching randomID %v", err)
 		}
+
 		id = newID
 	}
 
@@ -87,6 +88,7 @@ func dataSourceRegistryListRead(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	d.SetId(id)
+
 	if err = d.Set(utils2.TerraformResourceRegistriesList, flattenedNodes); err != nil {
 		return diag.Errorf("oops setting '%s' errored with : %v", utils2.TerraformResourceRegistriesList, err)
 	}

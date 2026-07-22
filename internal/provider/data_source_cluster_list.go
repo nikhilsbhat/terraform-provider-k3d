@@ -40,7 +40,7 @@ func dataSourceClusterList() *schema.Resource {
 	}
 }
 
-func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	id := d.Id()
@@ -52,10 +52,11 @@ func dataSourceListClusterRead(ctx context.Context, d *schema.ResourceData, meta
 
 			return diag.Errorf("errored while fetching randomID %v", err)
 		}
+
 		id = newID
 	}
 
-	clusters := utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]interface{}))
+	clusters := utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]any))
 	cfg := k3dCluster.Config{
 		All: utils2.Bool(d.Get(utils2.TerraformResourceAll)),
 	}

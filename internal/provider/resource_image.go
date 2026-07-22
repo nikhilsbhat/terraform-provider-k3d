@@ -77,7 +77,7 @@ func resourceImage() *schema.Resource {
 	}
 }
 
-func resourceLoadImageLoad(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadImageLoad(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	if d.IsNewResource() {
@@ -88,6 +88,7 @@ func resourceLoadImageLoad(ctx context.Context, d *schema.ResourceData, meta int
 			if err != nil {
 				return diag.Errorf("errored while fetching randomID %v", err)
 			}
+
 			id = newID
 		}
 
@@ -101,6 +102,7 @@ func resourceLoadImageLoad(ctx context.Context, d *schema.ResourceData, meta int
 		if err := imageCfg.Upload(ctx, defaultConfig.K3DRuntime); err != nil {
 			return diag.Errorf("%v", err)
 		}
+
 		d.SetId(id)
 
 		return resourceLoadImageRead(ctx, d, meta)
@@ -111,7 +113,7 @@ func resourceLoadImageLoad(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceLoadImageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadImageRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	imageCfg := image.Config{
@@ -133,17 +135,20 @@ func resourceLoadImageRead(ctx context.Context, d *schema.ResourceData, meta int
 
 		return diag.Errorf("errored while flattening images to store: %v", err)
 	}
-	if err := d.Set(utils2.TerraformResourceImagesStored, flattenedImagesToStore); err != nil {
+
+	if err = d.Set(utils2.TerraformResourceImagesStored, flattenedImagesToStore); err != nil {
 		d.SetId("")
 
 		return diag.Errorf("oops setting 'images_stored' errored with : %v", err)
 	}
-	if err := d.Set(utils2.TerraformResourceImages, imageCfg.Images); err != nil {
+
+	if err = d.Set(utils2.TerraformResourceImages, imageCfg.Images); err != nil {
 		d.SetId("")
 
 		return diag.Errorf("oops setting 'images' errored with : %v", err)
 	}
-	if err := d.Set(utils2.TerraformResourceCluster, imageCfg.Cluster); err != nil {
+
+	if err = d.Set(utils2.TerraformResourceCluster, imageCfg.Cluster); err != nil {
 		d.SetId("")
 
 		return diag.Errorf("oops setting 'cluster' errored with : %v", err)
@@ -152,24 +157,27 @@ func resourceLoadImageRead(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceLoadImageDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadImageDelete(_ context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 	_ = defaultConfig
 	// could be properly implemented once k3d supports deleting loaded images from cluster.
 
 	id := d.Id()
+
 	if len(id) == 0 {
 		return diag.Errorf("resource with the specified ID not found")
 	}
+
 	d.SetId("")
 
 	return nil
 }
 
-func resourceLoadImageUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadImageUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	log.Printf("uploading newer images to k3d clusters")
+
 	if d.HasChange(utils2.TerraformResourceCluster) || d.HasChange(utils2.TerraformResourceImages) {
 		updatedCluster, updatedImages := getUpdatedClusterAndImages(d)
 		// keepTarball := utils2.Bool(d.Get(utils2.TerraformResourceKeepTarball))
@@ -208,7 +216,9 @@ func getUpdatedClusterAndImages(d *schema.ResourceData) (cluster string, images 
 	if !cmp.Equal(oldCluster, newCluster) {
 		cluster = utils2.String(newCluster)
 	}
+
 	oldImages, newImages := d.GetChange(utils2.TerraformResourceImages)
+
 	images = getSlice(oldImages)
 	if !cmp.Equal(oldImages, newImages) {
 		images = getSlice(newImages)

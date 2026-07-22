@@ -13,15 +13,17 @@ import (
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 )
 
-func resourceConnectRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceConnectRegistryDelete(_ context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 	_ = defaultConfig
 	// could be properly implemented once k3d supports deleting loaded images from cluster.
 
 	id := d.Id()
+
 	if len(id) == 0 {
 		return diag.Errorf("resource with the specified ID not found")
 	}
+
 	d.SetId("")
 
 	return nil
@@ -35,6 +37,7 @@ func connectRegistryToCluster(ctx context.Context, runtime runtimes.Runtime, con
 
 		return nil
 	}
+
 	if err := config.Disconnect(ctx, runtime); err != nil {
 		return err
 	}
@@ -45,6 +48,7 @@ func connectRegistryToCluster(ctx context.Context, runtime runtimes.Runtime, con
 func getRegistryStatus(ctx context.Context, runtime runtimes.Runtime, config k3dRegistry.Config) ([]map[string]string, error) {
 	updatedStatus := make([]map[string]string, 0)
 	clusterCfg := cluster.Config{}
+
 	clusterData, err := clusterCfg.GetClusters(ctx, runtime, []string{config.Cluster})
 	if err != nil {
 		return nil, err
@@ -72,10 +76,12 @@ func getUpdatedRegistriesChanges(d *schema.ResourceData) (registries k3dRegistry
 	if !cmp.Equal(oldRegistries, newRegistries) {
 		registries.Name = getSlice(newRegistries)
 	}
+
 	oldCluster, newCluster := d.GetChange(utils2.TerraformResourceCluster)
 	if !cmp.Equal(oldCluster, newCluster) {
 		registries.Cluster = utils2.String(newCluster)
 	}
+
 	oldConnect, newConnect := d.GetChange(utils2.TerraformResourceConnect)
 	if !cmp.Equal(oldConnect, newConnect) {
 		registries.ConnectToCluster = utils2.Bool(newConnect)

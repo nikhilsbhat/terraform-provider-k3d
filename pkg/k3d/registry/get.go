@@ -11,6 +11,7 @@ import (
 // Get fetches the information of the list of selected registries.
 func (registry *Config) Get(ctx context.Context, runtime runtimes.Runtime) ([]*k3dNode.Config, error) {
 	cfg := k3dNode.Config{Labels: map[string]string{"k3d.role": "registry", "k3d.cluster": registry.Cluster}}
+
 	regs, err := cfg.GetNodesByLabels(ctx, runtime)
 	if err != nil {
 		return nil, err

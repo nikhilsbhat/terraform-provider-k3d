@@ -101,7 +101,7 @@ func resourceNodeAction() *schema.Resource {
 	}
 }
 
-func resourceNodeActionStartStop(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeActionStartStop(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	//nolint:nestif
@@ -115,6 +115,7 @@ func resourceNodeActionStartStop(ctx context.Context, d *schema.ResourceData, me
 
 				return diag.Errorf("errored while fetching randomID %v", err)
 			}
+
 			id = newID
 		}
 
@@ -146,7 +147,7 @@ func resourceNodeActionStartStop(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceNodeActionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeActionRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	cfg := k3dNode.Config{
@@ -172,7 +173,7 @@ func resourceNodeActionRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceNodeActionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeActionUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	//nolint:nestif
@@ -216,15 +217,17 @@ func resourceNodeActionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceNodeActionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeActionDelete(_ context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 	_ = defaultConfig
 	// could be properly implemented once k3d supports deleting loaded images from cluster.
 
 	id := d.Id()
+
 	if len(id) == 0 {
 		return diag.Errorf("resource with the specified ID not found")
 	}
+
 	d.SetId("")
 
 	return nil
@@ -234,16 +237,19 @@ func resourceNodeActionDelete(ctx context.Context, d *schema.ResourceData, meta 
 func getUpdatedNodeActionChanges(d *schema.ResourceData) (nodes []string, cluster string, start, stop bool) {
 	oldNodes, newNodes := d.GetChange(utils2.TerraformResourceNodes)
 	if !cmp.Equal(oldNodes, newNodes) {
-		nodes = utils2.GetSlice(newNodes.([]interface{}))
+		nodes = utils2.GetSlice(newNodes.([]any))
 	}
+
 	oldCluster, newCluster := d.GetChange(utils2.TerraformResourceCluster)
 	if !cmp.Equal(oldCluster, newCluster) {
 		cluster = utils2.String(newCluster)
 	}
+
 	oldStart, newStart := d.GetChange(utils2.TerraformResourceStart)
 	if !cmp.Equal(oldStart, newStart) {
 		start = utils2.Bool(newStart)
 	}
+
 	oldStop, newStop := d.GetChange(utils2.TerraformResourceStop)
 	if !cmp.Equal(oldStop, newStop) {
 		stop = utils2.Bool(newStop)
@@ -256,6 +262,7 @@ func getAction(start, stop bool) (bool, string) {
 	if start && stop {
 		return false, ""
 	}
+
 	if start {
 		return true, utils2.TerraformResourceStart
 	}

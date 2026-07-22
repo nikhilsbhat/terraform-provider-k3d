@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	terraformErrors "github.com/nikhilsbhat/terraform-provider-k3d/pkg/errors"
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/config"
 	"github.com/rancher/k3d/v5/pkg/config/v1alpha4"
@@ -26,7 +27,7 @@ func CreateCluster(ctx context.Context, runtime runtimes.Runtime, cfg *v1alpha4.
 	}
 
 	if _, err = client.ClusterGet(ctx, runtimes.SelectedRuntime, &clusterConfig.Cluster); err == nil {
-		return fmt.Errorf("failed to create cluster '%s' because a cluster with that name already exists: %w", cfg.Name, err)
+		return fmt.Errorf("%w: %s", terraformErrors.ErrClusterAlreadyExists, cfg.Name)
 	}
 
 	if err = client.ClusterRun(ctx, runtimes.SelectedRuntime, clusterConfig); err != nil {
@@ -45,9 +46,5 @@ func CreateCluster(ctx context.Context, runtime runtimes.Runtime, cfg *v1alpha4.
 		}
 	}
 
-	return nil
-}
-
-func CreateK3DCluster(ctx context.Context, runtime runtimes.Runtime, cfg *v1alpha4.SimpleConfig) error {
 	return nil
 }

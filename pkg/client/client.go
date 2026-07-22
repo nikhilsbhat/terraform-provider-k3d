@@ -20,41 +20,44 @@ type Config struct {
 }
 
 // GetK3dConfig validates the defaults passed in providers and set the configs.
-func GetK3dConfig(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func GetK3dConfig(_ context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 	newConfig := newK3dConfig()
 
-	if kubeVersion := d.Get("kubernetes_version").(string); len(kubeVersion) == 0 {
+	kubeVersion := d.Get("kubernetes_version").(string)
+	if len(kubeVersion) == 0 {
 		return nil, diag.Errorf("'kubernetes_version' was not set")
-	} else {
-		newConfig.KubeImageVersion = kubeVersion
 	}
 
-	if kubeVersion := utils2.String(d.Get(utils2.TerraformK3dRegistry)); len(kubeVersion) == 0 {
+	newConfig.KubeImageVersion = kubeVersion
+
+	if registry := utils2.String(d.Get(utils2.TerraformK3dRegistry)); len(registry) == 0 {
 		return nil, diag.Errorf("'%s' was not set", utils2.TerraformK3dRegistry)
-	} else {
-		newConfig.K3DRegistry = getRegistry(d)
 	}
 
-	if k3dAPIVersion := d.Get("k3d_api_version").(string); len(k3dAPIVersion) == 0 {
+	newConfig.K3DRegistry = getRegistry(d)
+
+	k3dAPIVersion := d.Get("k3d_api_version").(string)
+	if len(k3dAPIVersion) == 0 {
 		return nil, diag.Errorf("'k3d_api_version' was not set")
-	} else {
-		newConfig.K3DAPIVersion = k3dAPIVersion
 	}
 
-	if k3dKind := d.Get("kind").(string); len(k3dKind) == 0 {
+	newConfig.K3DAPIVersion = k3dAPIVersion
+
+	k3dKind := d.Get("kind").(string)
+	if len(k3dKind) == 0 {
 		return nil, diag.Errorf("'kind' was not set")
-	} else {
-		newConfig.K3DAPIVersion = k3dKind
 	}
 
-	if K3DRuntime := d.Get("runtime").(string); len(K3DRuntime) == 0 {
+	newConfig.K3DAPIVersion = k3dKind
+
+	K3DRuntime := d.Get("runtime").(string)
+	if len(K3DRuntime) == 0 {
 		return nil, diag.Errorf("'runtime' was not set")
-	} else {
-		newConfig.K3DRuntime = getRuntime(K3DRuntime)
 	}
 
-	_, err := newConfig.K3DRuntime.Info()
-	if err != nil {
+	newConfig.K3DRuntime = getRuntime(K3DRuntime)
+
+	if _, err := newConfig.K3DRuntime.Info(); err != nil {
 		return nil, diag.Errorf("%v", err)
 	}
 

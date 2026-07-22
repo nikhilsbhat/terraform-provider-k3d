@@ -74,7 +74,7 @@ func resourceClusterAction() *schema.Resource {
 	}
 }
 
-func resourceClusterActionStartStop(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceClusterActionStartStop(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	//nolint:nestif
@@ -88,10 +88,11 @@ func resourceClusterActionStartStop(ctx context.Context, d *schema.ResourceData,
 
 				return diag.Errorf("errored while fetching randomID %v", err)
 			}
+
 			id = newID
 		}
 
-		clusters := utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]interface{}))
+		clusters := utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]any))
 		start := utils2.Bool(d.Get(utils2.TerraformResourceStart))
 		stop := utils2.Bool(d.Get(utils2.TerraformResourceStop))
 
@@ -116,10 +117,10 @@ func resourceClusterActionStartStop(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceClusterActionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceClusterActionRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
-	clusters := utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]interface{}))
+	clusters := utils2.GetSlice(d.Get(utils2.TerraformResourceClusters).([]any))
 	start := utils2.Bool(d.Get(utils2.TerraformResourceStart))
 	stop := utils2.Bool(d.Get(utils2.TerraformResourceStop))
 
@@ -154,10 +155,11 @@ func resourceClusterActionRead(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceClusterActionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceClusterActionUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 
 	log.Printf("uploading newer images to k3d clusters")
+
 	if d.HasChange(utils2.TerraformResourceClusters) || d.HasChange(utils2.TerraformResourceStart) ||
 		d.HasChange(utils2.TerraformResourceStop) {
 		clusters, start, stop := getUpdatedClustersActionChanges(d)
@@ -192,15 +194,17 @@ func resourceClusterActionUpdate(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceClusterActionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceClusterActionDelete(_ context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	defaultConfig := meta.(*client.Config)
 	_ = defaultConfig
 	// could be properly implemented once k3d supports deleting loaded images from cluster.
 
 	id := d.Id()
+
 	if len(id) == 0 {
 		return diag.Errorf("resource with the specified ID not found")
 	}
+
 	d.SetId("")
 
 	return nil
@@ -210,12 +214,14 @@ func resourceClusterActionDelete(ctx context.Context, d *schema.ResourceData, me
 func getUpdatedClustersActionChanges(d *schema.ResourceData) (clusters []string, start, stop bool) {
 	oldClusters, newClusters := d.GetChange(utils2.TerraformResourceClusters)
 	if !cmp.Equal(oldClusters, newClusters) {
-		clusters = utils2.GetSlice(newClusters.([]interface{}))
+		clusters = utils2.GetSlice(newClusters.([]any))
 	}
+
 	oldStart, newStart := d.GetChange(utils2.TerraformResourceStart)
 	if !cmp.Equal(oldStart, newStart) {
 		start = utils2.Bool(newStart)
 	}
+
 	oldStop, newStop := d.GetChange(utils2.TerraformResourceStop)
 	if !cmp.Equal(oldStop, newStop) {
 		stop = utils2.Bool(newStop)

@@ -20,6 +20,7 @@ func validateAndSetProxy(d *schema.ResourceData, proxy map[string]string) map[st
 		if !validateProxy(proxy) {
 			return map[string]string{}
 		}
+
 		fmt.Print("proxy config validation failed, config cannot be empty, dropping proxy config")
 	}
 
