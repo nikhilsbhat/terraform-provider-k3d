@@ -2,11 +2,11 @@ package cluster
 
 import (
 	"context"
+	"slices"
 
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
-	"github.com/thoas/go-funk"
 )
 
 func (cfg *Config) GetClusters(ctx context.Context, runtime runtimes.Runtime, clusterList []string) ([]*Config, error) {
@@ -16,14 +16,10 @@ func (cfg *Config) GetClusters(ctx context.Context, runtime runtimes.Runtime, cl
 	}
 
 	if !cfg.All {
-		filteredCluster := funk.Filter(clusters, func(cluster *K3D.Cluster) bool {
-			return funk.Contains(clusterList, cluster.Name)
-		}).([]*K3D.Cluster)
-
-		clusters = filteredCluster
+		clusters = filterClustersByName(clusters, clusterList)
 	}
 
-	clusterConfig := make([]*Config, 0)
+	clusterConfig := make([]*Config, 0, len(clusters))
 
 	for _, cluster := range clusters {
 		serverCount, serversRunning := cluster.ServerCountRunning()
@@ -32,7 +28,7 @@ func (cfg *Config) GetClusters(ctx context.Context, runtime runtimes.Runtime, cl
 
 		clusterConfig = append(clusterConfig, &Config{
 			Name:            cluster.Name,
-			Nodes:           funk.Get(cluster.Nodes, "Name").([]string),
+			Nodes:           nodeNames(cluster.Nodes),
 			Network:         cluster.Network.Name,
 			Token:           cluster.Token,
 			ServersCount:    serverCount,
@@ -47,8 +43,30 @@ func (cfg *Config) GetClusters(ctx context.Context, runtime runtimes.Runtime, cl
 	return clusterConfig, nil
 }
 
+func filterClustersByName(clusters []*K3D.Cluster, names []string) []*K3D.Cluster {
+	filteredClusters := make([]*K3D.Cluster, 0, len(clusters))
+
+	for _, cluster := range clusters {
+		if slices.Contains(names, cluster.Name) {
+			filteredClusters = append(filteredClusters, cluster)
+		}
+	}
+
+	return filteredClusters
+}
+
+func nodeNames(nodes []*K3D.Node) []string {
+	names := make([]string, 0, len(nodes))
+
+	for _, node := range nodes {
+		names = append(names, node.Name)
+	}
+
+	return names
+}
+
 func (cfg *Config) GetClusterConfig() *K3D.Cluster {
-	nodes := make([]*K3D.Node, 0)
+	nodes := make([]*K3D.Node, 0, len(cfg.Nodes))
 
 	for _, node := range cfg.Nodes {
 		nodes = append(nodes, &K3D.Node{Name: node})

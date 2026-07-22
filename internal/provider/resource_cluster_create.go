@@ -22,206 +22,202 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-//nolint:funlen
 func resourceCluster() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceClusterCreate,
 		ReadContext:   resourceClusterRead,
 		DeleteContext: resourceClusterDelete,
 		// UpdateContext: resourceClusterUpdate,
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Optional:    true,
-				Description: "Name of the Cluster to be created",
-			},
-			"servers_count": {
-				Type:        schema.TypeInt,
-				Computed:    true,
-				Optional:    true,
-				Description: "Count of servers",
-			},
-			"agents_count": {
-				Type:        schema.TypeInt,
-				Computed:    true,
-				Optional:    true,
-				Description: "Count of agents in the cluster",
-			},
-			"image": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("K3D_IMAGE", nil),
-				ForceNew:    true,
-				Description: "Image name to be used for creation of cluster, it would be used along with kubernetes_version",
-			},
-			"network": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "Network to be associated with the cluster",
-			},
-			"subnetwork": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Define a subnet for the newly created container network",
-				Computed:    false,
-			},
-			"cluster_token": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Sensitive:   true,
-				Description: "superSecretToken to be used",
-			},
-			"volumes": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    false,
-				ForceNew:    true,
-				Description: "Mount volumes into the nodes (Format: [SOURCE:]DEST[@NODEFILTER[;NODEFILTER...]]",
-				Elem: &schema.Resource{
-					Schema: resourceClusterVolumeSchema(),
+		Schema: resourceClusterCreateSchema(),
+	}
+}
+
+func resourceClusterCreateSchema() map[string]*schema.Schema {
+	return mergeSchemas(
+		resourceClusterBaseCreateSchema(),
+		resourceClusterNestedCreateSchema(),
+		resourceClusterOptionsCreateSchema(),
+	)
+}
+
+func resourceClusterBaseCreateSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"name": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Optional:    true,
+			Description: "Name of the Cluster to be created",
+		},
+		"servers_count": {
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Optional:    true,
+			Description: "Count of servers",
+		},
+		"agents_count": {
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Optional:    true,
+			Description: "Count of agents in the cluster",
+		},
+		"image": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			DefaultFunc: schema.EnvDefaultFunc("K3D_IMAGE", nil),
+			ForceNew:    true,
+			Description: "Image name to be used for creation of cluster, it would be used along with kubernetes_version",
+		},
+		"network": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Computed:    true,
+			Description: "Network to be associated with the cluster",
+		},
+		"subnetwork": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			ForceNew:    true,
+			Description: "Define a subnet for the newly created container network",
+			Computed:    false,
+		},
+		"cluster_token": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Computed:    true,
+			Sensitive:   true,
+			Description: "superSecretToken to be used",
+		},
+		"config_yaml": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Optional:    true,
+			Description: "",
+		},
+	}
+}
+
+func resourceClusterNestedCreateSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"volumes": nestedClusterSet("Mount volumes into the nodes (Format: [SOURCE:]DEST[@NODEFILTER[;NODEFILTER...]]", resourceClusterVolumeSchema()),
+		"ports": {
+			Type:     schema.TypeSet,
+			ForceNew: true,
+			Optional: true,
+			Description: "Map ports from the node containers (via the serverlb) to the host " +
+				"(Format: [HOST:][HOSTPORT:]CONTAINERPORT[/PROTOCOL][@NODEFILTER])",
+			Elem: &schema.Resource{Schema: resourceClusterPortsConfig()},
+		},
+		"env":          nestedClusterSet("Environment variables to be added nodes.", resourceClusterEnvsAndLabelsSchema()),
+		"registries":   nestedClusterSet("Define how registries should be created or used", resourceClusterRegistriesSchema()),
+		"host_aliases": nestedClusterSet("/etc/hosts style entries to be injected into /etc/hosts in the node containers and in the NodeHosts section in CoreDNS.", resourceHostAliasesConfig()),
+		"kube_api":     resourceClusterKubeAPICreateSchema(),
+	}
+}
+
+func resourceClusterOptionsCreateSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"k3d_options": nestedClusterSet("k3d runtime settings", resourceClusterK3dOptionsSchema()),
+		"k3s_options": {
+			Type:        schema.TypeSet,
+			ForceNew:    true,
+			Optional:    true,
+			Computed:    false,
+			Description: "Options passed on to K3s itself",
+			Elem:        &schema.Resource{Schema: resourceClusterK3SOptionsCreateSchema()},
+		},
+		"kube_config": nestedClusterSet("Way to manage the kubeconfig generated after creating k3d clusters.", resourceKubeconfigConfig()),
+		"runtime": {
+			Description: "Runtime options for k3d",
+			ForceNew:    true,
+			Optional:    true,
+			Type:        schema.TypeSet,
+			MaxItems:    1,
+			Elem:        &schema.Resource{Schema: resourceClusterRuntimeSchema()},
+		},
+	}
+}
+
+func nestedClusterSet(description string, nestedSchema map[string]*schema.Schema) *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Optional:    true,
+		Computed:    false,
+		ForceNew:    true,
+		Description: description,
+		Elem:        &schema.Resource{Schema: nestedSchema},
+	}
+}
+
+func resourceClusterKubeAPICreateSchema() *schema.Schema {
+	return &schema.Schema{
+		Description: "same as `--api-port myhost.my.domain:6445` (where the name would resolve to 127.0.0.1)",
+		ForceNew:    true,
+		Optional:    true,
+		Type:        schema.TypeSet,
+		MaxItems:    1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"host": {
+					Description: "Important for the `server` setting in the kubeconfig.",
+					ForceNew:    true,
+					Optional:    true,
+					Type:        schema.TypeString,
 				},
-			},
-			"ports": {
-				Type:     schema.TypeSet,
-				ForceNew: true,
-				Optional: true,
-				Description: "Map ports from the node containers (via the serverlb) to the host " +
-					"(Format: [HOST:][HOSTPORT:]CONTAINERPORT[/PROTOCOL][@NODEFILTER])",
-				Elem: &schema.Resource{
-					Schema: resourceClusterPortsConfig(),
+				"host_ip": {
+					Description:  "Where the Kubernetes API will be listening on.",
+					ForceNew:     true,
+					Optional:     true,
+					Type:         schema.TypeString,
+					ValidateFunc: validation.IsIPAddress,
 				},
-			},
-			"env": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    false,
-				ForceNew:    true,
-				Description: "Environment variables to be added nodes.",
-				Elem: &schema.Resource{
-					Schema: resourceClusterEnvsAndLabelsSchema(),
+				"host_port": {
+					Description:  "Specify the Kubernetes API server port exposed on the LoadBalancer.",
+					ForceNew:     true,
+					Optional:     true,
+					Type:         schema.TypeInt,
+					ValidateFunc: validation.IsPortNumber,
 				},
-			},
-			"registries": {
-				Type:        schema.TypeSet,
-				Description: "Define how registries should be created or used",
-				Optional:    true,
-				Computed:    false,
-				ForceNew:    true,
-				Elem: &schema.Resource{
-					Schema: resourceClusterRegistriesSchema(),
-				},
-			},
-			"host_aliases": {
-				Type:        schema.TypeSet,
-				ForceNew:    true,
-				Optional:    true,
-				Description: "/etc/hosts style entries to be injected into /etc/hosts in the node containers and in the NodeHosts section in CoreDNS.",
-				Elem: &schema.Resource{
-					Schema: resourceHostAliasesConfig(),
-				},
-			},
-			"kube_api": {
-				Description: "same as `--api-port myhost.my.domain:6445` (where the name would resolve to 127.0.0.1)",
-				ForceNew:    true,
-				Optional:    true,
-				Type:        schema.TypeSet,
-				MaxItems:    1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"host": {
-							Description: "Important for the `server` setting in the kubeconfig.",
-							ForceNew:    true,
-							Optional:    true,
-							Type:        schema.TypeString,
-						},
-						"host_ip": {
-							Description:  "Where the Kubernetes API will be listening on.",
-							ForceNew:     true,
-							Optional:     true,
-							Type:         schema.TypeString,
-							ValidateFunc: validation.IsIPAddress,
-						},
-						"host_port": {
-							Description:  "Specify the Kubernetes API server port exposed on the LoadBalancer.",
-							ForceNew:     true,
-							Optional:     true,
-							Type:         schema.TypeInt,
-							ValidateFunc: validation.IsPortNumber,
-						},
-					},
-				},
-			},
-			"k3d_options": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    false,
-				ForceNew:    true,
-				Description: "k3d runtime settings",
-				Elem: &schema.Resource{
-					Schema: resourceClusterK3dOptionsSchema(),
-				},
-			},
-			"k3s_options": {
-				Type:        schema.TypeSet,
-				ForceNew:    true,
-				Optional:    true,
-				Computed:    false,
-				Description: "Options passed on to K3s itself",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"extra_args": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Computed:    false,
-							Description: "additional arguments passed to the `k3s server|agent` command; same as `--k3s-arg`",
-							Elem: &schema.Resource{
-								Schema: resourceClusterEnvsAndLabelsSchema(),
-							},
-						},
-						"node_labels": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Computed:    false,
-							Description: "same as `--k3s-node-label 'foo=bar@agent:1'` -> this results in a Kubernetes node label",
-							Elem: &schema.Resource{
-								Schema: resourceClusterEnvsAndLabelsSchema(),
-							},
-						},
-					},
-				},
-			},
-			"kube_config": {
-				Type:        schema.TypeSet,
-				ForceNew:    true,
-				Optional:    true,
-				Description: "Way to manage the kubeconfig generated after creating k3d clusters.",
-				Computed:    false,
-				Elem: &schema.Resource{
-					Schema: resourceKubeconfigConfig(),
-				},
-			},
-			"runtime": {
-				Description: "Runtime options for k3d",
-				ForceNew:    true,
-				Optional:    true,
-				Type:        schema.TypeSet,
-				MaxItems:    1,
-				Elem: &schema.Resource{
-					Schema: resourceClusterRuntimeSchema(),
-				},
-			},
-			"config_yaml": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Optional:    true,
-				Description: "",
 			},
 		},
 	}
+}
+
+func resourceClusterK3SOptionsCreateSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"extra_args": resourceClusterK3SNestedOptionCreateSchema(
+			"additional arguments passed to the `k3s server|agent` command; same as `--k3s-arg`",
+		),
+		"node_labels": resourceClusterK3SNestedOptionCreateSchema(
+			"same as `--k3s-node-label 'foo=bar@agent:1'` -> this results in a Kubernetes node label",
+		),
+	}
+}
+
+func resourceClusterK3SNestedOptionCreateSchema(description string) *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		Computed:    false,
+		Description: description,
+		Elem:        &schema.Resource{Schema: resourceClusterEnvsAndLabelsSchema()},
+	}
+}
+
+func mergeSchemas(schemas ...map[string]*schema.Schema) map[string]*schema.Schema {
+	total := 0
+	for _, schemaMap := range schemas {
+		total += len(schemaMap)
+	}
+
+	merged := make(map[string]*schema.Schema, total)
+
+	for _, schemaMap := range schemas {
+		for key, value := range schemaMap {
+			merged[key] = value
+		}
+	}
+
+	return merged
 }
 
 func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -333,9 +329,10 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta any
 }
 
 func flattenPorts(ports any) []v1alpha4.PortWithNodeFilters {
-	k3dPorts := make([]v1alpha4.PortWithNodeFilters, 0)
+	portList := schemaSetList(ports)
+	k3dPorts := make([]v1alpha4.PortWithNodeFilters, 0, len(portList))
 
-	for _, port := range ports.(*schema.Set).List() {
+	for _, port := range portList {
 		p := port.(map[string]any)
 		k3dPorts = append(k3dPorts, v1alpha4.PortWithNodeFilters{
 			Port:        getPortMappings(p),
@@ -351,9 +348,10 @@ func getPortMappings(p map[string]any) string {
 }
 
 func flattenVolumes(volumes any) []v1alpha4.VolumeWithNodeFilters {
-	k3dVolumes := make([]v1alpha4.VolumeWithNodeFilters, 0)
+	volumeList := schemaSetList(volumes)
+	k3dVolumes := make([]v1alpha4.VolumeWithNodeFilters, 0, len(volumeList))
 
-	for _, volume := range volumes.(*schema.Set).List() {
+	for _, volume := range volumeList {
 		v := volume.(map[string]any)
 		k3dVolumes = append(k3dVolumes, v1alpha4.VolumeWithNodeFilters{
 			Volume:      fmt.Sprintf("%s/%s", v["source"].(string), v["destination"].(string)),
@@ -365,9 +363,10 @@ func flattenVolumes(volumes any) []v1alpha4.VolumeWithNodeFilters {
 }
 
 func flattenHostAlias(alias any) []types2.HostAlias {
-	k3dAlias := make([]types2.HostAlias, 0)
+	aliasList := schemaSetList(alias)
+	k3dAlias := make([]types2.HostAlias, 0, len(aliasList))
 
-	for _, port := range alias.(*schema.Set).List() {
+	for _, port := range aliasList {
 		a := port.(map[string]any)
 		k3dAlias = append(k3dAlias, types2.HostAlias{
 			IP:        a["ip"].(string),
@@ -379,9 +378,10 @@ func flattenHostAlias(alias any) []types2.HostAlias {
 }
 
 func flattenEnvVars(envs any) []v1alpha4.EnvVarWithNodeFilters {
-	k3dEnvs := make([]v1alpha4.EnvVarWithNodeFilters, 0)
+	envList := schemaSetList(envs)
+	k3dEnvs := make([]v1alpha4.EnvVarWithNodeFilters, 0, len(envList))
 
-	for _, port := range envs.(*schema.Set).List() {
+	for _, port := range envList {
 		e := port.(map[string]any)
 		k3dEnvs = append(k3dEnvs, v1alpha4.EnvVarWithNodeFilters{
 			EnvVar:      fmt.Sprintf("%s=%s", e["key"].(string), e["value"].(string)),
@@ -395,11 +395,11 @@ func flattenEnvVars(envs any) []v1alpha4.EnvVarWithNodeFilters {
 func flattenKubeAPI(api any) v1alpha4.SimpleExposureOpts {
 	var exposureOpts v1alpha4.SimpleExposureOpts
 
-	if api.(*schema.Set).Len() == 0 {
+	apiList := schemaSetList(api)
+	if len(apiList) == 0 {
 		return exposureOpts
 	}
 
-	apiList := api.(*schema.Set).List()
 	a := apiList[0].(map[string]any)
 
 	hostPort, _ := k3dCmdUtil.GetFreePort()
@@ -417,7 +417,7 @@ func flattenKubeAPI(api any) v1alpha4.SimpleExposureOpts {
 }
 
 func flattenK3DOptions(k3d any) (v1alpha4.SimpleConfigOptionsK3d, error) {
-	k3dList := k3d.(*schema.Set).List()
+	k3dList := schemaSetList(k3d)
 
 	if len(k3dList) == 0 {
 		return defaultK3DOptions(), nil
@@ -460,11 +460,11 @@ func defaultK3DOptions() v1alpha4.SimpleConfigOptionsK3d {
 func flattenK3SOptions(k3s any) v1alpha4.SimpleConfigOptionsK3s {
 	var k3sOptions v1alpha4.SimpleConfigOptionsK3s
 
-	if k3s.(*schema.Set).Len() == 0 {
+	k3sList := schemaSetList(k3s)
+	if len(k3sList) == 0 {
 		return k3sOptions
 	}
 
-	k3sList := k3s.(*schema.Set).List()
 	k := k3sList[0].(map[string]any)
 	k3sOptions.ExtraArgs = flattenExtraArgs(k["extra_args"].([]any))
 	k3sOptions.NodeLabels = flattenNodeLabels(k["node_labels"].([]any))
@@ -507,11 +507,11 @@ func flattenNodeLabels(nodeLabels []any) []v1alpha4.LabelWithNodeFilters {
 func flattenKubeConfig(cfg any) v1alpha4.SimpleConfigOptionsKubeconfig {
 	var kubeConfig v1alpha4.SimpleConfigOptionsKubeconfig
 
-	if cfg.(*schema.Set).Len() == 0 {
+	cfgList := schemaSetList(cfg)
+	if len(cfgList) == 0 {
 		return kubeConfig
 	}
 
-	cfgList := cfg.(*schema.Set).List()
 	c := cfgList[0].(map[string]any)
 
 	kubeConfig.SwitchCurrentContext = c["switch_context"].(bool)
@@ -523,11 +523,11 @@ func flattenKubeConfig(cfg any) v1alpha4.SimpleConfigOptionsKubeconfig {
 func flattenRuntime(run any) v1alpha4.SimpleConfigOptionsRuntime {
 	var runtime v1alpha4.SimpleConfigOptionsRuntime
 
-	if run.(*schema.Set).Len() == 0 {
+	runList := schemaSetList(run)
+	if len(runList) == 0 {
 		return runtime
 	}
 
-	runList := run.(*schema.Set).List()
 	k := runList[0].(map[string]any)
 
 	runtime.GPURequest = k["gpu_request"].(string)
@@ -540,7 +540,7 @@ func flattenRuntime(run any) v1alpha4.SimpleConfigOptionsRuntime {
 }
 
 func flattenRegistries(reg any) v1alpha4.SimpleConfigRegistries {
-	regs := reg.(*schema.Set).List()
+	regs := schemaSetList(reg)
 	if len(regs) == 0 || regs[0] == nil {
 		return v1alpha4.SimpleConfigRegistries{}
 	}
@@ -555,4 +555,8 @@ func flattenRegistries(reg any) v1alpha4.SimpleConfigRegistries {
 	}
 
 	return v1alpha4.SimpleConfigRegistries{}
+}
+
+func schemaSetList(value any) []any {
+	return value.(*schema.Set).List()
 }

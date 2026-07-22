@@ -11,7 +11,6 @@ import (
 )
 
 func (registry *Config) Connect(ctx context.Context, runtime runtimes.Runtime) error {
-	clusters := make([]*K3D.Cluster, 0)
 	clusterCfg := cluster.Config{}
 
 	k3dClusters, err := clusterCfg.GetClusters(ctx, runtime, []string{registry.Cluster})
@@ -19,6 +18,7 @@ func (registry *Config) Connect(ctx context.Context, runtime runtimes.Runtime) e
 		return err
 	}
 
+	clusters := make([]*K3D.Cluster, 0, len(k3dClusters))
 	for _, k3dCluster := range k3dClusters {
 		clusters = append(clusters, k3dCluster.GetClusterConfig())
 	}

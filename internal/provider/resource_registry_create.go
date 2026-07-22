@@ -191,7 +191,7 @@ func resourceRegistryDelete(ctx context.Context, d *schema.ResourceData, meta an
 
 	registriesFromState := d.Get(utils2.TerraformResourceRegistriesList)
 
-	nodes := make([]*k3dNode.Config, 0)
+	nodes := make([]*k3dNode.Config, 0, len(registriesFromState.([]any)))
 
 	if err := mapstructure.Decode(registriesFromState, &nodes); err != nil {
 		return diag.Errorf("oops decoding retrieved registries errored : %s", err.Error())

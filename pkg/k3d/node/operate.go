@@ -3,13 +3,13 @@ package node
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	terraformErrors "github.com/nikhilsbhat/terraform-provider-k3d/pkg/errors"
 	"github.com/nikhilsbhat/terraform-provider-k3d/pkg/utils"
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
-	"github.com/thoas/go-funk"
 )
 
 // FilteredNodes fetches details of specified list of nodes.
@@ -19,7 +19,7 @@ func FilteredNodes(ctx context.Context, runtime runtimes.Runtime, nodes []string
 		return nil, err
 	}
 
-	filteredNodes := make([]*K3D.Node, 0)
+	filteredNodes := make([]*K3D.Node, 0, len(k3dNodes))
 
 	for _, k3dNode := range k3dNodes {
 		for _, node := range nodes {
@@ -41,12 +41,14 @@ func (cfg *Config) StartStopNode(ctx context.Context, runtime runtimes.Runtime) 
 		return err
 	}
 
-	filteredNodes := make([]*K3D.Node, 0)
-
+	filteredNodes := nodes
 	if !cfg.All {
-		filteredNodes = funk.Filter(nodes, func(node *K3D.Node) bool {
-			return funk.Contains(cfg.Name, node.Name)
-		}).([]*K3D.Node)
+		filteredNodes = make([]*K3D.Node, 0, len(nodes))
+		for _, node := range nodes {
+			if slices.Contains(cfg.Name, node.Name) {
+				filteredNodes = append(filteredNodes, node)
+			}
+		}
 	}
 
 	if len(filteredNodes) == 0 {

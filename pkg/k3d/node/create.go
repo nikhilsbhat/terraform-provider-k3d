@@ -35,7 +35,7 @@ func (cfg *Config) CreateNodeWithTimeout(ctx context.Context, runtime runtimes.R
 
 	clusterFetched := clusters[0].GetClusterConfig()
 
-	k3dNodes := make([]*K3D.Node, 0)
+	k3dNodes := make([]*K3D.Node, 0, len(nodes))
 
 	for _, node := range nodes {
 		k3dNodes = append(k3dNodes, node.GetNodeFromConfig())
@@ -50,7 +50,7 @@ func (cfg *Config) CreateNodeWithTimeout(ctx context.Context, runtime runtimes.R
 
 // CreateNodes creates number nodes specified in 'replicas', making this startFrom if in case we support update nodes on it.
 func (cfg *Config) CreateNodes(ctx context.Context, runtime runtimes.Runtime, startFrom int) error {
-	nodesToCreate := make([]*Config, 0)
+	nodesToCreate := make([]*Config, 0, cfg.Count-startFrom)
 
 	if _, err := dockerunits.RAMInBytes(cfg.Memory); cfg.Memory != "" && err != nil {
 		return terraformErrors.ErrInvalidMemoryLimit

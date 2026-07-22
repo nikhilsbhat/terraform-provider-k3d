@@ -2,11 +2,11 @@ package node
 
 import (
 	"context"
+	"slices"
 
 	"github.com/nikhilsbhat/terraform-provider-k3d/pkg/utils"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
-	"github.com/thoas/go-funk"
 )
 
 // GetFilteredNodesFromCluster returns the fetched all nodes from a specified cluster with list of *Config type.
@@ -30,9 +30,12 @@ func (cfg *Config) GetFilteredNodes(ctx context.Context, runtime runtimes.Runtim
 		return nil, err
 	}
 
-	filteredNodes := funk.Filter(k3dNodes, func(node *Config) bool {
-		return funk.Contains(cfg.Name, node.Name[0])
-	}).([]*Config)
+	filteredNodes := make([]*Config, 0, len(k3dNodes))
+	for _, node := range k3dNodes {
+		if slices.Contains(cfg.Name, node.Name[0]) {
+			filteredNodes = append(filteredNodes, node)
+		}
+	}
 
 	return filteredNodes, nil
 }
@@ -44,7 +47,7 @@ func (cfg *Config) GetNodesByLabels(ctx context.Context, runtime runtimes.Runtim
 		return nil, err
 	}
 
-	filteredNodes := make([]*Config, 0)
+	filteredNodes := make([]*Config, 0, len(k3dNodes))
 	for _, node := range k3dNodes {
 		filteredNodes = append(filteredNodes, &Config{
 			Name:                 []string{node.Name},
@@ -72,7 +75,7 @@ func (cfg *Config) GetNodeStatus(ctx context.Context, runtime runtimes.Runtime) 
 		return nil, err
 	}
 
-	nodeCurrentStatus := make([]*Status, 0)
+	nodeCurrentStatus := make([]*Status, 0, len(nodes))
 
 	for _, node := range nodes {
 		nodeCurrentStatus = append(nodeCurrentStatus, &Status{

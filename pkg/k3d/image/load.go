@@ -20,20 +20,15 @@ func (image *Config) Upload(ctx context.Context, runtime runtimes.Runtime) error
 		All: image.All,
 	}
 
-	clusters := make([]*K3D.Cluster, 0)
-
 	k3dClusters, err := clusterCfg.GetClusters(ctx, runtime, []string{image.Cluster})
 	if err != nil {
 		return err
 	}
 
+	errors := make([]string, 0, len(k3dClusters))
+
 	for _, k3dCluster := range k3dClusters {
-		clusters = append(clusters, k3dCluster.GetClusterConfig())
-	}
-
-	errors := make([]string, 0)
-
-	for _, cluster := range clusters {
+		cluster := k3dCluster.GetClusterConfig()
 		if err = client.ImageImportIntoClusterMulti(ctx, runtime, image.Images, cluster, loadImageOpts); err != nil {
 			errors = append(errors, fmt.Sprintf("failed to import image(s) into cluster '%s': %+v", cluster.Name, err))
 		}

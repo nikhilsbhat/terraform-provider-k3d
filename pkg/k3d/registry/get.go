@@ -2,10 +2,10 @@ package registry
 
 import (
 	"context"
+	"slices"
 
 	k3dNode "github.com/nikhilsbhat/terraform-provider-k3d/pkg/k3d/node"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
-	"github.com/thoas/go-funk"
 )
 
 // Get fetches the information of the list of selected registries.
@@ -21,9 +21,12 @@ func (registry *Config) Get(ctx context.Context, runtime runtimes.Runtime) ([]*k
 		return regs, nil
 	}
 
-	filteredRegistries := funk.Filter(regs, func(reg *k3dNode.Config) bool {
-		return funk.Contains(registry.Name, reg.Name[0])
-	}).([]*k3dNode.Config)
+	filteredRegistries := make([]*k3dNode.Config, 0, len(regs))
+	for _, reg := range regs {
+		if slices.Contains(registry.Name, reg.Name[0]) {
+			filteredRegistries = append(filteredRegistries, reg)
+		}
+	}
 
 	return filteredRegistries, nil
 }

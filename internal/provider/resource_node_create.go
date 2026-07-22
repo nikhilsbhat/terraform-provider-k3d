@@ -176,7 +176,7 @@ func resourceNodeDelete(ctx context.Context, d *schema.ResourceData, meta any) d
 
 	nodesFromState := d.Get(utils.TerraformResourceNodes)
 
-	nodes := make([]*k3dNode.Config, 0)
+	nodes := make([]*k3dNode.Config, 0, len(nodesFromState.([]any)))
 
 	if err := mapstructure.Decode(nodesFromState, &nodes); err != nil {
 		return diag.Errorf("oops reading nodes from state errored with : %s", err.Error())

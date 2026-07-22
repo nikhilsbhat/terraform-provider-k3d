@@ -18,7 +18,7 @@ func (image *Config) List(ctx context.Context, runtime runtimes.Runtime) ([]*Sto
 		return nil, err
 	}
 
-	storedImages := make([]*StoredImages, 0)
+	storedImages := make([]*StoredImages, 0, len(retrievedClusters))
 	for _, retrievedCluster := range retrievedClusters {
 		storedImages = append(storedImages, &StoredImages{
 			Cluster: retrievedCluster.Name,

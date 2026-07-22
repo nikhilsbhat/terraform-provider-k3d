@@ -3,13 +3,13 @@ package node
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	terraformErrors "github.com/nikhilsbhat/terraform-provider-k3d/pkg/errors"
 	"github.com/rancher/k3d/v5/pkg/client"
 	"github.com/rancher/k3d/v5/pkg/runtimes"
 	K3D "github.com/rancher/k3d/v5/pkg/types"
-	"github.com/thoas/go-funk"
 )
 
 // DeleteNodesFromCluster deletes the specified node.
@@ -23,15 +23,18 @@ func (cfg *Config) DeleteNodesFromCluster(ctx context.Context, runtime runtimes.
 		return err
 	}
 
-	filteredNodes := funk.Filter(nodes, func(node *K3D.Node) bool {
-		return funk.Contains(cfg.Name, node.Name)
-	}).([]*K3D.Node)
+	filteredNodes := make([]*K3D.Node, 0, len(nodes))
+	for _, node := range nodes {
+		if slices.Contains(cfg.Name, node.Name) {
+			filteredNodes = append(filteredNodes, node)
+		}
+	}
 
 	deleteOps := K3D.NodeDeleteOpts{
 		SkipLBUpdate: false,
 	}
 
-	errors := make([]string, 0)
+	errors := make([]string, 0, len(filteredNodes))
 
 	for _, filteredNode := range filteredNodes {
 		if delErr := client.NodeDelete(ctx, runtime, filteredNode, deleteOps); delErr != nil {
